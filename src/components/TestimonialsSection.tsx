@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Testimonial } from '../types';
+import DOMPurify from 'dompurify';
 
 const MOCK_TESTIMONIALS: Testimonial[] = [
   {
@@ -138,38 +139,46 @@ export function TestimonialsSection() {
                   transform: `translateX(calc(-${currentIndex * (100 / visibleCount)}% - ${currentIndex * (24 / visibleCount)}px))` 
                 }}
               >
-                {testimonials.map(testimonial => (
-                  <div 
-                    key={testimonial.id}
-                    className="min-w-full md:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] bg-[#141B22] border border-white/5 p-8 rounded-xl relative hover:border-[#E08A3E] transition-colors duration-200 flex flex-col group snap-center"
-                  >
-                    <span className="font-space text-6xl text-[#E08A3E] opacity-40 absolute top-4 left-6 leading-none">"</span>
-                    
-                    <p className="font-inter text-[16px] text-[#EDEFF2] leading-[1.7] relative z-10 mb-8 pt-4 flex-grow">
-                      {testimonial.quote}
-                    </p>
-                    
-                    <div className="h-[1px] w-full bg-[#9BA4B5] opacity-30 mb-6"></div>
-                    
-                    <div className="flex items-center justify-between mt-auto">
-                      <div>
-                        <h4 className="font-space font-bold text-[#EDEFF2]">{testimonial.authorName}</h4>
-                        <p className="font-inter text-sm text-[#9BA4B5]">
-                          {testimonial.authorRole}, {testimonial.authorCompany}
-                        </p>
+                {testimonials.map(testimonial => {
+                  const safeUrl = testimonial.linkedinUrl && (testimonial.linkedinUrl.startsWith('http://') || testimonial.linkedinUrl.startsWith('https://'))
+                    ? DOMPurify.sanitize(testimonial.linkedinUrl, { ALLOWED_TAGS: [] })
+                    : '#';
+                  
+                  return (
+                    <div 
+                      key={testimonial.id}
+                      className="min-w-full md:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] bg-[#141B22] border border-white/5 p-8 rounded-xl relative hover:border-[#E08A3E] transition-colors duration-200 flex flex-col group snap-center"
+                    >
+                      <span className="font-space text-6xl text-[#E08A3E] opacity-40 absolute top-4 left-6 leading-none">"</span>
+                      
+                      <p className="font-inter text-[16px] text-[#EDEFF2] leading-[1.7] relative z-10 mb-8 pt-4 flex-grow">
+                        {DOMPurify.sanitize(testimonial.quote || '', { ALLOWED_TAGS: [] })}
+                      </p>
+                      
+                      <div className="h-[1px] w-full bg-[#9BA4B5] opacity-30 mb-6"></div>
+                      
+                      <div className="flex items-center justify-between mt-auto">
+                        <div>
+                          <h4 className="font-space font-bold text-[#EDEFF2]">{DOMPurify.sanitize(testimonial.authorName || '', { ALLOWED_TAGS: [] })}</h4>
+                          <p className="font-inter text-sm text-[#9BA4B5]">
+                            {DOMPurify.sanitize(testimonial.authorRole || '', { ALLOWED_TAGS: [] })}, {DOMPurify.sanitize(testimonial.authorCompany || '', { ALLOWED_TAGS: [] })}
+                          </p>
+                        </div>
+                        {safeUrl !== '#' && (
+                          <a 
+                            href={safeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-accent-cyan hover:opacity-80 transition-opacity font-mono p-2 bg-accent-cyan/10 rounded-full"
+                            title="Profil LinkedIn"
+                          >
+                            <ExternalLink size={18} />
+                          </a>
+                        )}
                       </div>
-                      <a 
-                        href={testimonial.linkedinUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-accent-cyan hover:opacity-80 transition-opacity font-mono p-2 bg-accent-cyan/10 rounded-full"
-                        title="Profil LinkedIn"
-                      >
-                        <ExternalLink size={18} />
-                      </a>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

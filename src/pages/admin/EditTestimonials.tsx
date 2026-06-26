@@ -16,6 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Edit, Trash2, Plus, MessageSquareQuote, Loader2 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { Testimonial } from '../../types';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 import { toast } from 'sonner';
@@ -175,12 +176,43 @@ export function EditTestimonials() {
   const handleSave = async () => {
     setSavingState('saving');
     try {
+      // 1. Validation and Sanitization
+      const sanitizedQuote = DOMPurify.sanitize(formData.quote || '', { ALLOWED_TAGS: [] }).trim();
+      const sanitizedName = DOMPurify.sanitize(formData.authorName || '', { ALLOWED_TAGS: [] }).trim();
+      const sanitizedRole = DOMPurify.sanitize(formData.authorRole || '', { ALLOWED_TAGS: [] }).trim();
+      const sanitizedCompany = DOMPurify.sanitize(formData.authorCompany || '', { ALLOWED_TAGS: [] }).trim();
+      const sanitizedUrl = DOMPurify.sanitize(formData.linkedinUrl || '', { ALLOWED_TAGS: [] }).trim();
+
+      if (!sanitizedQuote || !sanitizedName || !sanitizedRole || !sanitizedCompany || !sanitizedUrl) {
+        toast.error("Tous les champs sont requis et ne peuvent pas être vides ou composés uniquement d'espaces.");
+        setSavingState('idle');
+        return;
+      }
+
+      if (sanitizedQuote.length > 280) {
+        toast.error("La citation ne doit pas dépasser 280 caractères.");
+        setSavingState('idle');
+        return;
+      }
+
+      // Basic URL validation
+      try {
+        const urlObj = new URL(sanitizedUrl);
+        if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+          throw new Error("Protocole invalide");
+        }
+      } catch (e) {
+        toast.error("L'URL LinkedIn n'est pas valide.");
+        setSavingState('idle');
+        return;
+      }
+
       const payload = {
-        quote: formData.quote,
-        author_name: formData.authorName,
-        author_role: formData.authorRole,
-        author_company: formData.authorCompany,
-        linkedin_url: formData.linkedinUrl,
+        quote: sanitizedQuote,
+        author_name: sanitizedName,
+        author_role: sanitizedRole,
+        author_company: sanitizedCompany,
+        linkedin_url: sanitizedUrl,
         order: formData.order
       };
       if (editingId !== 'new' && editingId) {

@@ -1,32 +1,8 @@
-import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { AuthService } from '../services/auth.service';
+import { useAuth } from '../contexts/AuthContext';
 
 export function ProtectedRoute() {
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-
-    AuthService.getCurrentSession().then(session => {
-      if (mounted) {
-        setAuthenticated(!!session);
-        setLoading(false);
-      }
-    });
-
-    const unsubscribe = AuthService.onAuthStateChange(session => {
-      if (mounted) {
-        setAuthenticated(!!session);
-      }
-    });
-
-    return () => {
-      mounted = false;
-      unsubscribe();
-    };
-  }, []);
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -36,5 +12,5 @@ export function ProtectedRoute() {
     );
   }
 
-  return authenticated ? <Outlet /> : <Navigate to="/admin/login" replace />;
+  return user ? <Outlet /> : <Navigate to="/admin/login" replace />;
 }

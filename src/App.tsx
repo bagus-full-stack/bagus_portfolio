@@ -5,10 +5,11 @@ import { Toaster } from 'sonner';
 import { CookieBanner } from './components/CookieBanner';
 import PWAInstallBanner from './components/PWAInstallBanner';
 import PWAUpdateBanner from './components/PWAUpdateBanner';
+import { AuthProvider } from './contexts/AuthContext';
 
 export default function App() {
   return (
-    <>
+    <AuthProvider>
       <Suspense fallback={
         <div className="flex items-center justify-center h-screen bg-[#0B0F14]">
           <div className="w-8 h-8 border-2 border-[#E08A3E] border-t-transparent rounded-full animate-spin" />
@@ -34,6 +35,6 @@ export default function App() {
       <CookieBanner />
       <PWAInstallBanner />
       <PWAUpdateBanner />
-    </>
+    </AuthProvider>
   );
 }

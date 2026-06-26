@@ -24,6 +24,17 @@ export function ChatbotWidget() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const lastMessageTime = useRef<number>(0);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Pulse animation after 5s
@@ -71,11 +82,23 @@ export function ChatbotWidget() {
   };
 
   const handleSend = async (text: string) => {
-    if (!text.trim() || loading) return;
+    if (Date.now() - lastMessageTime.current < 3000) {
+      alert("Veuillez patienter 3 secondes entre chaque message.");
+      return;
+    }
+    lastMessageTime.current = Date.now();
+
+    const trimmedText = text.trim();
+    if (!trimmedText || loading) return;
+
+    if (trimmedText.length > 500) {
+      alert("Votre message est trop long. Veuillez le limiter à 500 caractères.");
+      return;
+    }
 
     const userMsg: ChatMessage = {
       role: 'user',
-      content: text.trim(),
+      content: trimmedText,
       timestamp: new Date().toISOString()
     };
 
@@ -84,11 +107,15 @@ export function ChatbotWidget() {
     setLoading(true);
     setError(false);
 
+    abortControllerRef.current = new AbortController();
+
     try {
       if (!supabase) throw new Error("Supabase not configured");
       const { data, error: invokeError } = await supabase.functions.invoke('chat-resume', {
-        body: { message: text, history: messages.slice(-10) }
-      });
+        body: { message: trimmedText, history: messages.slice(-10) },
+        signal: abortControllerRef.current.signal
+      } as any);
+      
       if (invokeError) throw invokeError;
       
       const assistantMsg: ChatMessage = {
@@ -98,7 +125,11 @@ export function ChatbotWidget() {
       };
       
       setMessages(prev => [...prev, assistantMsg]);
-    } catch (e) {
+    } catch (e: any) {
+      if (e.name === 'AbortError') {
+        console.log('Request cancelled due to unmount');
+        return;
+      }
       console.error(e);
       setError(true);
       // We don't add an error message to the history as requested, just show inline error

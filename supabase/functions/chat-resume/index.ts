@@ -23,6 +23,9 @@ const MODELS = [
   "gemini-1.5-flash"
 ];
 
+const rateLimit = new Map<string, number>();
+const RATE_LIMIT_WINDOW = 3000; // 3 seconds
+
 serve(async (req) => {
   // Gestion CORS (Preflight request)
   if (req.method === 'OPTIONS') {
@@ -30,12 +33,34 @@ serve(async (req) => {
   }
 
   try {
+    // Basic Rate Limiting using in-memory Map based on IP
+    const ip = req.headers.get('x-forwarded-for') || 'unknown';
+    const now = Date.now();
+    const lastRequestTime = rateLimit.get(ip) || 0;
+    
+    if (now - lastRequestTime < RATE_LIMIT_WINDOW) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please wait 3 seconds.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 429,
+      })
+    }
+    rateLimit.set(ip, now);
+
     const { message, history } = await req.json() as ChatRequest
 
-    if (!message) {
+    const trimmedMessage = message?.trim();
+
+    if (!trimmedMessage) {
       return new Response(JSON.stringify({ error: 'Message is required' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
+      })
+    }
+
+    if (trimmedMessage.length > 500) {
+      return new Response(JSON.stringify({ error: 'Message exceeds the 500 characters limit' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 413,
       })
     }
 
@@ -95,7 +120,7 @@ CV : ${CV_JSON}`;
     }))
     
     // Ajout du message actuel de l'utilisateur
-    geminiContents.push({ role: 'user', parts: [{ text: message }] })
+    geminiContents.push({ role: 'user', parts: [{ text: trimmedMessage }] })
 
     let lastError = null;
     let assistantMessage = null;

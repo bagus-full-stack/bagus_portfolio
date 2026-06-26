@@ -35,12 +35,24 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const customFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
   try {
     const response = await fetch(input, init);
+    
+    // Intercepter les erreurs 401 Unauthorized
+    if (response.status === 401) {
+      const url = typeof input === 'string' ? input : (input instanceof URL ? input.toString() : input.url);
+      if (!url.includes('/auth/v1/logout')) {
+        console.warn('401 Unauthorized intercepté, déconnexion forcée...');
+        // Let the application handle it (e.g., event listener or direct logout)
+        // Note: we can't easily call supabase.auth.signOut() here because supabase isn't initialized yet
+        // However, this fetcher is used *by* the supabase client. 
+        // Best is to trigger a custom event that the AuthContext can listen to.
+        window.dispatchEvent(new CustomEvent('supabase:401'));
+      }
+    }
+
     if (!response.ok) {
-      if (response.status !== 404) {
+      if (response.status !== 404 && response.status !== 401) {
         console.error(`[Supabase HTTP Error] ${response.status} ${response.statusText}`, response.url);
       }
-      // We don't necessarily want to toast on EVERY error (e.g. 404s might be expected),
-      // but the prompt asked for generic network error toasts.
       if (response.status >= 500) {
         toast.error('Erreur serveur réseau. Veuillez réessayer plus tard.');
       }

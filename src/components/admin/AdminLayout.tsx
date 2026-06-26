@@ -36,6 +36,16 @@ export function AdminLayout() {
   ];
 
   useEffect(() => {
+    // Forcer le thème sombre en admin
+    document.documentElement.setAttribute('data-theme', 'dark');
+    return () => {
+      // Restaurer le thème utilisateur au départ
+      const saved = localStorage.getItem('portfolio-theme');
+      document.documentElement.setAttribute('data-theme', saved || 'dark');
+    };
+  }, []);
+
+  useEffect(() => {
     let startTime = Date.now();
     const interval = setInterval(() => {
       const diff = Math.floor((Date.now() - startTime) / 1000);
@@ -81,7 +91,7 @@ export function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary flex font-inter selection:bg-accent-cyan/30">
+    <div className="min-h-screen bg-bg-primary text-text-primary flex font-inter selection:bg-accent-cyan/30" data-theme="dark">
       
       {/* Mobile Drawer Overlay */}
       {isMobileMenuOpen && (
@@ -132,8 +142,8 @@ export function AdminLayout() {
               className={({ isActive }) => `
                 flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative
                 ${isActive
-                  ? 'bg-[#E08A3E]/20 text-[#EDEFF2]'
-                  : 'text-[#8B94A3] hover:text-[#EDEFF2] hover:bg-[#141B22]'
+                  ? 'bg-[#E08A3E]/20 text-[var(--text-primary)]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'
                 }
               `}
               style={({ isActive }) => (isActive ? {

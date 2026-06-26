@@ -1,13 +1,247 @@
 {
-  "nav.projects": "Projets",
-  "nav.experiences": "Expériences",
-  "nav.skills": "Compétences",
-  "nav.contact": "Contact",
-  "hero.badge": "Disponible pour de nouveaux projets",
-  "hero.cta.projects": "Voir mes projets",
-  "hero.cta.download": "Télécharger le CV",
-  "contact.send": "Envoyer le message",
-  "contact.success": "Message envoyé avec succès",
-  "contact.error": "Erreur lors de l'envoi du message",
-  "footer.rights": "Tous droits réservés"
+  "nav": {
+    "projects": "Projets",
+    "experiences": "Expériences",
+    "skills": "Compétences",
+    "certifications": "Certifications",
+    "contact": "Contact",
+    "hire": "Me recruter"
+  },
+
+  "hero": {
+    "badge": "DISPONIBLE POUR UN CDI",
+    "subtitle": "Full Stack & AI Engineer",
+    "cta": {
+      "projects": "Voir mes projets",
+      "download": "Télécharger le CV"
+    },
+    "stats": {
+      "visitors": "visiteurs uniques"
+    }
+  },
+
+  "about": {
+    "title": "À propos",
+    "location": "Île-de-France, France",
+    "available": "Disponible immédiatement",
+    "loading": "Chargement du profil...",
+    "error": "Impossible de charger le profil."
+  },
+
+  "experiences": {
+    "title": "Parcours",
+    "badge": {
+      "pro": "PRO",
+      "education": "FORMATION"
+    },
+    "present": "Présent",
+    "expand": "Voir plus",
+    "collapse": "Voir moins",
+    "empty": "Aucune expérience renseignée.",
+    "loading": "Chargement des expériences...",
+    "error": "Impossible de charger les expériences."
+  },
+
+  "projects": {
+    "title": "Projets sélectionnés",
+    "subtitle": "Des projets concrets, pas des tutoriels.",
+    "filter": {
+      "all": "Tous",
+      "active": "Filtre actif"
+    },
+    "card": {
+      "case": "Voir le cas",
+      "github": "GitHub"
+    },
+    "empty": {
+      "filter": "Aucun projet avec ce stack.",
+      "reset": "Réinitialiser le filtre"
+    },
+    "loading": "Chargement des projets...",
+    "error": "Impossible de charger les projets.",
+    "status": {
+      "production": "En production",
+      "beta": "Bêta",
+      "archived": "Archivé"
+    }
+  },
+
+  "project_detail": {
+    "back": "← Retour aux projets",
+    "sections": {
+      "context": "Contexte",
+      "architecture": "Architecture",
+      "choices": "Choix techniques",
+      "challenges": "Difficultés rencontrées",
+      "results": "Résultats",
+      "stack": "Stack technique",
+      "links": "Liens"
+    },
+    "links": {
+      "github": "Voir le code",
+      "live": "Voir en live",
+      "demo": "Démo"
+    },
+    "share": {
+      "copy": "Copier le lien",
+      "copied": "Lien copié !",
+      "linkedin": "Partager sur LinkedIn",
+      "cv": "CV PDF"
+    },
+    "architecture": {
+      "empty": "Schéma d'architecture non renseigné."
+    },
+    "not_found": "Ce projet n'existe pas.",
+    "loading": "Chargement du projet...",
+    "error": "Impossible de charger ce projet."
+  },
+
+  "skills": {
+    "title": "Arsenal technique",
+    "subtitle": "Des compétences prouvées par des projets.",
+    "categories": {
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "ai_ml": "IA & ML",
+      "devops": "DevOps",
+      "mobile": "Mobile"
+    },
+    "linked_projects": "Projets utilisant",
+    "no_linked": "Aucun projet public utilisant cette compétence.",
+    "loading": "Chargement des compétences...",
+    "error": "Impossible de charger les compétences."
+  },
+
+  "certifications": {
+    "title": "Certifications",
+    "verify": "Vérifier",
+    "loading": "Chargement...",
+    "error": "Impossible de charger les certifications."
+  },
+
+  "testimonials": {
+    "title": "Ils ont travaillé avec moi"
+  },
+
+  "contact": {
+    "title": "Initier une collaboration",
+    "subtitle": "Disponible pour un CDI en Île-de-France.",
+    "book": "Réserver un appel",
+    "form": {
+      "name": "Nom complet",
+      "email": "Adresse email",
+      "subject": "Sujet (optionnel)",
+      "message": "Votre message",
+      "send": "Envoyer le message",
+      "sending": "Envoi en cours...",
+      "success": "Message envoyé !",
+      "error": "Échec de l'envoi. Réessayez.",
+      "placeholder": {
+        "name": "Jean Dupont",
+        "email": "jean@entreprise.fr",
+        "subject": "Opportunité CDI",
+        "message": "Bonjour Assami, ..."
+      }
+    }
+  },
+
+  "booking": {
+    "title": "Réserver un appel",
+    "subtitle": "30 minutes — Visio ou téléphone",
+    "steps": {
+      "date": "Choisir une date",
+      "slot": "Choisir un créneau",
+      "confirm": "Confirmer"
+    },
+    "timezone": "Heure de Paris (Europe/Paris)",
+    "next": "Suivant →",
+    "back": "← Retour",
+    "confirm_btn": "Confirmer la réservation",
+    "loading_slots": "Chargement des créneaux...",
+    "no_slots": "Aucun créneau disponible ce jour.",
+    "success": {
+      "title": "Votre appel est confirmé !",
+      "email": "Un email de confirmation a été envoyé à",
+      "join": "Rejoindre le Meet",
+      "ics": "Télécharger l'invitation .ics",
+      "close": "Fermer"
+    }
+  },
+
+  "chatbot": {
+    "title": "Assistant d'Assami",
+    "powered": "Propulsé par GPT-4o-mini",
+    "welcome": "Bonjour ! Je suis l'assistant d'Assami Baga. Posez-moi vos questions sur son parcours, ses projets ou sa disponibilité.",
+    "suggestions": [
+      "Quel est ton stack principal ?",
+      "Parle-moi d'AgroSahel AI",
+      "Tu es disponible quand ?"
+    ],
+    "placeholder": "Posez votre question...",
+    "listening": "Je vous écoute...",
+    "dictate": "Dicter un message",
+    "stop": "Arrêter l'enregistrement",
+    "clear": "Vider la conversation",
+    "open": "Ouvrir le chatbot",
+    "bubble": "Posez-moi une question",
+    "close": "Fermer",
+    "error": "Je rencontre un problème technique. Contactez Assami directement via le formulaire.",
+    "send": "Envoyer"
+  },
+
+  "search": {
+    "placeholder": "Rechercher un projet, une compétence...",
+    "suggestions_label": "Suggestions",
+    "no_results": "Aucun résultat pour",
+    "no_results_hint": "Essayez une compétence ou un projet",
+    "categories": {
+      "projects": "Projets",
+      "skills": "Compétences",
+      "experiences": "Expériences",
+      "certifications": "Certifications"
+    }
+  },
+
+  "presentation": {
+    "badge": "MODE PRÉSENTATION",
+    "quit": "Quitter",
+    "trigger": "Alt+P — Mode présentation"
+  },
+
+  "pwa": {
+    "install_title": "Installer le portfolio",
+    "install_desc": "Accès rapide depuis votre écran d'accueil, fonctionne hors connexion.",
+    "install_later": "Plus tard",
+    "install_btn": "Installer",
+    "update_available": "Nouvelle version disponible",
+    "update_btn": "Mettre à jour"
+  },
+
+  "theme": {
+    "dark": "Thème sombre",
+    "light": "Thème clair",
+    "activate_light": "Activer le thème clair",
+    "activate_dark": "Activer le thème sombre"
+  },
+
+  "cookie": {
+    "message": "Ce site compte les visites pour mesurer son audience. Aucun cookie tiers, aucun tracking publicitaire.",
+    "accept": "Compris"
+  },
+
+  "footer": {
+    "rights": "Tous droits réservés.",
+    "made_with": "Fait avec"
+  },
+
+  "not_found": {
+    "message": "Cette page n'existe pas encore.",
+    "cta": "Retour à l'accueil"
+  },
+
+  "errors": {
+    "network": "Problème de connexion. Vérifiez votre réseau.",
+    "generic": "Une erreur est survenue.",
+    "retry": "Réessayer"
+  }
 }

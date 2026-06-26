@@ -29,16 +29,16 @@ export function AgroSahelPage() {
             AgroSahel AI
           </h1>
           
-          <p className="font-sans text-xl text-[#9BA4B5] max-w-2xl mx-auto mb-10">
+          <p className="font-sans text-xl text-[var(--text-muted)] max-w-2xl mx-auto mb-10">
             Diagnostic agricole IA pour les cultures du Sahel
           </p>
           
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-[#141B22] border border-white/10 hover:border-accent-cyan rounded text-text-primary transition-colors font-medium">
+            <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-[var(--bg-card)] border border-white/10 hover:border-accent-cyan rounded text-text-primary transition-colors font-medium">
               <Github size={18} />
               GitHub
             </a>
-            <a href="#" className="flex items-center gap-2 px-6 py-3 bg-[#141B22] border border-white/10 hover:border-accent-cyan rounded text-text-primary transition-colors font-medium">
+            <a href="#" className="flex items-center gap-2 px-6 py-3 bg-[var(--bg-card)] border border-white/10 hover:border-accent-cyan rounded text-text-primary transition-colors font-medium">
               <ExternalLink size={18} />
               API Docs
             </a>
@@ -54,27 +54,27 @@ export function AgroSahelPage() {
       <section className="max-w-6xl mx-auto px-6 mb-32">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/5">
           {/* Gauche: Le problème */}
-          <div className="bg-[#141B22] p-10 md:p-16 flex flex-col justify-center">
+          <div className="bg-[var(--bg-card)] p-10 md:p-16 flex flex-col justify-center">
             <h2 className="font-sans text-2xl font-bold text-[#E08A3E] mb-8">Le problème</h2>
             
             <div className="flex flex-col gap-8 mb-10">
               <div>
                 <div className="font-mono text-4xl text-text-primary mb-1">14M</div>
-                <div className="text-[#9BA4B5] text-sm">agriculteurs Sahel</div>
+                <div className="text-[var(--text-muted)] text-sm">agriculteurs Sahel</div>
               </div>
               <div>
                 <div className="font-mono text-4xl text-text-primary mb-1">72h</div>
-                <div className="text-[#9BA4B5] text-sm">délai diagnostic</div>
+                <div className="text-[var(--text-muted)] text-sm">délai diagnostic</div>
               </div>
               <div>
                 <div className="font-mono text-4xl text-text-primary mb-1">5</div>
-                <div className="text-[#9BA4B5] text-sm">cultures ciblées</div>
+                <div className="text-[var(--text-muted)] text-sm">cultures ciblées</div>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
               {['pearl millet', 'sorghum', 'maize', 'groundnut', 'cassava'].map(tag => (
-                <span key={tag} className="px-3 py-1 bg-black/30 border border-white/5 rounded text-xs text-[#9BA4B5] font-mono">
+                <span key={tag} className="px-3 py-1 bg-black/30 border border-white/5 rounded text-xs text-[var(--text-muted)] font-mono">
                   {tag}
                 </span>
               ))}
@@ -82,7 +82,7 @@ export function AgroSahelPage() {
           </div>
 
           {/* Droite: La solution */}
-          <div className="bg-[#0B0F14] p-10 md:p-16 flex flex-col justify-center">
+          <div className="bg-[var(--bg-primary)] p-10 md:p-16 flex flex-col justify-center">
             <h2 className="font-sans text-2xl font-bold text-accent-cyan mb-10">La solution</h2>
             
             <div className="space-y-8">
@@ -92,7 +92,7 @@ export function AgroSahelPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-text-primary mb-1">Photo → diagnostic instantané</h3>
-                  <p className="text-sm text-[#9BA4B5]">Analyse en temps réel de l'état de la plante via l'appareil photo du smartphone.</p>
+                  <p className="text-sm text-[var(--text-muted)]">Analyse en temps réel de l'état de la plante via l'appareil photo du smartphone.</p>
                 </div>
               </div>
               
@@ -102,7 +102,7 @@ export function AgroSahelPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-text-primary mb-1">Fonctionne hors connexion</h3>
-                  <p className="text-sm text-[#9BA4B5]">Le modèle léger embarqué permet un diagnostic même sans couverture réseau.</p>
+                  <p className="text-sm text-[var(--text-muted)]">Le modèle léger embarqué permet un diagnostic même sans couverture réseau.</p>
                 </div>
               </div>
 
@@ -112,7 +112,7 @@ export function AgroSahelPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-text-primary mb-1">Interface multilingue</h3>
-                  <p className="text-sm text-[#9BA4B5]">Traduction intégrée pour les dialectes locaux et langues régionales majeures.</p>
+                  <p className="text-sm text-[var(--text-muted)]">Traduction intégrée pour les dialectes locaux et langues régionales majeures.</p>
                 </div>
               </div>
             </div>
@@ -163,21 +163,21 @@ export function AgroSahelPage() {
       {/* Section Métriques */}
       <section className="max-w-6xl mx-auto px-6 mb-32">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="bg-[#141B22] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+          <div className="bg-[var(--bg-card)] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center text-center">
             <div className="font-sans font-bold text-4xl text-accent-cyan mb-2">94.2%</div>
-            <div className="font-mono text-sm text-[#9BA4B5]">Précision modèle</div>
+            <div className="font-mono text-sm text-[var(--text-muted)]">Précision modèle</div>
           </div>
-          <div className="bg-[#141B22] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+          <div className="bg-[var(--bg-card)] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center text-center">
             <div className="font-sans font-bold text-4xl text-accent-cyan mb-2">18</div>
-            <div className="font-mono text-sm text-[#9BA4B5]">Classes maladies</div>
+            <div className="font-mono text-sm text-[var(--text-muted)]">Classes maladies</div>
           </div>
-          <div className="bg-[#141B22] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+          <div className="bg-[var(--bg-card)] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center text-center">
             <div className="font-sans font-bold text-4xl text-accent-cyan mb-2">340ms</div>
-            <div className="font-mono text-sm text-[#9BA4B5]">Temps inférence</div>
+            <div className="font-mono text-sm text-[var(--text-muted)]">Temps inférence</div>
           </div>
-          <div className="bg-[#141B22] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+          <div className="bg-[var(--bg-card)] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center text-center">
             <div className="font-sans font-bold text-4xl text-accent-cyan mb-2">5</div>
-            <div className="font-mono text-sm text-[#9BA4B5]">Cultures</div>
+            <div className="font-mono text-sm text-[var(--text-muted)]">Cultures</div>
           </div>
         </div>
       </section>
@@ -190,33 +190,33 @@ export function AgroSahelPage() {
           <div>
             <h3 className="font-bold text-text-primary mb-4 text-sm uppercase tracking-wider">Mobile</h3>
             <div className="flex flex-col gap-2">
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">Flutter</span>
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">Dart</span>
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">Provider</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">Flutter</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">Dart</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">Provider</span>
             </div>
           </div>
           <div>
             <h3 className="font-bold text-text-primary mb-4 text-sm uppercase tracking-wider">Backend</h3>
             <div className="flex flex-col gap-2">
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">FastAPI</span>
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">Python</span>
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">PostgreSQL</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">FastAPI</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">Python</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">PostgreSQL</span>
             </div>
           </div>
           <div>
             <h3 className="font-bold text-text-primary mb-4 text-sm uppercase tracking-wider">ML</h3>
             <div className="flex flex-col gap-2">
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">TensorFlow</span>
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">TFLite</span>
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">OpenCV</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">TensorFlow</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">TFLite</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">OpenCV</span>
             </div>
           </div>
           <div>
             <h3 className="font-bold text-text-primary mb-4 text-sm uppercase tracking-wider">DevOps</h3>
             <div className="flex flex-col gap-2">
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">Docker</span>
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">Supabase</span>
-              <span className="px-3 py-2 bg-[#141B22] border border-[#9BA4B5]/30 rounded text-sm text-[#9BA4B5]">GitHub Actions</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">Docker</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">Supabase</span>
+              <span className="px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded text-sm text-[var(--text-muted)]">GitHub Actions</span>
             </div>
           </div>
         </div>
@@ -224,10 +224,10 @@ export function AgroSahelPage() {
 
       {/* CTA Final */}
       <section className="max-w-4xl mx-auto px-6 mb-12">
-        <div className="bg-[#141B22] p-12 rounded-2xl border border-white/5 text-center">
+        <div className="bg-[var(--bg-card)] p-12 rounded-2xl border border-white/5 text-center">
           <h2 className="font-sans text-3xl font-bold text-text-primary mb-8">Intéressé par ce projet ?</h2>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-[#0B0F14] border border-white/10 hover:border-text-primary rounded text-text-primary transition-colors font-medium">
+            <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-[var(--bg-primary)] border border-white/10 hover:border-text-primary rounded text-text-primary transition-colors font-medium">
               <Github size={18} />
               Code Source
             </a>

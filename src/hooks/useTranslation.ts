@@ -8,7 +8,7 @@ export function useTranslation() {
     return I18nService.subscribe(setLang);
   }, []);
 
-  const t = (key: string) => I18nService.translate(key);
+  const t = (key: string, options?: { returnObjects?: boolean; [key: string]: any }) => I18nService.translate(key, options);
 
   return { t, lang };
 }

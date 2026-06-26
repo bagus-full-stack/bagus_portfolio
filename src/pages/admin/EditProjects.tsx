@@ -322,7 +322,7 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
               transition-all duration-200
               ${isDragActive
                 ? 'border-[#E08A3E] bg-[#E08A3E]/10'
-                : 'border-[#8B94A3]/30 hover:border-[#8B94A3]/60'
+                : 'border-[var(--border-subtle)]/30 hover:border-[var(--border-subtle)]/60'
               }
             `}
           >
@@ -342,11 +342,11 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
             ) : (
               <div className="absolute inset-0 flex flex-col
                 items-center justify-center gap-2">
-                <ImageIcon size={32} className="text-[#8B94A3]" />
-                <p className="text-[#8B94A3] font-[Inter] text-sm">
+                <ImageIcon size={32} className="text-[var(--text-muted)]" />
+                <p className="text-[var(--text-muted)] font-[Inter] text-sm">
                   Glissez une image ou cliquez
                 </p>
-                <p className="text-[#8B94A3]/60
+                <p className="text-[var(--text-muted)]/60
                   font-[JetBrains_Mono] text-xs">
                   JPG, PNG, WebP, GIF — 5MB max
                 </p>
@@ -474,10 +474,10 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
         </div>
       </div>
 
-      <div className="sticky bottom-4 z-50 bg-[#0B0F14] pt-4 border-t border-[#9BA4B5]/20 flex justify-between items-center gap-3">
+      <div className="sticky bottom-4 z-50 bg-[var(--bg-primary)] pt-4 border-t border-[var(--border-subtle)]/20 flex justify-between items-center gap-3">
         <div className="flex items-center">
           {saveState === 'saving' && (
-            <span className="text-[#8B94A3] font-mono text-xs flex items-center gap-1">
+            <span className="text-[var(--text-muted)] font-mono text-xs flex items-center gap-1">
               <Loader2 size={12} className="animate-spin" />
               Enregistrement...
             </span>

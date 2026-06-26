@@ -150,9 +150,9 @@ export function SecuritySettings() {
       </div>
 
       {currentSession && (
-        <div className="flex items-center gap-3 p-4 bg-[#0B0F14] rounded-xl border border-[#2DD4BF]/20">
+        <div className="flex items-center gap-3 p-4 bg-[var(--bg-primary)] rounded-xl border border-[#2DD4BF]/20">
           <Shield size={16} className="text-[#2DD4BF] shrink-0" />
-          <div className="font-[JetBrains_Mono] text-xs text-[#8B94A3] flex flex-wrap gap-x-4 gap-y-1">
+          <div className="font-[JetBrains_Mono] text-xs text-[var(--text-muted)] flex flex-wrap gap-x-4 gap-y-1">
             <span className="text-[#2DD4BF]">Session active</span>
             <span>{sessionInfo.os} — {sessionInfo.browser}</span>
             <span>{sessionInfo.city}, {sessionInfo.country}</span>
@@ -182,7 +182,7 @@ export function SecuritySettings() {
                 type={showCurrent ? "text" : "password"}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full bg-[#141B22] border border-white/10 rounded-lg px-4 py-2 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-colors"
+                className="w-full bg-[var(--bg-card)] border border-white/10 rounded-lg px-4 py-2 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-colors"
                 required
               />
               <button
@@ -202,13 +202,13 @@ export function SecuritySettings() {
                   type={showNew ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-[#141B22] border border-white/10 rounded-lg px-4 py-2 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-colors"
+                  className="w-full bg-[var(--bg-card)] border border-white/10 rounded-lg px-4 py-2 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-colors"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowNew(!showNew)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9BA4B5] hover:text-[#EDEFF2] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -225,13 +225,13 @@ export function SecuritySettings() {
                   type={showConfirm ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[#141B22] border border-white/10 rounded-lg px-4 py-2 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-colors"
+                  className="w-full bg-[var(--bg-card)] border border-white/10 rounded-lg px-4 py-2 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-colors"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9BA4B5] hover:text-[#EDEFF2] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -288,7 +288,7 @@ export function SecuritySettings() {
             {sessions.map(session => (
               <div 
                 key={session.id} 
-                className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border ${session.isCurrent ? 'bg-accent-ocre/5 border-accent-ocre/20' : 'bg-[#141B22] border-white/5'}`}
+                className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border ${session.isCurrent ? 'bg-accent-ocre/5 border-accent-ocre/20' : 'bg-[var(--bg-card)] border-white/5'}`}
               >
                 <div className="flex items-start gap-4 mb-4 sm:mb-0">
                   <div className={`p-2 rounded-full mt-1 ${session.isCurrent ? 'bg-accent-ocre/20 text-accent-ocre' : 'bg-white/5 text-text-muted'}`}>
@@ -323,7 +323,7 @@ export function SecuritySettings() {
             ))}
             
             {otherSessions.length === 0 && (
-              <div className="flex items-center justify-center p-6 bg-[#141B22] border border-white/5 rounded-lg text-text-muted">
+              <div className="flex items-center justify-center p-6 bg-[var(--bg-card)] border border-white/5 rounded-lg text-text-muted">
                 <CheckCircle2 size={20} className="text-accent-cyan mr-3" />
                 <span>Aucune autre session active.</span>
               </div>

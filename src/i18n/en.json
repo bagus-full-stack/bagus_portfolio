@@ -1,13 +1,228 @@
 {
-  "nav.projects": "Projects",
-  "nav.experiences": "Experiences",
-  "nav.skills": "Skills",
-  "nav.contact": "Contact",
-  "hero.badge": "Available for new projects",
-  "hero.cta.projects": "View my projects",
-  "hero.cta.download": "Download CV",
-  "contact.send": "Send message",
-  "contact.success": "Message sent successfully",
-  "contact.error": "Error sending message",
-  "footer.rights": "All rights reserved"
+  "nav": {
+    "projects": "Projects",
+    "experiences": "Experience",
+    "skills": "Skills",
+    "certifications": "Certifications",
+    "contact": "Contact",
+    "hire": "Hire me"
+  },
+  "hero": {
+    "badge": "AVAILABLE FOR FULL-TIME",
+    "subtitle": "Full Stack & AI Engineer",
+    "cta": {
+      "projects": "View my projects",
+      "download": "Download CV"
+    },
+    "stats": {
+      "visitors": "unique visitors"
+    }
+  },
+  "about": {
+    "title": "About",
+    "location": "Île-de-France, France",
+    "available": "Available immediately",
+    "loading": "Loading profile...",
+    "error": "Unable to load profile."
+  },
+  "experiences": {
+    "title": "Experience",
+    "badge": {
+      "pro": "WORK",
+      "education": "EDUCATION"
+    },
+    "present": "Present",
+    "expand": "Read more",
+    "collapse": "Read less",
+    "empty": "No experience listed.",
+    "loading": "Loading experience...",
+    "error": "Unable to load experience."
+  },
+  "projects": {
+    "title": "Selected Projects",
+    "subtitle": "Real projects, not tutorials.",
+    "filter": {
+      "all": "All",
+      "active": "Filter active"
+    },
+    "card": {
+      "case": "View case study",
+      "github": "GitHub"
+    },
+    "empty": {
+      "filter": "No projects with this stack.",
+      "reset": "Reset filter"
+    },
+    "loading": "Loading projects...",
+    "error": "Unable to load projects.",
+    "status": {
+      "production": "In production",
+      "beta": "Beta",
+      "archived": "Archived"
+    }
+  },
+  "project_detail": {
+    "back": "← Back to projects",
+    "sections": {
+      "context": "Context",
+      "architecture": "Architecture",
+      "choices": "Technical choices",
+      "challenges": "Challenges",
+      "results": "Results",
+      "stack": "Tech stack",
+      "links": "Links"
+    },
+    "links": {
+      "github": "View code",
+      "live": "View live",
+      "demo": "Demo"
+    },
+    "share": {
+      "copy": "Copy link",
+      "copied": "Link copied!",
+      "linkedin": "Share on LinkedIn",
+      "cv": "CV PDF"
+    },
+    "architecture": {
+      "empty": "Architecture diagram not provided."
+    },
+    "not_found": "This project does not exist.",
+    "loading": "Loading project...",
+    "error": "Unable to load this project."
+  },
+  "skills": {
+    "title": "Technical Arsenal",
+    "subtitle": "Skills proven by real projects.",
+    "categories": {
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "ai_ml": "AI & ML",
+      "devops": "DevOps",
+      "mobile": "Mobile"
+    },
+    "linked_projects": "Projects using",
+    "no_linked": "No public projects using this skill.",
+    "loading": "Loading skills...",
+    "error": "Unable to load skills."
+  },
+  "certifications": {
+    "title": "Certifications",
+    "verify": "Verify",
+    "loading": "Loading...",
+    "error": "Unable to load certifications."
+  },
+  "testimonials": {
+    "title": "They worked with me"
+  },
+  "contact": {
+    "title": "Start a collaboration",
+    "subtitle": "Available for full-time in Île-de-France.",
+    "book": "Book a call",
+    "form": {
+      "name": "Full name",
+      "email": "Email address",
+      "subject": "Subject (optional)",
+      "message": "Your message",
+      "send": "Send message",
+      "sending": "Sending...",
+      "success": "Message sent!",
+      "error": "Failed to send. Please try again.",
+      "placeholder": {
+        "name": "John Smith",
+        "email": "john@company.com",
+        "subject": "Full-time opportunity",
+        "message": "Hello Assami, ..."
+      }
+    }
+  },
+  "booking": {
+    "title": "Book a call",
+    "subtitle": "30 minutes — Video or phone",
+    "steps": {
+      "date": "Choose a date",
+      "slot": "Choose a time",
+      "confirm": "Confirm"
+    },
+    "timezone": "Paris time (Europe/Paris)",
+    "next": "Next →",
+    "back": "← Back",
+    "confirm_btn": "Confirm booking",
+    "loading_slots": "Loading available slots...",
+    "no_slots": "No slots available on this day.",
+    "success": {
+      "title": "Your call is confirmed!",
+      "email": "A confirmation email has been sent to",
+      "join": "Join the Meet",
+      "ics": "Download .ics invitation",
+      "close": "Close"
+    }
+  },
+  "chatbot": {
+    "title": "Assami's Assistant",
+    "powered": "Powered by GPT-4o-mini",
+    "welcome": "Hello! I am Assami Baga's assistant. Ask me anything about his background, projects or availability.",
+    "suggestions": [
+      "What is your main tech stack?",
+      "Tell me about AgroSahel AI",
+      "When are you available?"
+    ],
+    "placeholder": "Ask your question...",
+    "listening": "I'm listening...",
+    "dictate": "Dictate a message",
+    "stop": "Stop recording",
+    "clear": "Clear conversation",
+    "open": "Open chatbot",
+    "bubble": "Ask me a question",
+    "close": "Close",
+    "error": "I'm experiencing a technical issue. Please contact Assami directly via the contact form.",
+    "send": "Send"
+  },
+  "search": {
+    "placeholder": "Search a project, a skill...",
+    "suggestions_label": "Suggestions",
+    "no_results": "No results for",
+    "no_results_hint": "Try a skill or project name",
+    "categories": {
+      "projects": "Projects",
+      "skills": "Skills",
+      "experiences": "Experience",
+      "certifications": "Certifications"
+    }
+  },
+  "presentation": {
+    "badge": "PRESENTATION MODE",
+    "quit": "Exit",
+    "trigger": "Alt+P — Presentation mode"
+  },
+  "pwa": {
+    "install_title": "Install portfolio",
+    "install_desc": "Quick access from your home screen, works offline.",
+    "install_later": "Later",
+    "install_btn": "Install",
+    "update_available": "New version available",
+    "update_btn": "Update"
+  },
+  "theme": {
+    "dark": "Dark theme",
+    "light": "Light theme",
+    "activate_light": "Switch to light theme",
+    "activate_dark": "Switch to dark theme"
+  },
+  "cookie": {
+    "message": "This site counts visits to measure its audience. No third-party cookies, no advertising tracking.",
+    "accept": "Got it"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "made_with": "Made with"
+  },
+  "not_found": {
+    "message": "This page doesn't exist yet.",
+    "cta": "Back to home"
+  },
+  "errors": {
+    "network": "Connection issue. Check your network.",
+    "generic": "An error occurred.",
+    "retry": "Retry"
+  }
 }

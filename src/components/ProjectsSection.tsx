@@ -4,12 +4,14 @@ import { ExternalLink, Code2 } from 'lucide-react';
 import { Project } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
+import { useTranslation } from '../hooks/useTranslation';
 
 export function ProjectsSection() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [filter, setFilter] = useState<string>('Tous');
+  const [filter, setFilter] = useState<string>('all');
 
   useEffect(() => {
     let mounted = true;
@@ -25,20 +27,20 @@ export function ProjectsSection() {
         if (mounted) {
           setError(true);
           setLoading(false);
-          toast.error("Erreur lors du chargement des projets");
+          toast.error(t('projects.error'));
         }
       }
     }
     
     loadProjects();
     return () => { mounted = false; };
-  }, []);
+  }, [t]);
 
   const allStacks = useMemo(() => Array.from(new Set(projects.flatMap(p => p.stack))), [projects]);
-  const filters = ['Tous', ...allStacks];
+  const filters = [{ id: 'all', label: t('projects.filter.all') }, ...allStacks.map(s => ({ id: s, label: s }))];
 
   const filteredProjects = projects.filter(
-    p => filter === 'Tous' || p.stack.includes(filter)
+    p => filter === 'all' || p.stack.includes(filter)
   );
 
   if (error) {
@@ -46,7 +48,7 @@ export function ProjectsSection() {
       <section id="projects" className="py-24 bg-bg-card/20 border-t border-white/5">
          <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-sm text-sm font-inter">
-            Erreur de connexion : Impossible de charger les projets.
+            {t('projects.error')}
           </div>
         </div>
       </section>
@@ -57,21 +59,21 @@ export function ProjectsSection() {
     <section id="projects" className="py-24 bg-bg-card/20 border-t border-white/5">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary">Projets Sélectionnés</h2>
+          <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary">{t('projects.title')}</h2>
           
           {!loading && (
             <div className="flex flex-wrap gap-2">
               {filters.map(f => (
                 <button
-                  key={f}
-                  onClick={() => setFilter(f)}
+                  key={f.id}
+                  onClick={() => setFilter(f.id)}
                   className={`px-4 py-1.5 rounded-full text-sm font-inter transition-colors duration-200 ${
-                    filter === f
+                    filter === f.id
                       ? 'bg-accent-ocre text-bg-primary font-medium'
                       : 'border border-text-muted/30 text-text-muted hover:border-text-muted hover:text-text-primary'
                   }`}
                 >
-                  {f}
+                  {f.label}
                 </button>
               ))}
             </div>
@@ -99,7 +101,7 @@ export function ProjectsSection() {
           </div>
         ) : filteredProjects.length === 0 ? (
           <div className="py-20 text-center text-text-muted font-inter italic">
-            Aucun projet avec ce stack — essayez un autre filtre
+            {t('projects.empty.filter')}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -143,7 +145,7 @@ export function ProjectsSection() {
                       to={`/projects/${project.slug}`}
                       className="text-sm font-inter font-medium text-text-primary hover:text-accent-ocre transition-colors"
                     >
-                      Voir le cas →
+                      {t('projects.card.case')} →
                     </Link>
                     
                     {project.github_url && (
@@ -152,6 +154,7 @@ export function ProjectsSection() {
                         target="_blank"
                         rel="noreferrer"
                         className="text-text-muted hover:text-text-primary transition-colors"
+                        title={t('projects.card.github')}
                       >
                         <ExternalLink size={18} />
                       </a>

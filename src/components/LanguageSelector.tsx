@@ -11,7 +11,7 @@ export function LanguageSelector() {
         className={`font-mono text-[12px] px-2 py-1 rounded transition-colors ${
           lang === 'fr' 
             ? 'bg-accent-ocre text-white' 
-            : 'bg-transparent text-text-muted hover:text-[#EDEFF2]'
+            : 'bg-transparent text-text-muted hover:text-[var(--text-primary)]'
         }`}
       >
         FR
@@ -21,7 +21,7 @@ export function LanguageSelector() {
         className={`font-mono text-[12px] px-2 py-1 rounded transition-colors ${
           lang === 'en' 
             ? 'bg-accent-ocre text-white' 
-            : 'bg-transparent text-text-muted hover:text-[#EDEFF2]'
+            : 'bg-transparent text-text-muted hover:text-[var(--text-primary)]'
         }`}
       >
         EN

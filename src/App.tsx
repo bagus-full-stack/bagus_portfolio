@@ -11,7 +11,7 @@ export default function App() {
   return (
     <AuthProvider>
       <Suspense fallback={
-        <div className="flex items-center justify-center h-screen bg-[#0B0F14]">
+        <div className="flex items-center justify-center h-screen bg-[var(--bg-primary)]">
           <div className="w-8 h-8 border-2 border-[#E08A3E] border-t-transparent rounded-full animate-spin" />
         </div>
       }>
@@ -25,9 +25,9 @@ export default function App() {
         toastOptions={{
           className: 'toast-aria',
           style: {
-            background: '#141B22',
-            border: '1px solid rgba(255,255,255,0.05)',
-            color: '#EDEFF2',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-primary)',
             fontFamily: 'Inter, sans-serif'
           }
         }} 

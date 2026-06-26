@@ -39,9 +39,26 @@ class I18nServiceClass {
     return () => this.listeners.delete(callback);
   }
 
-  translate(key: string): string {
-    const dict = translations[this.currentLang] as Record<string, string>;
-    return dict[key] || key;
+  translate(key: string, options?: { returnObjects?: boolean; [key: string]: any }): any {
+    const dict = translations[this.currentLang] as any;
+    const keys = key.split('.');
+    let result = dict;
+    
+    for (const k of keys) {
+      if (result === undefined) break;
+      result = result[k];
+    }
+    
+    if (result === undefined) return key;
+
+    if (typeof result === 'string' && options) {
+      return Object.keys(options).reduce((str, varKey) => {
+        if (varKey === 'returnObjects') return str;
+        return str.replace(`{{${varKey}}}`, options[varKey]);
+      }, result);
+    }
+    
+    return result;
   }
 }
 

@@ -37,7 +37,7 @@ function SortableItem({ id, testimonial, onEdit, onDelete }: { key?: string | nu
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-4 p-4 bg-[#0B0F14] border border-white/5 rounded-xl group hover:border-white/10 transition-colors">
+    <div ref={setNodeRef} style={style} className="flex items-center gap-4 p-4 bg-[var(--bg-primary)] border border-white/5 rounded-xl group hover:border-white/10 transition-colors">
       <div {...attributes} {...listeners} className="cursor-grab text-text-muted hover:text-text-primary p-2">
         <GripVertical size={20} />
       </div>
@@ -272,7 +272,7 @@ export function EditTestimonials() {
                 value={formData.quote || ''}
                 onChange={e => setFormData({...formData, quote: e.target.value})}
                 maxLength={280}
-                className="w-full bg-[#0B0F14] border border-white/10 rounded-lg px-4 py-3 text-text-primary focus:border-accent-ocre/50 focus:outline-none min-h-[100px]"
+                className="w-full bg-[var(--bg-primary)] border border-white/10 rounded-lg px-4 py-3 text-text-primary focus:border-accent-ocre/50 focus:outline-none min-h-[100px]"
                 placeholder="Message du client..."
               />
               <div className="text-right text-xs text-text-muted mt-1">
@@ -287,7 +287,7 @@ export function EditTestimonials() {
                   type="text"
                   value={formData.authorName || ''}
                   onChange={e => setFormData({...formData, authorName: e.target.value})}
-                  className="w-full bg-[#0B0F14] border border-white/10 rounded-lg px-4 py-2 text-text-primary focus:border-accent-ocre/50 focus:outline-none"
+                  className="w-full bg-[var(--bg-primary)] border border-white/10 rounded-lg px-4 py-2 text-text-primary focus:border-accent-ocre/50 focus:outline-none"
                 />
               </div>
               <div>
@@ -296,7 +296,7 @@ export function EditTestimonials() {
                   type="text"
                   value={formData.authorRole || ''}
                   onChange={e => setFormData({...formData, authorRole: e.target.value})}
-                  className="w-full bg-[#0B0F14] border border-white/10 rounded-lg px-4 py-2 text-text-primary focus:border-accent-ocre/50 focus:outline-none"
+                  className="w-full bg-[var(--bg-primary)] border border-white/10 rounded-lg px-4 py-2 text-text-primary focus:border-accent-ocre/50 focus:outline-none"
                 />
               </div>
               <div>
@@ -305,7 +305,7 @@ export function EditTestimonials() {
                   type="text"
                   value={formData.authorCompany || ''}
                   onChange={e => setFormData({...formData, authorCompany: e.target.value})}
-                  className="w-full bg-[#0B0F14] border border-white/10 rounded-lg px-4 py-2 text-text-primary focus:border-accent-ocre/50 focus:outline-none"
+                  className="w-full bg-[var(--bg-primary)] border border-white/10 rounded-lg px-4 py-2 text-text-primary focus:border-accent-ocre/50 focus:outline-none"
                 />
               </div>
               <div>
@@ -315,12 +315,12 @@ export function EditTestimonials() {
                   value={formData.linkedinUrl || ''}
                   onChange={e => setFormData({...formData, linkedinUrl: e.target.value})}
                   placeholder="https://linkedin.com/in/..."
-                  className="w-full bg-[#0B0F14] border border-white/10 rounded-lg px-4 py-2 text-text-primary focus:border-accent-ocre/50 focus:outline-none"
+                  className="w-full bg-[var(--bg-primary)] border border-white/10 rounded-lg px-4 py-2 text-text-primary focus:border-accent-ocre/50 focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="sticky bottom-4 z-50 bg-[#0B0F14] pt-4 border-t border-[#9BA4B5]/20 flex justify-end gap-3">
+            <div className="sticky bottom-4 z-50 bg-[var(--bg-primary)] pt-4 border-t border-[var(--border-subtle)]/20 flex justify-end gap-3">
               <button 
                 onClick={() => setEditingId(null)}
                 className="px-6 py-2.5 text-text-primary hover:bg-white/5 font-medium rounded transition-colors"

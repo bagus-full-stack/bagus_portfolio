@@ -170,7 +170,7 @@ export function MessageDetail() {
           <div className="flex items-center gap-2">
             <a 
               href={mailtoUrl}
-              className="flex items-center gap-2 px-4 py-2 border border-[#8B94A3]/30 rounded-lg text-[#8B94A3] hover:text-[#EDEFF2] hover:border-[#8B94A3] transition-colors font-[Inter] text-sm"
+              className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)]/30 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] transition-colors font-[Inter] text-sm"
             >
               <Reply size={14} /> Répondre
             </a>
@@ -222,18 +222,18 @@ export function MessageDetail() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-8 pt-4 border-t border-[#8B94A3]/20">
+      <div className="flex items-center justify-between mt-8 pt-4 border-t border-[var(--border-subtle)]/20">
         <button
           onClick={goToPrevious}
           disabled={!hasPrevious}
-          className="flex items-center gap-2 text-[#2DD4BF] font-[JetBrains_Mono] text-sm hover:text-[#EDEFF2] transition-colors disabled:text-[#8B94A3]/40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 text-[#2DD4BF] font-[JetBrains_Mono] text-sm hover:text-[var(--text-primary)] transition-colors disabled:text-[var(--text-muted)]/40 disabled:cursor-not-allowed"
         >
           <ChevronLeft size={16} />
           Message précédent
         </button>
 
         {messageIds.length > 0 && (
-          <span className="text-[#8B94A3] font-[JetBrains_Mono] text-xs">
+          <span className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
             {currentIndex + 1} / {messageIds.length}
           </span>
         )}
@@ -241,7 +241,7 @@ export function MessageDetail() {
         <button
           onClick={goToNext}
           disabled={!hasNext}
-          className="flex items-center gap-2 text-[#2DD4BF] font-[JetBrains_Mono] text-sm hover:text-[#EDEFF2] transition-colors disabled:text-[#8B94A3]/40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 text-[#2DD4BF] font-[JetBrains_Mono] text-sm hover:text-[var(--text-primary)] transition-colors disabled:text-[var(--text-muted)]/40 disabled:cursor-not-allowed"
         >
           Message suivant
           <ChevronRight size={16} />

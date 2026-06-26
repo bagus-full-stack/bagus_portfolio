@@ -1,13 +1,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* THÈME SOMBRE (défaut) */
+:root,
+[data-theme="dark"] {
+  --bg-primary: #0B0F14;
+  --bg-card: #141B22;
+  --accent-ocre: #E08A3E;
+  --accent-cyan: #2DD4BF;
+  --text-primary: #EDEFF2;
+  --text-muted: #8B94A3;
+  --border-subtle: rgba(139, 148, 163, 0.2);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* THÈME CLAIR */
+[data-theme="light"] {
+  --bg-primary: #F4F6F9;
+  --bg-card: #FFFFFF;
+  --accent-ocre: #C97A35;
+  --accent-cyan: #0EA5A0;
+  --text-primary: #0B0F14;
+  --text-muted: #4A5568;
+  --border-subtle: rgba(74, 85, 104, 0.15);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Transition douce sur tous les éléments */
+*, *::before, *::after {
+  transition: background-color 250ms ease,
+              color 200ms ease,
+              border-color 200ms ease;
+}
+
 @theme {
-  --color-bg-primary: #0B0F14;
-  --color-bg-card: #141B22;
-  --color-accent-ocre: #E08A3E;
-  --color-accent-cyan: #2DD4BF;
-  --color-text-primary: #EDEFF2;
-  --color-text-muted: #9BA4B5;
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-card: var(--bg-card);
+  --color-accent-ocre: var(--accent-ocre);
+  --color-accent-cyan: var(--accent-cyan);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
 
   --font-space: "Space Grotesk", sans-serif;
   --font-inter: "Inter", sans-serif;

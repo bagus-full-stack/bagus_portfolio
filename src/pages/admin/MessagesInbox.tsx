@@ -58,7 +58,7 @@ const MessageRow: React.FC<{ message: Message, onDelete: (id: string) => void, o
         dragConstraints={{ left: -120, right: 0 }}
         dragElastic={0.1}
         onDragEnd={handleDragEnd}
-        className="relative cursor-pointer active:cursor-grabbing flex items-start gap-3 p-4 hover:bg-[#141B22] transition-colors"
+        className="relative cursor-pointer active:cursor-grabbing flex items-start gap-3 p-4 hover:bg-[var(--bg-card)] transition-colors"
         onClick={() => onClick(message.id)}
       >
         {/* Point non lu — position absolute haut droite */}
@@ -76,14 +76,14 @@ const MessageRow: React.FC<{ message: Message, onDelete: (id: string) => void, o
         {/* Contenu */}
         <div className="flex-1 min-w-0 pr-8">
           <div className="flex items-center justify-between mb-1">
-            <span className={`font-[Inter] text-sm ${message.read ? 'text-[#8B94A3]' : 'text-[#EDEFF2] font-semibold'}`}>
+            <span className={`font-[Inter] text-sm ${message.read ? 'text-[var(--text-muted)]' : 'text-[var(--text-primary)] font-semibold'}`}>
               {message.name}
             </span>
-            <span className="text-[#8B94A3] text-xs font-[JetBrains_Mono] shrink-0 ml-2">
+            <span className="text-[var(--text-muted)] text-xs font-[JetBrains_Mono] shrink-0 ml-2">
               {formatDate(message.created_at)}
             </span>
           </div>
-          <p className="text-[#8B94A3] text-sm font-[Inter] truncate">
+          <p className="text-[var(--text-muted)] text-sm font-[Inter] truncate">
             {message.message.slice(0, 50)}
             {message.message.length > 50 ? '...' : ''}
           </p>

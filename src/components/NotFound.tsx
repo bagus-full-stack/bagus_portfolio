@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Network, ArrowLeft } from 'lucide-react';
+import { useTranslation } from '../hooks/useTranslation';
 
 export function NotFound() {
+  const { t } = useTranslation();
+
   return (
     <div className="flex-grow flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
       
@@ -11,7 +14,7 @@ export function NotFound() {
           <span className="text-accent-cyan">&lt;</span>AB<span className="text-accent-cyan">/&gt;</span>
         </Link>
         <Link to="/" className="flex items-center text-sm font-inter text-text-muted hover:text-text-primary transition-colors">
-          <ArrowLeft size={16} className="mr-2" /> Retour
+          <ArrowLeft size={16} className="mr-2" /> {t('not_found.back')}
         </Link>
       </div>
 
@@ -26,13 +29,13 @@ export function NotFound() {
           <span className="absolute inset-0 text-accent-cyan/20 blur-md">404</span>
         </h1>
         <p className="font-inter text-text-muted text-xl mb-10 max-w-md mx-auto">
-          Cette page n'existe pas encore.
+          {t('not_found.desc')}
         </p>
         <Link 
           to="/" 
           className="px-8 py-3 bg-accent-ocre text-bg-primary font-inter font-medium rounded hover:bg-accent-ocre/90 transition-all duration-200 shadow-[0_0_15px_rgba(224,138,62,0.3)] hover:shadow-[0_0_25px_rgba(224,138,62,0.5)]"
         >
-          Retour à l'accueil
+          {t('not_found.home')}
         </Link>
       </div>
     </div>

@@ -106,7 +106,7 @@ export function EditProfile() {
               className={`flex-1 border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
                 isDragActive 
                   ? 'border-[#E08A3E] bg-[#E08A3E]/10' 
-                  : 'border-[#9BA4B5]/30 hover:border-[#9BA4B5]'
+                  : 'border-[var(--border-subtle)]/30 hover:border-[var(--border-subtle)]'
               }`}
             >
               <input {...getInputProps()} />
@@ -215,7 +215,7 @@ export function EditProfile() {
 
       </div>
 
-      <div className="sticky bottom-4 z-50 bg-[#0B0F14] pt-4 border-t border-[#9BA4B5]/20 flex justify-end gap-3">
+      <div className="sticky bottom-4 z-50 bg-[var(--bg-primary)] pt-4 border-t border-[var(--border-subtle)]/20 flex justify-end gap-3">
         <button 
           type="submit" 
           disabled={savingState === 'saving'}

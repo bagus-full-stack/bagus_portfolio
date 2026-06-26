@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-[#0B0F14] text-text-primary flex flex-col font-inter selection:bg-accent-cyan/30 overflow-hidden relative">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-text-primary flex flex-col font-inter selection:bg-accent-cyan/30 overflow-hidden relative">
       {/* Background SVG Graph Pattern (simplified) */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -28,7 +28,7 @@ export function NotFoundPage() {
 
       {/* Content */}
       <main className="flex-grow flex flex-col items-center justify-center text-center px-6 relative z-10">
-        <h1 className="font-space font-bold text-8xl md:text-9xl text-[#EDEFF2] mb-6">
+        <h1 className="font-space font-bold text-8xl md:text-9xl text-[var(--text-primary)] mb-6">
           404
         </h1>
         <p className="font-inter text-xl text-text-muted mb-10 max-w-md font-space">
@@ -36,7 +36,7 @@ export function NotFoundPage() {
         </p>
         <Link 
           to="/"
-          className="px-8 py-3.5 rounded-sm bg-[#E08A3E] text-[#0B0F14] font-space font-semibold transition-opacity hover:opacity-90"
+          className="px-8 py-3.5 rounded-sm bg-accent-ocre text-[var(--bg-primary)] font-space font-semibold transition-opacity hover:opacity-90"
         >
           Retour à l'accueil
         </Link>

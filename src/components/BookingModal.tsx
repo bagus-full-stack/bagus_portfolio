@@ -106,16 +106,16 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B0F14]/80 backdrop-blur-sm" onClick={handleOverlayClick}>
-      <div className="bg-[#141B22] border border-[#8B94A3]/30 rounded-xl w-full max-w-[480px] p-8 shadow-2xl flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--bg-primary)]/80 backdrop-blur-sm" onClick={handleOverlayClick}>
+      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded-xl w-full max-w-[480px] p-8 shadow-2xl flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="flex justify-between items-start mb-6">
           <div>
             <h2 className="font-space text-2xl font-bold text-white mb-1">Réserver un appel</h2>
-            <p className="font-inter text-[#8B94A3] text-sm">30 minutes — Visio ou téléphone</p>
+            <p className="font-inter text-[var(--text-muted)] text-sm">30 minutes — Visio ou téléphone</p>
           </div>
-          <button onClick={onClose} className="text-[#8B94A3] hover:text-white transition-colors">
+          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-white transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -132,7 +132,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     ? 'bg-[#E08A3E] text-white' 
                     : step > s 
                       ? 'bg-[#2DD4BF] text-[#0B0F14]' 
-                      : 'bg-[#141B22] border-2 border-[#8B94A3]/50 text-[#8B94A3]'
+                      : 'bg-[var(--bg-card)] border-2 border-[var(--border-subtle)]/50 text-[var(--text-muted)]'
                 }`}
               >
                 {step > s ? <CheckCircle2 size={14} /> : s}
@@ -146,7 +146,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-inter font-medium text-white">Choisissez une date</h3>
-              <span className="text-xs text-[#8B94A3] bg-[#0B0F14] px-2 py-1 rounded">Europe/Paris</span>
+              <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-primary)] px-2 py-1 rounded">Europe/Paris</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {dates.map((date, idx) => {
@@ -162,10 +162,10 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     onClick={() => handleDateSelect(date)}
                     className={`p-3 rounded-lg border text-left font-mono text-sm transition-colors ${
                       isWeekend 
-                        ? 'opacity-30 border-white/5 cursor-not-allowed text-[#8B94A3]' 
+                        ? 'opacity-30 border-white/5 cursor-not-allowed text-[var(--text-muted)]' 
                         : isSelected
                           ? 'bg-[#E08A3E] border-[#E08A3E] text-white'
-                          : 'border-[#8B94A3]/30 hover:border-[#E08A3E] text-white bg-[#141B22]'
+                          : 'border-[var(--border-subtle)]/30 hover:border-[#E08A3E] text-white bg-[var(--bg-card)]'
                     }`}
                   >
                     {formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)}
@@ -190,7 +190,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-inter font-medium text-white">Choisissez une heure</h3>
-              <span className="text-xs text-[#8B94A3] bg-[#0B0F14] px-2 py-1 rounded">Europe/Paris</span>
+              <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-primary)] px-2 py-1 rounded">Europe/Paris</span>
             </div>
             
             {loadingSlots ? (
@@ -200,7 +200,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 ))}
               </div>
             ) : availableSlots.length === 0 ? (
-              <p className="text-center py-8 text-[#8B94A3]">Aucun créneau disponible à cette date.</p>
+              <p className="text-center py-8 text-[var(--text-muted)]">Aucun créneau disponible à cette date.</p>
             ) : (
               <div className="grid grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-2">
                 {availableSlots.map((slot, idx) => {
@@ -212,7 +212,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       className={`p-3 rounded-lg border font-mono text-sm transition-colors text-center ${
                         isSelected
                           ? 'bg-[#E08A3E] border-[#E08A3E] text-white'
-                          : 'border-[#8B94A3]/30 hover:border-[#E08A3E] text-white bg-[#141B22]'
+                          : 'border-[var(--border-subtle)]/30 hover:border-[#E08A3E] text-white bg-[var(--bg-card)]'
                       }`}
                     >
                       {slot.label}
@@ -225,7 +225,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
             <div className="pt-4 flex justify-between">
               <button
                 onClick={() => setStep(1)}
-                className="px-4 py-2 text-[#8B94A3] hover:text-white transition-colors"
+                className="px-4 py-2 text-[var(--text-muted)] hover:text-white transition-colors"
               >
                 ← Retour
               </button>
@@ -245,7 +245,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
           <form onSubmit={handleSubmit} className="space-y-4">
             <h3 className="font-inter font-medium text-white mb-2">Vos informations</h3>
 
-            <div className="bg-[#0B0F14] rounded-lg p-3 mb-4 font-mono text-sm text-white">
+            <div className="bg-[var(--bg-primary)] rounded-lg p-3 mb-4 font-mono text-sm text-white">
               {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' }).replace(/^\w/, c => c.toUpperCase())} à {selectedSlot?.label} — 30 minutes
             </div>
 
@@ -257,7 +257,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   required
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-[#0B0F14] border border-[#8B94A3]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E08A3E] transition-colors"
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-subtle)]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E08A3E] transition-colors"
                 />
               </div>
               <div>
@@ -267,7 +267,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   required
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full bg-[#0B0F14] border border-[#8B94A3]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E08A3E] transition-colors"
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-subtle)]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E08A3E] transition-colors"
                 />
               </div>
               <div>
@@ -276,7 +276,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   placeholder="Sujet de l'appel (optionnel)"
                   value={formData.subject}
                   onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full bg-[#0B0F14] border border-[#8B94A3]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E08A3E] transition-colors"
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-subtle)]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E08A3E] transition-colors"
                 />
               </div>
               <div>
@@ -285,7 +285,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   rows={3}
                   value={formData.notes}
                   onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full bg-[#0B0F14] border border-[#8B94A3]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E08A3E] transition-colors resize-none"
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-subtle)]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E08A3E] transition-colors resize-none"
                 />
               </div>
             </div>
@@ -294,7 +294,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="px-4 py-2 text-[#8B94A3] hover:text-white transition-colors"
+                className="px-4 py-2 text-[var(--text-muted)] hover:text-white transition-colors"
               >
                 ← Retour
               </button>
@@ -318,13 +318,13 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
             
             <div>
               <h3 className="font-space text-2xl font-bold text-white mb-2">Votre appel est confirmé !</h3>
-              <p className="font-inter text-[#8B94A3] text-sm">
+              <p className="font-inter text-[var(--text-muted)] text-sm">
                 Un email de confirmation avec le lien Meet a été envoyé à {formData.email}
               </p>
             </div>
 
-            <div className="bg-[#0B0F14] border border-[#8B94A3]/30 rounded-lg p-4 w-full text-left font-mono text-sm space-y-3">
-              <div className="flex items-center text-[#8B94A3]">
+            <div className="bg-[var(--bg-primary)] border border-[var(--border-subtle)]/30 rounded-lg p-4 w-full text-left font-mono text-sm space-y-3">
+              <div className="flex items-center text-[var(--text-muted)]">
                 <CalendarIcon size={16} className="mr-3" />
                 <span className="text-white">
                   {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} 
@@ -332,7 +332,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 </span>
               </div>
               {confirmationData?.meetLink && (
-                <div className="flex items-center text-[#8B94A3] pt-3 border-t border-[#8B94A3]/20">
+                <div className="flex items-center text-[var(--text-muted)] pt-3 border-t border-[var(--border-subtle)]/20">
                   <Video size={16} className="mr-3" />
                   <a href={confirmationData.meetLink} target="_blank" rel="noreferrer" className="text-[#2DD4BF] hover:underline break-all truncate block">
                     Rejoindre le Meet : {confirmationData.meetLink.replace('https://', '')}
@@ -345,7 +345,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
               {confirmationData?.icsContent && (
                 <button
                   onClick={() => downloadICS(confirmationData.icsContent!, 'appel.ics')}
-                  className="w-full py-3 bg-transparent border border-[#8B94A3]/30 hover:border-[#8B94A3] text-[#8B94A3] hover:text-white font-medium rounded-lg transition-colors"
+                  className="w-full py-3 bg-transparent border border-[var(--border-subtle)]/30 hover:border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-white font-medium rounded-lg transition-colors"
                 >
                   Télécharger l'invitation .ics
                 </button>

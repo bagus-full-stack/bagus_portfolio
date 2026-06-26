@@ -261,7 +261,7 @@ export function MediaManager() {
                 text-center cursor-pointer transition-all duration-200
                 ${isDragActive
                   ? 'border-[#E08A3E] bg-[#E08A3E]/10 scale-[1.02]'
-                  : 'border-[#8B94A3]/30 hover:border-[#8B94A3]/60'
+                  : 'border-[var(--border-subtle)]/30 hover:border-[var(--border-subtle)]/60'
                 }
               `}
             >
@@ -272,14 +272,14 @@ export function MediaManager() {
                 </p>
               ) : (
                 <>
-                  <Upload className="mx-auto mb-3 text-[#8B94A3]" size={32} />
-                  <p className="text-[#EDEFF2] font-[Inter]">
+                  <Upload className="mx-auto mb-3 text-[var(--text-muted)]" size={32} />
+                  <p className="text-[var(--text-primary)] font-[Inter]">
                     Glissez une photo ou{' '}
                     <span className="text-[#E08A3E] underline">
                       cliquez pour parcourir
                     </span>
                   </p>
-                  <p className="text-[#8B94A3] text-sm mt-1 font-[JetBrains_Mono]">
+                  <p className="text-[var(--text-muted)] text-sm mt-1 font-[JetBrains_Mono]">
                     JPG, PNG, WebP — 2MB max
                   </p>
                 </>
@@ -303,13 +303,13 @@ export function MediaManager() {
         
         {profile.cv_url ? (
           <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-bg-primary border border-white/10 rounded-lg mb-6 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-[#0B0F14] rounded-lg w-full sm:w-auto">
+            <div className="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-lg w-full sm:w-auto">
               <FileText size={16} className="text-[#2DD4BF]" />
               <div>
-                <p className="text-[#EDEFF2] font-[JetBrains_Mono] text-sm">
+                <p className="text-[var(--text-primary)] font-[JetBrains_Mono] text-sm">
                   {cvFileName}
                 </p>
-                <p className="text-[#8B94A3] font-[JetBrains_Mono] text-xs">
+                <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
                   Mis à jour le {cvUpdatedAt}
                 </p>
               </div>
@@ -318,7 +318,7 @@ export function MediaManager() {
               <button
                 onClick={handlePreviewCV}
                 disabled={previewLoading}
-                className="flex items-center gap-2 px-4 py-2 border border-[#8B94A3]/30 rounded-lg text-[#8B94A3] hover:text-[#EDEFF2] hover:border-[#8B94A3] transition-colors disabled:opacity-50 font-[Inter] text-sm"
+                className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)]/30 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] transition-colors disabled:opacity-50 font-[Inter] text-sm"
               >
                 {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
                 Prévisualiser

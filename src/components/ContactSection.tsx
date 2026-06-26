@@ -49,18 +49,14 @@ export function ContactSection() {
   return (
     <section id="contact" className="py-24 bg-bg-primary border-t border-white/5">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
-        <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary mb-16">Contact</h2>
+        <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary mb-16">{t('contact.title')}</h2>
         
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
           
           {/* Left Column: Direct Info */}
           <div className="lg:w-1/3 flex flex-col space-y-10">
             <div>
-              <h3 className="font-space text-xl font-semibold text-text-primary mb-4">Discutons de votre projet</h3>
-              <p className="font-inter text-text-muted text-sm leading-relaxed mb-8">
-                Je suis actuellement ouvert à de nouvelles opportunités. Que vous ayez une question ou que vous souhaitiez 
-                simplement dire bonjour, je ferai de mon mieux pour vous répondre !
-              </p>
+              <h3 className="font-space text-xl font-semibold text-text-primary mb-4">{t('contact.subtitle')}</h3>
               
               <a 
                 href="mailto:contact@example.com" 
@@ -79,7 +75,7 @@ export function ContactSection() {
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#E08A3E] text-white rounded-lg hover:bg-[#C97A35] transition-colors font-inter font-medium"
               >
                 <Calendar size={18} />
-                Réserver un appel
+                {t('contact.book')}
               </button>
             </div>
             
@@ -102,12 +98,13 @@ export function ContactSection() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col space-y-2">
-                  <label htmlFor="name" className="font-inter text-sm text-text-muted">Nom <span className="text-accent-ocre">*</span></label>
+                  <label htmlFor="name" className="font-inter text-sm text-text-muted">{t('contact.form.name')} <span className="text-accent-ocre">*</span></label>
                   <input
                     type="text"
                     id="name"
                     name="name"
                     required
+                    placeholder={t('contact.form.placeholder.name')}
                     value={formData.name}
                     onChange={handleChange}
                     disabled={status === 'submitting'}
@@ -116,12 +113,13 @@ export function ContactSection() {
                 </div>
                 
                 <div className="flex flex-col space-y-2">
-                  <label htmlFor="email" className="font-inter text-sm text-text-muted">Email <span className="text-accent-ocre">*</span></label>
+                  <label htmlFor="email" className="font-inter text-sm text-text-muted">{t('contact.form.email')} <span className="text-accent-ocre">*</span></label>
                   <input
                     type="email"
                     id="email"
                     name="email"
                     required
+                    placeholder={t('contact.form.placeholder.email')}
                     value={formData.email}
                     onChange={handleChange}
                     disabled={status === 'submitting'}
@@ -131,11 +129,12 @@ export function ContactSection() {
               </div>
               
               <div className="flex flex-col space-y-2">
-                <label htmlFor="subject" className="font-inter text-sm text-text-muted">Sujet (optionnel)</label>
+                <label htmlFor="subject" className="font-inter text-sm text-text-muted">{t('contact.form.subject')}</label>
                 <input
                   type="text"
                   id="subject"
                   name="subject"
+                  placeholder={t('contact.form.placeholder.subject')}
                   value={formData.subject}
                   onChange={handleChange}
                   disabled={status === 'submitting'}
@@ -144,12 +143,13 @@ export function ContactSection() {
               </div>
               
               <div className="flex flex-col space-y-2">
-                <label htmlFor="message" className="font-inter text-sm text-text-muted">Message <span className="text-accent-ocre">*</span></label>
+                <label htmlFor="message" className="font-inter text-sm text-text-muted">{t('contact.form.message')} <span className="text-accent-ocre">*</span></label>
                 <textarea
                   id="message"
                   name="message"
                   required
                   rows={5}
+                  placeholder={t('contact.form.placeholder.message')}
                   value={formData.message}
                   onChange={handleChange}
                   disabled={status === 'submitting'}
@@ -175,20 +175,20 @@ export function ContactSection() {
                   className="w-full sm:w-auto px-8 py-3 bg-accent-ocre text-bg-primary font-inter font-medium rounded-md hover:bg-accent-ocre/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[200px]"
                 >
                   {status === 'submitting' && <Loader2 size={18} className="mr-2 animate-spin" />}
-                  {status === 'idle' && t('contact.send')}
-                  {status === 'submitting' && 'Envoi en cours...'}
-                  {status === 'success' && 'Message envoyé !'}
-                  {status === 'error' && 'Réessayer'}
+                  {status === 'idle' && t('contact.form.send')}
+                  {status === 'submitting' && t('contact.form.sending')}
+                  {status === 'success' && t('contact.form.success')}
+                  {status === 'error' && t('contact.form.error')}
                 </button>
                 
                 {status === 'success' && (
                   <span className="text-green-400 font-inter text-sm animate-in fade-in duration-300">
-                    {t('contact.success')}
+                    {t('contact.form.success')}
                   </span>
                 )}
                 {status === 'error' && (
                   <span className="text-red-400 font-inter text-sm animate-in fade-in duration-300">
-                    {t('contact.error')}
+                    {t('contact.form.error')}
                   </span>
                 )}
               </div>

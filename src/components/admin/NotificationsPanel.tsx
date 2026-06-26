@@ -69,12 +69,12 @@ export function NotificationsPanel({ isOpen, onClose, setUnreadCount }: Notifica
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Overlay */}
       <div 
-        className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm transition-opacity" 
+        className="absolute inset-0 bg-[var(--bg-primary)]/80 backdrop-blur-sm transition-opacity" 
         onClick={onClose}
       />
       
       {/* Panel */}
-      <div className="relative w-full max-w-[360px] bg-[#141B22] h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 ease-out border-l border-white/5">
+      <div className="relative w-full max-w-[360px] bg-[var(--bg-card)] h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 ease-out border-l border-white/5">
         
         {/* Header */}
         <div className="p-6 flex items-center justify-between border-b border-white/5">

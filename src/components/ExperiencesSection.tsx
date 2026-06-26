@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Experience } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
+import { useTranslation } from '../hooks/useTranslation';
 
 const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, isEven }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const isPro = exp.type === 'pro';
   const showToggle = exp.description && exp.description.length > 120; // heuristic for > 3 lines
@@ -22,7 +24,7 @@ const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, i
       {/* Content Card */}
       <div className={`w-full md:w-1/2 pl-16 md:pl-0 ${isEven ? 'md:pr-16 md:text-right' : 'md:pl-16 md:text-left'}`}>
         <div className={`font-mono text-sm text-text-muted mb-2 flex justify-start ${isEven ? 'md:justify-end' : 'md:justify-start'}`}>
-           {exp.start_date} — {exp.end_date || 'Présent'}
+           {exp.start_date} — {exp.end_date || t('experiences.present')}
         </div>
         
         <h3 className="font-space text-xl font-semibold text-text-primary mb-1">
@@ -43,7 +45,7 @@ const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, i
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-accent-cyan font-inter text-[14px] bg-transparent mt-2 hover:underline"
             >
-              {isExpanded ? 'Voir moins ↑' : 'Voir plus ↓'}
+              {isExpanded ? t('experiences.see_less') : t('experiences.see_more')}
             </button>
           </div>
         )}
@@ -66,6 +68,7 @@ const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, i
 }
 
 export function ExperiencesSection() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -84,21 +87,21 @@ export function ExperiencesSection() {
         if (mounted) {
           setError(true);
           setLoading(false);
-          toast.error("Erreur lors du chargement des expériences");
+          toast.error(t('experiences.error'));
         }
       }
     }
     
     loadExperiences();
     return () => { mounted = false; };
-  }, []);
+  }, [t]);
 
   if (error) {
     return (
       <section id="experiences" className="py-24 bg-bg-primary">
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-sm text-sm font-inter">
-            Erreur de connexion : Impossible de récupérer le journal d'activités.
+            {t('experiences.error')}
           </div>
         </div>
       </section>
@@ -112,7 +115,7 @@ export function ExperiencesSection() {
   return (
     <section id="experiences" className="py-24 bg-bg-primary">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
-        <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary mb-16">Expériences & Formations</h2>
+        <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary mb-16">{t('experiences.title')}</h2>
         
         {loading ? (
           <div className="relative">
@@ -135,7 +138,7 @@ export function ExperiencesSection() {
           </div>
         ) : experiences.length === 0 ? (
           <div className="text-center text-text-muted font-inter py-12 italic">
-            Aucune expérience ajoutée
+            {t('experiences.empty')}
           </div>
         ) : (
           <div className="relative">

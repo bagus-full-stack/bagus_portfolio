@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { SearchOverlay } from './SearchOverlay';
 import { LanguageSelector } from './LanguageSelector';
+import ThemeToggle from './ui/ThemeToggle';
 import { useTranslation } from '../hooks/useTranslation';
 
 export function Navbar() {
@@ -40,7 +41,7 @@ export function Navbar() {
       <nav 
         className={`no-print fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled 
-            ? 'bg-bg-primary/90 backdrop-blur-md border-b border-white/5 py-4' 
+            ? 'bg-[var(--bg-primary)]/95 backdrop-blur-md border-b border-[var(--border-subtle)] py-4' 
             : 'bg-transparent py-6'
         }`}
       >
@@ -54,7 +55,7 @@ export function Navbar() {
               <a 
                 key={item.id} 
                 href={`#${item.id}`} 
-                className="font-inter text-sm font-medium text-text-muted hover:text-text-primary transition-colors"
+                className="font-inter text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
                 {t(item.key)}
               </a>
@@ -64,17 +65,19 @@ export function Navbar() {
           <div className="flex items-center gap-6">
             <button 
               onClick={() => setIsSearchOpen(true)}
-              className="flex items-center text-text-muted hover:text-text-primary transition-colors"
+              className="flex items-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               title="Rechercher (Cmd+K)"
             >
               <Search size={20} />
             </button>
+            <div className="w-px h-4 bg-[var(--border-subtle)]" />
             <LanguageSelector />
+            <ThemeToggle />
             <a 
               href="#contact" 
-              className="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-sm bg-accent-ocre text-bg-primary font-space font-semibold transition-opacity hover:opacity-90"
+              className="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-sm bg-accent-ocre text-[var(--bg-primary)] font-space font-semibold transition-opacity hover:opacity-90"
             >
-              Hire me
+              {t('nav.hire')}
             </a>
           </div>
         </div>

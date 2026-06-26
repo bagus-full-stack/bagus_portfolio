@@ -190,7 +190,7 @@ export function Analytics() {
           <p className="text-text-muted">Suivez la fréquentation de votre portfolio.</p>
         </div>
 
-        <div className="flex bg-[#141B22] border border-white/10 rounded-lg p-1 font-mono">
+        <div className="flex bg-[var(--bg-card)] border border-white/10 rounded-lg p-1 font-mono">
           {(['7', '30', '90'] as Period[]).map((p) => (
             <button
               key={p}
@@ -229,7 +229,7 @@ export function Analytics() {
       ) : (
         <>
           {/* Main Chart */}
-          <div className="bg-[#141B22] border border-white/5 rounded-xl p-6">
+          <div className="bg-[var(--bg-card)] border border-white/5 rounded-xl p-6">
             <h3 className="font-space text-lg font-bold mb-6">Évolution des visites</h3>
             <div className="h-[300px] w-full">
               <Line 

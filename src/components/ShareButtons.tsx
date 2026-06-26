@@ -83,7 +83,7 @@ export function ShareButtons() {
       <button
         onClick={handleDownloadCV}
         disabled={loading}
-        className="flex items-center gap-2 px-4 py-2 border border-[#8B94A3]/30 rounded-lg text-[#8B94A3] hover:text-[#EDEFF2] hover:border-[#8B94A3] transition-colors disabled:opacity-50"
+        className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)]/30 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] transition-colors disabled:opacity-50"
       >
         {loading ? (
           <Loader2 size={16} className="animate-spin" />

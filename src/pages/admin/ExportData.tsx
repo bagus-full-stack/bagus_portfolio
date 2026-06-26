@@ -204,7 +204,7 @@ export function ExportData() {
           </div>
           
           <div className="flex-1">
-            <div className="bg-[#0B0F14] rounded-lg h-32 mb-4 flex items-center justify-center border border-white/5 relative overflow-hidden">
+            <div className="bg-[var(--bg-primary)] rounded-lg h-32 mb-4 flex items-center justify-center border border-white/5 relative overflow-hidden">
               <iframe 
                 src="/" 
                 className="w-[800px] h-[600px] scale-[0.2] transform origin-top-left absolute top-0 left-0 pointer-events-none opacity-50"
@@ -291,7 +291,7 @@ export function ExportData() {
           </div>
           
           <div className="flex-1">
-            <div className="flex bg-[#0B0F14] rounded-lg p-1 mb-6">
+            <div className="flex bg-[var(--bg-primary)] rounded-lg p-1 mb-6">
               <button 
                 onClick={() => setCsvPeriod('month')}
                 className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${csvPeriod === 'month' ? 'bg-white/10 text-white' : 'text-text-muted hover:text-white'}`}

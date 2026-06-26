@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, X, Folder, Award, Briefcase, Zap, ArrowRight } from 'lucide-react';
 import { SearchService } from '../services/search.service';
 import { SearchResults, SearchResult } from '../types';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface SearchOverlayProps {
 const SUGGESTIONS = ['AgroSahel AI', 'PyTorch', 'FastAPI', 'Angular'];
 
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +72,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     { id: '1', title: 'AgroSahel AI', url: '/projects/agrosahel-ai', type: 'project', excerpt: '' },
     { id: '2', title: 'PyTorch', url: '/#skills', type: 'skill', excerpt: '' },
     { id: '3', title: 'FastAPI', url: '/#skills', type: 'skill', excerpt: '' },
-    { id: '4', title: 'Me contacter', url: '/#contact', type: 'other', excerpt: '' }
+    { id: '4', title: t('nav.contact'), url: '/#contact', type: 'other', excerpt: '' }
   ];
 
   const flatResults: SearchResult[] = [];
@@ -165,11 +167,11 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 bg-[#0B0F14]/90 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 bg-[var(--bg-primary)]/90 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-[640px] bg-[#141B22] border border-[#9BA4B5]/30 rounded-xl shadow-2xl flex flex-col overflow-hidden"
+        className="w-full max-w-[640px] bg-[var(--bg-card)] border border-[var(--border-subtle)]/30 rounded-xl shadow-2xl flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         {/* Search Input Area */}
@@ -181,10 +183,10 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Rechercher un projet, une compétence..."
+            placeholder={t('search.placeholder')}
             className="w-full bg-transparent border-none outline-none text-text-primary pl-10 pr-12 py-2 placeholder:text-text-muted/50"
           />
-          <div className="absolute right-4 font-mono text-[10px] bg-[#0B0F14] text-text-muted px-1.5 py-1 rounded border border-white/10 hidden sm:block">
+          <div className="absolute right-4 font-mono text-[10px] bg-[var(--bg-primary)] text-text-muted px-1.5 py-1 rounded border border-white/10 hidden sm:block">
             ESC
           </div>
         </div>
@@ -193,7 +195,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         <div className="overflow-y-auto flex-1 max-h-[400px] p-2 hide-scrollbar">
           {!query.trim() ? (
             <div className="py-2">
-              {renderGroup('Suggestions', defaultSuggestions, <Search size={14} />)}
+              {renderGroup(t('search.suggestions_label'), defaultSuggestions, <Search size={14} />)}
             </div>
           ) : isLoading ? (
             <div className="p-4 space-y-4">
@@ -209,15 +211,15 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             </div>
           ) : flatResults.length > 0 ? (
             <div className="py-2">
-              {renderGroup('Projets', results!.projects, <Folder size={14} />)}
-              {renderGroup('Compétences', results!.skills, <Zap size={14} />)}
-              {renderGroup('Expériences', results!.experiences, <Briefcase size={14} />)}
-              {renderGroup('Certifications', results!.certifications, <Award size={14} />)}
+              {renderGroup(t('search.categories.projects'), results!.projects, <Folder size={14} />)}
+              {renderGroup(t('search.categories.skills'), results!.skills, <Zap size={14} />)}
+              {renderGroup(t('search.categories.experiences'), results!.experiences, <Briefcase size={14} />)}
+              {renderGroup(t('search.categories.certifications'), results!.certifications, <Award size={14} />)}
             </div>
           ) : (
             <div className="py-12 px-4 text-center">
-              <p className="text-text-primary mb-2">Aucun résultat pour « {query} »</p>
-              <p className="text-sm text-text-muted">Essayez une compétence ou un projet</p>
+              <p className="text-text-primary mb-2">{t('search.no_results')} « {query} »</p>
+              <p className="text-sm text-text-muted">{t('search.no_results_hint')}</p>
             </div>
           )}
         </div>

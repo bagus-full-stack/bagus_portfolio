@@ -209,7 +209,7 @@ function CertificationForm({ initialData, onCancel, onSave }: { initialData: Cer
         </div>
       </div>
 
-      <div className="sticky bottom-4 z-50 bg-[#0B0F14] pt-4 border-t border-[#9BA4B5]/20 flex justify-end gap-3">
+      <div className="sticky bottom-4 z-50 bg-[var(--bg-primary)] pt-4 border-t border-[var(--border-subtle)]/20 flex justify-end gap-3">
         <button type="button" onClick={onCancel} className="px-6 py-2.5 text-text-primary hover:bg-white/5 font-medium rounded transition-colors">Annuler</button>
         <button type="submit" disabled={savingState === 'saving'} className="px-6 py-2.5 bg-[#E08A3E] text-[#0B0F14] font-medium rounded hover:bg-[#E08A3E]/90 transition-colors disabled:opacity-70 flex items-center">
           {savingState === 'saving' && <Loader2 size={18} className="animate-spin mr-2" />}

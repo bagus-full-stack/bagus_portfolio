@@ -35,7 +35,7 @@ export function ActivityLog() {
       case 'message':
         return <Mail size={16} className="text-accent-ocre" />;
       case 'auth':
-        return <Shield size={16} className="text-[#9BA4B5]" />;
+        return <Shield size={16} className="text-[var(--text-muted)]" />;
       case 'error':
         return <AlertTriangle size={16} className="text-[#EF4444]" />;
       default:
@@ -111,7 +111,7 @@ export function ActivityLog() {
           <div className="divide-y divide-white/5">
             {filteredLogs.map(log => (
               <div key={log.id} className="p-4 sm:p-5 flex gap-4 items-start hover:bg-white/5 transition-colors">
-                <div className="mt-1 w-8 h-8 rounded-full bg-[#0B0F14] border border-white/10 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <div className="mt-1 w-8 h-8 rounded-full bg-[var(--bg-primary)] border border-white/10 flex items-center justify-center flex-shrink-0 shadow-sm">
                   {getIcon(log.type)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -123,7 +123,7 @@ export function ActivityLog() {
                   </p>
                 </div>
                 <div className="hidden sm:block flex-shrink-0">
-                  <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-[#0B0F14] border border-white/5 text-text-muted">
+                  <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-[var(--bg-primary)] border border-white/5 text-text-muted">
                     {getBadgeText(log.type)}
                   </span>
                 </div>

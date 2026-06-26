@@ -126,7 +126,7 @@ export function EditSkills() {
               }}
               placeholder="Nom de la catégorie..."
               autoFocus
-              className="flex-1 bg-[#0B0F14] border border-[#8B94A3]/30 rounded-lg px-3 py-2 text-[#EDEFF2] font-[Inter] text-sm focus:outline-none focus:border-[#2DD4BF] placeholder:text-[#8B94A3]"
+              className="flex-1 bg-[var(--bg-primary)] border border-[var(--border-subtle)]/30 rounded-lg px-3 py-2 text-[var(--text-primary)] font-[Inter] text-sm focus:outline-none focus:border-[#2DD4BF] placeholder:text-[var(--text-muted)]"
             />
             <button
               onClick={handleAddCategory}
@@ -140,7 +140,7 @@ export function EditSkills() {
                 setShowNewCategoryInput(false);
                 setNewCategoryName('');
               }}
-              className="px-3 py-2 border border-[#8B94A3]/30 text-[#8B94A3] rounded-lg text-sm hover:text-[#EDEFF2] transition-colors"
+              className="px-3 py-2 border border-[var(--border-subtle)]/30 text-[var(--text-muted)] rounded-lg text-sm hover:text-[var(--text-primary)] transition-colors"
             >
               Annuler
             </button>
@@ -219,7 +219,7 @@ export function EditSkills() {
               
               <div className="absolute bottom-4 right-4">
                 {saveState === 'saving' && (
-                  <span className="text-[#8B94A3] font-mono text-xs flex items-center gap-1">
+                  <span className="text-[var(--text-muted)] font-mono text-xs flex items-center gap-1">
                     <Loader2 size={10} className="animate-spin" />
                     Enregistrement...
                   </span>

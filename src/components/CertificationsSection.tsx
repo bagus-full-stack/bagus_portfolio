@@ -3,8 +3,10 @@ import { ExternalLink } from 'lucide-react';
 import { Certification } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
+import { useTranslation } from '../hooks/useTranslation';
 
 export function CertificationsSection() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [certifications, setCertifications] = useState<Certification[]>([]);
@@ -23,21 +25,21 @@ export function CertificationsSection() {
         if (mounted) {
           setError(true);
           setLoading(false);
-          toast.error("Erreur lors du chargement des certifications");
+          toast.error(t('certifications.error'));
         }
       }
     }
     
     loadCertifications();
     return () => { mounted = false; };
-  }, []);
+  }, [t]);
 
   if (error) {
     return (
       <section id="certifications" className="py-24 bg-bg-primary border-t border-white/5">
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-sm text-sm font-inter">
-            Impossible de charger les certifications.
+            {t('certifications.error')}
           </div>
         </div>
       </section>
@@ -51,7 +53,7 @@ export function CertificationsSection() {
   return (
     <section id="certifications" className="py-24 bg-bg-primary border-t border-white/5">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
-        <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary mb-12">Certifications</h2>
+        <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary mb-12">{t('certifications.title')}</h2>
         
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -83,7 +85,7 @@ export function CertificationsSection() {
                       target="_blank"
                       rel="noreferrer"
                       className="text-accent-cyan hover:text-accent-cyan/80 transition-colors"
-                      title="Vérifier la certification"
+                      title={t('certifications.verify')}
                     >
                       <ExternalLink size={18} />
                     </a>

@@ -113,7 +113,7 @@ export function TestimonialsSection() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-[#141B22] border border-white/5 p-8 rounded-xl h-[300px] animate-pulse">
+              <div key={i} className="bg-[var(--bg-card)] border border-white/5 p-8 rounded-xl h-[300px] animate-pulse">
                 <div className="w-10 h-10 bg-white/5 rounded-full mb-6" />
                 <div className="space-y-3 mb-8">
                   <div className="h-4 bg-white/5 rounded w-full" />
@@ -147,20 +147,20 @@ export function TestimonialsSection() {
                   return (
                     <div 
                       key={testimonial.id}
-                      className="min-w-full md:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] bg-[#141B22] border border-white/5 p-8 rounded-xl relative hover:border-[#E08A3E] transition-colors duration-200 flex flex-col group snap-center"
+                      className="min-w-full md:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] bg-[var(--bg-card)] border border-white/5 p-8 rounded-xl relative hover:border-[#E08A3E] transition-colors duration-200 flex flex-col group snap-center"
                     >
                       <span className="font-space text-6xl text-[#E08A3E] opacity-40 absolute top-4 left-6 leading-none">"</span>
                       
-                      <p className="font-inter text-[16px] text-[#EDEFF2] leading-[1.7] relative z-10 mb-8 pt-4 flex-grow">
+                      <p className="font-inter text-[16px] text-[var(--text-primary)] leading-[1.7] relative z-10 mb-8 pt-4 flex-grow">
                         {DOMPurify.sanitize(testimonial.quote || '', { ALLOWED_TAGS: [] })}
                       </p>
                       
-                      <div className="h-[1px] w-full bg-[#9BA4B5] opacity-30 mb-6"></div>
+                      <div className="h-[1px] w-full bg-[var(--border-subtle)] opacity-30 mb-6"></div>
                       
                       <div className="flex items-center justify-between mt-auto">
                         <div>
-                          <h4 className="font-space font-bold text-[#EDEFF2]">{DOMPurify.sanitize(testimonial.authorName || '', { ALLOWED_TAGS: [] })}</h4>
-                          <p className="font-inter text-sm text-[#9BA4B5]">
+                          <h4 className="font-space font-bold text-[var(--text-primary)]">{DOMPurify.sanitize(testimonial.authorName || '', { ALLOWED_TAGS: [] })}</h4>
+                          <p className="font-inter text-sm text-[var(--text-muted)]">
                             {DOMPurify.sanitize(testimonial.authorRole || '', { ALLOWED_TAGS: [] })}, {DOMPurify.sanitize(testimonial.authorCompany || '', { ALLOWED_TAGS: [] })}
                           </p>
                         </div>
@@ -190,7 +190,7 @@ export function TestimonialsSection() {
                       key={i}
                       onClick={() => setCurrentIndex(i)}
                       className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                        currentIndex === i ? 'bg-[#E08A3E]' : 'bg-[#9BA4B5] hover:bg-[#E08A3E]/50'
+                        currentIndex === i ? 'bg-[#E08A3E]' : 'bg-[var(--border-subtle)] hover:bg-[#E08A3E]/50'
                       }`}
                       aria-label={`Aller au groupe de témoignages ${i + 1}`}
                     />

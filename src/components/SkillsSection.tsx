@@ -4,8 +4,10 @@ import { Skill, Project } from '../types';
 import { SupabaseService, supabase } from '../services/supabase.service';
 import { toast } from 'sonner';
 import { X, Folder } from 'lucide-react';
+import { useTranslation } from '../hooks/useTranslation';
 
 export function SkillsSection() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -28,14 +30,14 @@ export function SkillsSection() {
         if (mounted) {
           setError(true);
           setLoading(false);
-          toast.error("Impossible de charger les compétences.");
+          toast.error(t('skills.error'));
         }
       }
     }
     
     loadData();
     return () => { mounted = false; };
-  }, []);
+  }, [t]);
 
   const handleSkillClick = async (skillName: string) => {
     if (selectedSkill === skillName) {
@@ -77,7 +79,7 @@ export function SkillsSection() {
       <section id="skills" className="py-24 bg-bg-primary">
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-sm text-sm font-inter">
-            Impossible de charger les compétences.
+            {t('skills.error')}
           </div>
         </div>
       </section>
@@ -87,7 +89,7 @@ export function SkillsSection() {
   return (
     <section id="skills" className="py-24 bg-bg-primary">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
-        <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary mb-12">Compétences</h2>
+        <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary mb-12">{t('skills.title')}</h2>
         
         {loading ? (
           <div className="space-y-10">
@@ -106,7 +108,11 @@ export function SkillsSection() {
           <div className="space-y-12">
             {(Object.entries(categories) as [string, string[]][]).map(([categoryName, skillNames]) => (
               <div key={categoryName}>
-                <h3 className="font-space text-xl font-semibold text-text-primary mb-4">{categoryName}</h3>
+                <h3 className="font-space text-xl font-semibold text-text-primary mb-4">
+                  {t(`skills.categories.${categoryName.toLowerCase()}`) !== `skills.categories.${categoryName.toLowerCase()}` 
+                    ? t(`skills.categories.${categoryName.toLowerCase()}`) 
+                    : categoryName}
+                </h3>
                 <div className="flex flex-wrap gap-3">
                   {skillNames.map(skillName => {
                     const isActive = selectedSkill === skillName;
@@ -129,17 +135,17 @@ export function SkillsSection() {
             ))}
             
             {selectedSkill && (
-              <div className="mt-6 p-4 bg-[#141B22] rounded-xl border border-[#2DD4BF]/20 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="mt-6 p-4 bg-[var(--bg-card)] rounded-xl border border-[#2DD4BF]/20 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="flex items-center justify-between mb-4">
                   <p className="font-[JetBrains_Mono] text-sm text-[#2DD4BF]">
-                    Projets utilisant <span className="text-[#EDEFF2]">{selectedSkill}</span>
+                    {t('skills.linked_projects')} <span className="text-[var(--text-primary)]">{selectedSkill}</span>
                   </p>
                   <button
                     onClick={() => {
                       setSelectedSkill(null);
                       setLinkedProjects([]);
                     }}
-                    className="text-[#8B94A3] hover:text-[#EDEFF2] transition-colors"
+                    className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     <X size={14} />
                   </button>
@@ -148,12 +154,12 @@ export function SkillsSection() {
                 {loadingProjects ? (
                   <div className="grid grid-cols-2 gap-3">
                     {[1, 2].map(i => (
-                      <div key={i} className="h-20 bg-[#0B0F14] rounded-lg animate-pulse" />
+                      <div key={i} className="h-20 bg-[var(--bg-primary)] rounded-lg animate-pulse" />
                     ))}
                   </div>
                 ) : linkedProjects.length === 0 ? (
-                  <p className="text-[#8B94A3] font-[Inter] text-sm">
-                    Aucun projet public utilisant cette compétence.
+                  <p className="text-[var(--text-muted)] font-[Inter] text-sm">
+                    {t('skills.no_linked')}
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -161,7 +167,7 @@ export function SkillsSection() {
                       <Link
                         key={project.id}
                         to={`/projects/${project.slug}`}
-                        className="flex items-center gap-3 p-3 bg-[#0B0F14] rounded-lg hover:border-[#E08A3E]/40 border border-transparent transition-colors group"
+                        className="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-lg hover:border-[#E08A3E]/40 border border-transparent transition-colors group"
                       >
                         {project.cover_image ? (
                           <img
@@ -170,15 +176,15 @@ export function SkillsSection() {
                             className="w-12 h-12 rounded object-cover shrink-0"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded bg-[#141B22] flex items-center justify-center shrink-0">
-                            <Folder size={16} className="text-[#8B94A3]" />
+                          <div className="w-12 h-12 rounded bg-[var(--bg-card)] flex items-center justify-center shrink-0">
+                            <Folder size={16} className="text-[var(--text-muted)]" />
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="text-[#EDEFF2] font-[Inter] text-sm font-medium truncate group-hover:text-[#E08A3E] transition-colors">
+                          <p className="text-[var(--text-primary)] font-[Inter] text-sm font-medium truncate group-hover:text-[#E08A3E] transition-colors">
                             {project.title}
                           </p>
-                          <p className="text-[#8B94A3] font-[JetBrains_Mono] text-xs truncate">
+                          <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs truncate">
                             {project.stack?.slice(0, 3).join(' · ')}
                           </p>
                         </div>

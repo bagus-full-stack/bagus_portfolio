@@ -1,0 +1,6 @@
+{
+  "name": "Portfolio & Admin Dashboard",
+  "description": "A modern portfolio with an admin dashboard, featuring internationalization, drag-and-drop management, and export capabilities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

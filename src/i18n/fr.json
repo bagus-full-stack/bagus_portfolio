@@ -1,0 +1,13 @@
+{
+  "nav.projects": "Projets",
+  "nav.experiences": "Expériences",
+  "nav.skills": "Compétences",
+  "nav.contact": "Contact",
+  "hero.badge": "Disponible pour de nouveaux projets",
+  "hero.cta.projects": "Voir mes projets",
+  "hero.cta.download": "Télécharger le CV",
+  "contact.send": "Envoyer le message",
+  "contact.success": "Message envoyé avec succès",
+  "contact.error": "Erreur lors de l'envoi du message",
+  "footer.rights": "Tous droits réservés"
+}

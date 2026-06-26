@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OG Image Template</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      width: 1200px;
+      height: 630px;
+      background-color: #0B0F14;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Motif Graphe SVG en fond */
+    .bg-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.15;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex: 1;
+      padding: 80px;
+    }
+
+    .left-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: 60px;
+    }
+
+    .divider {
+      width: 1px;
+      background-color: #8B94A3;
+      opacity: 0.3;
+      margin: 0 20px;
+    }
+
+    .right-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 64px; /* Slightly larger than 48px to fill space better on 1200x630 */
+      font-weight: 700;
+      color: #EDEFF2;
+      margin: 0 0 16px 0;
+      letter-spacing: -1px;
+    }
+
+    .title {
+      font-family: 'Inter', sans-serif;
+      font-size: 32px; /* Adjusted */
+      font-weight: 500;
+      color: #8B94A3;
+      margin: 0 0 24px 0;
+    }
+
+    .location {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      color: #8B94A3;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .location svg {
+      width: 24px;
+      height: 24px;
+      stroke: #8B94A3;
+    }
+
+    .avatar {
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background-color: #141B22;
+      border: 4px solid #E08A3E; /* accent ocre */
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 60px rgba(224, 138, 62, 0.2);
+    }
+    
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 40px 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+      z-index: 1;
+    }
+
+    .url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      color: #2DD4BF; /* accent cyan */
+      font-weight: 500;
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #E08A3E; /* accent ocre */
+      width: 64px;
+      height: 64px;
+      background: rgba(224, 138, 62, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(224, 138, 62, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Abstract Node Graph Pattern -->
+  <svg class="bg-pattern" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#2DD4BF" stop-opacity="0.2"/>
+        <stop offset="100%" stop-color="#0B0F14" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    
+    <rect width="100%" height="100%" fill="url(#glow)"/>
+    
+    <g stroke="#2DD4BF" stroke-width="1.5" stroke-opacity="0.4" fill="none">
+      <!-- Edges -->
+      <line x1="200" y1="150" x2="450" y2="300" />
+      <line x1="450" y1="300" x2="800" y2="200" />
+      <line x1="800" y1="200" x2="1000" y2="450" />
+      <line x1="450" y1="300" x2="300" y2="500" />
+      <line x1="450" y1="300" x2="600" y2="550" />
+      
+      <!-- Nodes -->
+      <circle cx="200" cy="150" r="6" fill="#0B0F14" />
+      <circle cx="200" cy="150" r="2" fill="#2DD4BF" />
+      
+      <circle cx="450" cy="300" r="8" fill="#0B0F14" stroke-width="2" />
+      <circle cx="450" cy="300" r="3" fill="#2DD4BF" />
+      
+      <circle cx="800" cy="200" r="6" fill="#0B0F14" />
+      <circle cx="800" cy="200" r="2" fill="#2DD4BF" />
+      
+      <circle cx="1000" cy="450" r="6" fill="#0B0F14" />
+      <circle cx="1000" cy="450" r="2" fill="#2DD4BF" />
+      
+      <circle cx="300" cy="500" r="6" fill="#0B0F14" />
+      <circle cx="300" cy="500" r="2" fill="#2DD4BF" />
+      
+      <circle cx="600" cy="550" r="6" fill="#0B0F14" />
+      <circle cx="600" cy="550" r="2" fill="#2DD4BF" />
+    </g>
+  </svg>
+
+  <div class="container">
+    <div class="left-content">
+      <h1 class="name">Assami Baga</h1>
+      <p class="title">Ingénieur Full Stack & IA</p>
+      <div class="location">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        Dakar, Sénégal
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="right-content">
+      <div class="avatar">
+        <!-- Remplacer src par l'URL de la vraie photo de profil -->
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Assami" alt="Avatar">
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="url">assami-baga.com</div>
+    <div class="logo">AB</div>
+  </div>
+
+</body>
+</html>

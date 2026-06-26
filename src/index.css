@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #0B0F14;
+  --color-bg-card: #141B22;
+  --color-accent-ocre: #E08A3E;
+  --color-accent-cyan: #2DD4BF;
+  --color-text-primary: #EDEFF2;
+  --color-text-muted: #9BA4B5;
+
+  --font-space: "Space Grotesk", sans-serif;
+  --font-inter: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.presentation-mode nav,
+.presentation-mode footer,
+.presentation-mode .chatbot-widget,
+.presentation-mode .cookie-banner {
+  display: none !important;
+}
+
+@media print {
+  /* Masquer les éléments non imprimables */
+  .no-print,
+  nav,
+  footer,
+  .chatbot-widget,
+  .cookie-banner,
+  .share-buttons,
+  button:not(.print-visible) {
+    display: none !important;
+  }
+
+  /* Reset fond pour impression */
+  body, html {
+    background: white !important;
+    color: #0B0F14 !important;
+  }
+
+  /* Conserver l'accent ocre pour le nom */
+  .hero-name {
+    color: #E08A3E !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Mise en page A4 */
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  /* Éviter les coupures en milieu de carte */
+  .experience-item,
+  .project-card,
+  .certification-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Sections en pleine largeur */
+  section {
+    width: 100% !important;
+    padding: 8mm 0 !important;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

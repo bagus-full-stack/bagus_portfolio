@@ -26,10 +26,10 @@ export function EditProfile() {
     return () => { mounted = false; };
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const dropzoneConfig: any = {
     accept: { 'image/*': ['.jpg', '.png', '.webp'] },
     maxSize: 2 * 1024 * 1024, // 2MB
-    onDrop: async (files) => {
+    onDrop: async (files: File[]) => {
       const file = files[0];
       if (!file) return;
       try {
@@ -48,7 +48,8 @@ export function EditProfile() {
         toast.error('Erreur lors du téléchargement de l\'image');
       }
     }
-  });
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone(dropzoneConfig);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

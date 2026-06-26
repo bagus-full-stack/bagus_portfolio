@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 import { corsHeaders } from '../_shared/cors.ts'
 
 interface ChatMessage {
@@ -11,24 +12,6 @@ interface ChatRequest {
   message: string
   history: ChatMessage[]
 }
-
-const CV_JSON = JSON.stringify({
-  name: "Assami Baga",
-  role: "Ingénieur Full Stack & IA",
-  bio: "Développeur passionné avec 5 ans d'expérience.",
-  experiences: [
-    { role: "Lead Dev", company: "AgroSahel AI", year: "2024-2026", description: "Plateforme IA pour l'agriculture en Afrique." }
-  ],
-  availability: "Disponible pour de nouvelles opportunités"
-});
-
-const SYSTEM_PROMPT = `Tu es l'assistant professionnel d'Assami Baga,
-ingénieur Full Stack & IA. Tu réponds uniquement
-sur la base des informations de son parcours
-ci-dessous. Si une question dépasse ce cadre,
-redirige poliment vers le formulaire de contact.
-Ne jamais inventer d'informations.
-CV : ${CV_JSON}`;
 
 // Liste de priorité des modèles Google (Fallback)
 const MODELS = [
@@ -60,6 +43,49 @@ serve(async (req) => {
     if (!geminiKey) {
       throw new Error('GEMINI_API_KEY is not set')
     }
+
+    // Récupération dynamique du CV via Supabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const [
+      { data: profile },
+      { data: experiences },
+      { data: projects },
+      { data: skills }
+    ] = await Promise.all([
+      supabase.from('profiles').select('*').single(),
+      supabase.from('experiences').select('*').order('start_date', { ascending: false }),
+      supabase.from('projects').select('*'),
+      supabase.from('skills').select('*')
+    ]);
+
+    const CV_JSON = JSON.stringify({
+      name: profile?.full_name || "Assami Baga",
+      role: profile?.title || "Ingénieur Full Stack & IA",
+      bio: profile?.bio || "Développeur passionné avec 5 ans d'expérience.",
+      contact: profile?.email ? { email: profile.email, github: profile.github_url, linkedin: profile.linkedin_url } : null,
+      experiences: (experiences || []).map(exp => ({
+        role: exp.role,
+        company: exp.company,
+        period: `${exp.start_date} - ${exp.end_date || 'Présent'}`,
+        description: exp.description
+      })),
+      projects: (projects || []).map(p => ({
+        title: p.title,
+        description: p.description,
+        technologies: p.technologies
+      })),
+      skills: (skills || []).map(s => s.name),
+      availability: "Disponible pour de nouvelles opportunités"
+    });
+
+    const SYSTEM_PROMPT = `Tu es l'assistant professionnel de ce profil.
+Tu réponds uniquement sur la base des informations du parcours ci-dessous.
+Si une question dépasse ce cadre, redirige poliment vers le formulaire de contact ou la réservation d'un appel.
+Ne jamais inventer d'informations. Réponds de manière concise, polie et engageante.
+CV : ${CV_JSON}`;
 
     // Formatage de l'historique pour l'API Gemini
     // L'API Google attend "user" ou "model" (au lieu de "assistant")

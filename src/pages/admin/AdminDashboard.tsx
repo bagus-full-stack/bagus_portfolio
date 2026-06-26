@@ -4,40 +4,78 @@ import {
   Eye, TrendingUp, Mail, Folder, Shield, 
   User, Plus, ExternalLink, Download, CheckCircle, AlertTriangle
 } from 'lucide-react';
-import { DashboardStats } from '../../types';
+import { supabase } from '../../services/supabase.service';
 
 export function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [lastLogin, setLastLogin] = useState<string>('');
 
   useEffect(() => {
     let mounted = true;
     
-    // Simulate API call for dashboard stats
-    setTimeout(() => {
-      if (mounted) {
-        setStats({
-          totalViews: 12450,
-          todayViews: 142,
-          unreadMessages: 3,
-          publishedProjects: 8,
-          viewsChange: 12.5,
-          recentMessages: [
-            { id: '1', name: 'Jean Dupont', excerpt: 'Bonjour, je suis très intéressé par votre profil...', date: '10:30', read: false },
-            { id: '2', name: 'Marie Martin', excerpt: 'Suite à notre échange, voici le brief...', date: 'Hier', read: false },
-            { id: '3', name: 'Tech Recruiter', excerpt: 'Nous recherchons un dev React pour...', date: 'Hier', read: false },
-          ]
-        });
-        setLoading(false);
+    async function fetchDashboardData() {
+      try {
+        const { data: metricsData, error: metricsError } = await supabase.rpc('get_dashboard_metrics');
+        
+        if (metricsError) throw metricsError;
+
+        // Fetch recent messages
+        const { data: messagesData, error: messagesError } = await supabase
+          .from('messages')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (messagesError) throw messagesError;
+
+        // Fetch last login
+        const { data: { session } } = await supabase.auth.getSession();
+        let sessionLastLogin = '';
+        if (session?.user?.last_sign_in_at) {
+          sessionLastLogin = new Date(session.user.last_sign_in_at).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+
+        if (mounted) {
+          setLastLogin(sessionLastLogin);
+          setStats({
+            totalViews: metricsData?.totalViews || 0,
+            todayViews: metricsData?.todayViews || 0,
+            unreadMessages: metricsData?.unreadMessages || 0,
+            publishedProjects: metricsData?.publishedProjects || 0,
+            viewsChange: metricsData?.viewsChange || 0,
+            recentMessages: messagesData?.map(m => ({
+              id: m.id,
+              name: m.name,
+              excerpt: m.message?.substring(0, 50) + '...',
+              date: new Date(m.created_at).toLocaleDateString('fr-FR'),
+              read: m.read
+            })) || []
+          });
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        if (mounted) {
+          setError(true);
+          setLoading(false);
+        }
       }
-    }, 1000);
+    }
+
+    fetchDashboardData();
 
     return () => { mounted = false; };
   }, []);
 
   const todayDate = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  const lastLogin = "24/06/2026 à 18:42 depuis Paris, FR";
 
   if (loading) {
     return (
@@ -59,6 +97,15 @@ export function AdminDashboard() {
       </div>
     );
   }
+
+  const getInitials = (name: string) => {
+    if (!name) return '??';
+    return name.split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <div className="space-y-8">
@@ -87,7 +134,7 @@ export function AdminDashboard() {
           title="Vues aujourd'hui" 
           value={stats.todayViews.toLocaleString('fr-FR')} 
           icon={<TrendingUp size={24} className="text-accent-ocre" />} 
-          change={4.2} 
+          change={stats.viewsChange ?? 0} 
         />
         <MetricCard 
           title="Messages non lus" 
@@ -122,11 +169,18 @@ export function AdminDashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-              {stats.recentMessages.map(msg => (
+              {stats.recentMessages.map((msg: any) => (
                 <div key={msg.id} className="flex items-start justify-between p-4 rounded bg-bg-primary/50 border border-white/5 hover:border-white/10 transition-colors">
-                  <div className="pr-4">
-                    <h3 className="font-medium text-sm text-text-primary mb-1">{msg.name}</h3>
-                    <p className="text-sm text-text-muted line-clamp-1">{msg.excerpt}</p>
+                  <div className="flex items-start pr-4">
+                    <div className="w-9 h-9 rounded-full bg-[#E08A3E]/20 border border-[#E08A3E]/30 flex items-center justify-center shrink-0 mr-3">
+                      <span className="text-[#E08A3E] text-xs font-[JetBrains_Mono] font-bold">
+                        {getInitials(msg.name)}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm text-text-primary mb-1">{msg.name}</h3>
+                      <p className="text-sm text-text-muted line-clamp-1">{msg.excerpt}</p>
+                    </div>
                   </div>
                   <div className="flex flex-col items-end flex-shrink-0">
                     <span className="font-mono text-xs text-text-muted mb-2">{msg.date}</span>

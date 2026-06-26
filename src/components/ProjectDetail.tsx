@@ -5,6 +5,7 @@ import { Project } from '../types';
 import { setProjectMeta } from '../services/meta.service';
 import { SEOHead } from './SEOHead';
 import { ShareButtons } from './ShareButtons';
+import ArchitectureDiagram from './ArchitectureDiagram';
 
 export function ProjectDetail() {
   const { project } = useLoaderData() as { project: Project };
@@ -71,17 +72,21 @@ export function ProjectDetail() {
             </p>
           </section>
           
-          {/* Architecture (Placeholder abstrait) */}
+          {/* Architecture */}
           <section>
             <h2 className="font-space text-2xl font-semibold text-text-primary mb-6">Architecture</h2>
             <div className="bg-bg-card rounded-xl p-8 border border-white/5 flex flex-col items-center justify-center min-h-[200px]">
-              {project.architecture ? (
+              {project.architecture_nodes && project.architecture_nodes.length > 0 ? (
+                <ArchitectureDiagram
+                  nodes={project.architecture_nodes}
+                  edges={project.architecture_edges || []}
+                />
+              ) : project.architecture ? (
                 <p className="font-mono text-sm text-accent-cyan text-center">{project.architecture}</p>
               ) : (
-                <div className="flex flex-col items-center opacity-50">
-                   <Network size={48} className="text-accent-cyan mb-4" />
-                   <span className="font-mono text-xs text-text-muted">Diagramme d'architecture conceptuel</span>
-                </div>
+                <p className="text-[#8B94A3] font-[Inter] text-sm italic">
+                  Schéma d'architecture non renseigné.
+                </p>
               )}
             </div>
           </section>

@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Skill, Project } from '../types';
-import { SupabaseService } from '../services/supabase.service';
+import { SupabaseService, supabase } from '../services/supabase.service';
 import { toast } from 'sonner';
+import { X, Folder } from 'lucide-react';
 
 export function SkillsSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [skills, setSkills] = useState<Skill[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [activeSkill, setActiveSkill] = useState<string | null>(null);
+  
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const [linkedProjects, setLinkedProjects] = useState<Project[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(false);
 
   useEffect(() => {
     let mounted = true;
     
     async function loadData() {
       try {
-        const [skillsData, projectsData] = await Promise.all([
-          SupabaseService.getSkills(),
-          SupabaseService.getProjects()
-        ]);
+        const skillsData = await SupabaseService.getSkills();
         if (mounted) {
           setSkills(skillsData);
-          setProjects(projectsData);
           setLoading(false);
         }
       } catch (err) {
@@ -38,12 +37,30 @@ export function SkillsSection() {
     return () => { mounted = false; };
   }, []);
 
-  const handleSkillClick = (skillName: string) => {
-    setActiveSkill(activeSkill === skillName ? null : skillName);
-  };
+  const handleSkillClick = async (skillName: string) => {
+    if (selectedSkill === skillName) {
+      setSelectedSkill(null);
+      setLinkedProjects([]);
+      return;
+    }
 
-  const getProjectsForSkill = (skillName: string) => {
-    return projects.filter(p => p.stack.includes(skillName));
+    setSelectedSkill(skillName);
+    setLoadingProjects(true);
+
+    try {
+      const { data } = await supabase
+        .from('projects')
+        .select('id, title, slug, cover_image, description, stack, status')
+        .contains('stack', [skillName])
+        .eq('status', 'production')
+        .limit(4);
+
+      setLinkedProjects(data || []);
+    } catch {
+      setLinkedProjects([]);
+    } finally {
+      setLoadingProjects(false);
+    }
   };
 
   // Group skills by category
@@ -66,8 +83,6 @@ export function SkillsSection() {
       </section>
     );
   }
-
-  const activeProjects = activeSkill ? getProjectsForSkill(activeSkill) : [];
 
   return (
     <section id="skills" className="py-24 bg-bg-primary">
@@ -94,7 +109,7 @@ export function SkillsSection() {
                 <h3 className="font-space text-xl font-semibold text-text-primary mb-4">{categoryName}</h3>
                 <div className="flex flex-wrap gap-3">
                   {skillNames.map(skillName => {
-                    const isActive = activeSkill === skillName;
+                    const isActive = selectedSkill === skillName;
                     return (
                       <button
                         key={skillName}
@@ -113,30 +128,63 @@ export function SkillsSection() {
               </div>
             ))}
             
-            {/* Inline Panel for Active Skill */}
-            {activeSkill && (
-              <div className="mt-8 p-6 bg-bg-card/50 border border-accent-cyan/30 rounded-xl animate-in fade-in slide-in-from-top-4 duration-300">
-                <h4 className="font-inter text-text-primary mb-4">
-                  Projets utilisant <span className="font-mono text-accent-cyan">{activeSkill}</span> :
-                </h4>
-                {activeProjects.length > 0 ? (
-                  <ul className="space-y-3">
-                    {activeProjects.map(project => (
-                      <li key={project.id} className="flex items-center">
-                        <span className="text-accent-cyan mr-3">↳</span>
-                        <Link 
-                          to={`/projects/${project.slug}`}
-                          className="font-inter text-sm text-text-muted hover:text-text-primary transition-colors underline decoration-white/20 underline-offset-4"
-                        >
-                          {project.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="font-inter text-sm text-text-muted italic">
-                    Aucun projet public ne mentionne explicitement cette technologie pour le moment.
+            {selectedSkill && (
+              <div className="mt-6 p-4 bg-[#141B22] rounded-xl border border-[#2DD4BF]/20 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="font-[JetBrains_Mono] text-sm text-[#2DD4BF]">
+                    Projets utilisant <span className="text-[#EDEFF2]">{selectedSkill}</span>
                   </p>
+                  <button
+                    onClick={() => {
+                      setSelectedSkill(null);
+                      setLinkedProjects([]);
+                    }}
+                    className="text-[#8B94A3] hover:text-[#EDEFF2] transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
+                {loadingProjects ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {[1, 2].map(i => (
+                      <div key={i} className="h-20 bg-[#0B0F14] rounded-lg animate-pulse" />
+                    ))}
+                  </div>
+                ) : linkedProjects.length === 0 ? (
+                  <p className="text-[#8B94A3] font-[Inter] text-sm">
+                    Aucun projet public utilisant cette compétence.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {linkedProjects.map(project => (
+                      <Link
+                        key={project.id}
+                        to={`/projects/${project.slug}`}
+                        className="flex items-center gap-3 p-3 bg-[#0B0F14] rounded-lg hover:border-[#E08A3E]/40 border border-transparent transition-colors group"
+                      >
+                        {project.cover_image ? (
+                          <img
+                            src={project.cover_image}
+                            alt={project.title}
+                            className="w-12 h-12 rounded object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded bg-[#141B22] flex items-center justify-center shrink-0">
+                            <Folder size={16} className="text-[#8B94A3]" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-[#EDEFF2] font-[Inter] text-sm font-medium truncate group-hover:text-[#E08A3E] transition-colors">
+                            {project.title}
+                          </p>
+                          <p className="text-[#8B94A3] font-[JetBrains_Mono] text-xs truncate">
+                            {project.stack?.slice(0, 3).join(' · ')}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 )}
               </div>
             )}

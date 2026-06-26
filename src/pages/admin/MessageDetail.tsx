@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Mail, Check, AlertTriangle, Reply } from 'lucide-react';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, Trash2, Mail, Check, AlertTriangle, Reply, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { Message } from '../../types';
 import { SupabaseService } from '../../services/supabase.service';
@@ -8,9 +8,28 @@ import { SupabaseService } from '../../services/supabase.service';
 export function MessageDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [message, setMessage] = useState<Message | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+
+  const { messageIds = [], currentIndex = 0 } = location.state || {};
+  const hasPrevious = currentIndex > 0;
+  const hasNext = currentIndex < messageIds.length - 1;
+
+  const goToPrevious = () => {
+    if (!hasPrevious) return;
+    navigate(`/admin/messages/${messageIds[currentIndex - 1]}`, {
+      state: { messageIds, currentIndex: currentIndex - 1 }
+    });
+  };
+
+  const goToNext = () => {
+    if (!hasNext) return;
+    navigate(`/admin/messages/${messageIds[currentIndex + 1]}`, {
+      state: { messageIds, currentIndex: currentIndex + 1 }
+    });
+  };
 
   useEffect(() => {
     if (id) {
@@ -104,7 +123,21 @@ export function MessageDetail() {
 
   const date = new Date(message.created_at);
   const fullDate = date.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  const mailtoUrl = `mailto:${message.email}?subject=RE: ${message.subject || 'Votre message'}`;
+  
+  const buildMailtoLink = (msg: Message) => {
+    const subject = encodeURIComponent(
+      `Re: ${msg.subject || 'Votre message'}`
+    );
+    const body = encodeURIComponent(
+      `\n\n---\nEn réponse à votre message du ${
+        new Date(msg.created_at)
+          .toLocaleDateString('fr-FR')
+      } :\n"${msg.message.slice(0, 100)}..."`
+    );
+    return `mailto:${msg.email}?subject=${subject}&body=${body}`;
+  };
+
+  const mailtoUrl = buildMailtoLink(message);
 
   return (
     <div className="max-w-4xl mx-auto pb-12">
@@ -113,9 +146,21 @@ export function MessageDetail() {
           <ArrowLeft size={16} className="mr-2" /> Boîte de réception
         </Link>
         <div className="flex items-center gap-4 text-sm font-mono text-accent-cyan">
-          <button className="hover:underline opacity-50 cursor-not-allowed" disabled>&lt; Précédent</button>
+          <button 
+            onClick={goToPrevious} 
+            disabled={!hasPrevious}
+            className="hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            &lt; Précédent
+          </button>
           <span className="text-white/20">|</span>
-          <button className="hover:underline opacity-50 cursor-not-allowed" disabled>Suivant &gt;</button>
+          <button 
+            onClick={goToNext} 
+            disabled={!hasNext}
+            className="hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Suivant &gt;
+          </button>
         </div>
       </div>
 
@@ -125,9 +170,9 @@ export function MessageDetail() {
           <div className="flex items-center gap-2">
             <a 
               href={mailtoUrl}
-              className="flex items-center px-4 py-2 bg-white/5 hover:bg-white/10 text-text-primary text-sm font-medium rounded transition-colors"
+              className="flex items-center gap-2 px-4 py-2 border border-[#8B94A3]/30 rounded-lg text-[#8B94A3] hover:text-[#EDEFF2] hover:border-[#8B94A3] transition-colors font-[Inter] text-sm"
             >
-              <Reply size={16} className="mr-2" /> Répondre par email
+              <Reply size={14} /> Répondre
             </a>
             <button 
               onClick={toggleReadStatus}
@@ -175,6 +220,32 @@ export function MessageDetail() {
             {message.message}
           </div>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between mt-8 pt-4 border-t border-[#8B94A3]/20">
+        <button
+          onClick={goToPrevious}
+          disabled={!hasPrevious}
+          className="flex items-center gap-2 text-[#2DD4BF] font-[JetBrains_Mono] text-sm hover:text-[#EDEFF2] transition-colors disabled:text-[#8B94A3]/40 disabled:cursor-not-allowed"
+        >
+          <ChevronLeft size={16} />
+          Message précédent
+        </button>
+
+        {messageIds.length > 0 && (
+          <span className="text-[#8B94A3] font-[JetBrains_Mono] text-xs">
+            {currentIndex + 1} / {messageIds.length}
+          </span>
+        )}
+
+        <button
+          onClick={goToNext}
+          disabled={!hasNext}
+          className="flex items-center gap-2 text-[#2DD4BF] font-[JetBrains_Mono] text-sm hover:text-[#EDEFF2] transition-colors disabled:text-[#8B94A3]/40 disabled:cursor-not-allowed"
+        >
+          Message suivant
+          <ChevronRight size={16} />
+        </button>
       </div>
 
       {/* Delete Modal */}

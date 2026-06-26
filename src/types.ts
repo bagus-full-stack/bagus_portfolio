@@ -6,6 +6,7 @@ export interface Profile {
   location: string;
   photo_url?: string;
   cv_url?: string;
+  cv_updated_at?: string;
   email?: string;
   linkedin_url?: string;
   github_url?: string;
@@ -39,6 +40,8 @@ export interface Project {
   live_url?: string;
   status: 'production' | 'beta' | 'archived';
   architecture?: string;
+  architecture_nodes?: any[];
+  architecture_edges?: any[];
 }
 
 export interface Skill {
@@ -159,7 +162,7 @@ export interface ChatRequest {
 
 export interface SearchResult {
   id: string;
-  type: 'project' | 'skill' | 'experience' | 'certification';
+  type: 'project' | 'skill' | 'experience' | 'certification' | 'other';
   title: string;
   excerpt: string;
   url: string;

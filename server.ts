@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { OpenAI } from "openai";
 
 async function startServer() {
   const app = express();
@@ -14,14 +13,12 @@ async function startServer() {
     try {
       const { message, history } = req.body;
       
-      const apiKey = process.env.OPENAI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
-        throw new Error("OPENAI_API_KEY is not set.");
+        throw new Error("GEMINI_API_KEY is not set.");
       }
 
-      const openai = new OpenAI({ apiKey });
-
-      // In a real app, you would fetch this from DB, but for now we'll mock the JSON
+      // In a real app, you would fetch this from DB, but for local mock we'll use a mocked JSON
       const cvJson = JSON.stringify({
         name: "Assami Baga",
         role: "Ingénieur Full Stack & IA",
@@ -40,21 +37,58 @@ redirige poliment vers le formulaire de contact.
 Ne jamais inventer d'informations.
 CV : ${cvJson}`;
 
-      const openAiMessages = [
-        { role: 'system', content: systemPrompt },
-        ...(history || []).map((msg: any) => ({
-          role: msg.role === 'user' ? 'user' : 'assistant',
-          content: msg.content
-        })),
-        { role: 'user', content: message }
+      const geminiContents = (history || []).map((msg: any) => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      }));
+      geminiContents.push({ role: 'user', parts: [{ text: message }] });
+
+      const MODELS = [
+        "gemini-3.5-flash",
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-pro-preview",
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
+        "gemini-1.5-flash"
       ];
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: openAiMessages as any,
-      });
+      let assistantMessage = null;
+      let lastError = null;
 
-      res.json({ response: completion.choices[0].message.content });
+      for (const modelName of MODELS) {
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                system_instruction: { parts: [{ text: systemPrompt }] },
+                contents: geminiContents,
+                generationConfig: { temperature: 0.7, maxOutputTokens: 500 }
+              })
+            }
+          );
+
+          const data = await response.json();
+          if (!response.ok || data.error) {
+            lastError = data.error?.message || `HTTP ${response.status}`;
+            continue;
+          }
+          
+          assistantMessage = data.candidates[0].content.parts[0].text;
+          break;
+        } catch (err: any) {
+          lastError = err.message;
+          continue;
+        }
+      }
+
+      if (!assistantMessage) {
+        throw new Error(`All models failed. Last error: ${lastError}`);
+      }
+
+      res.json({ response: assistantMessage });
     } catch (error: any) {
       console.error(error);
       res.status(500).json({ error: error.message || "Internal server error" });

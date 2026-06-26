@@ -4,6 +4,8 @@ import { useTranslation } from '../hooks/useTranslation';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
+import Skeleton from './ui/Skeleton';
+
 export function HeroSection() {
   const [views, setViews] = useState<number | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -160,18 +162,21 @@ export function HeroSection() {
         </div>
 
         {/* Visitor Counter */}
-        <div className="flex items-center gap-3 text-text-muted">
-          <div className="font-mono text-lg font-medium text-accent-cyan text-right min-h-[28px] flex items-center justify-end">
-            {views === null ? (
-              <span className="inline-block w-[48px] h-[28px] bg-[#141B22] animate-pulse rounded-sm"></span>
-            ) : (
-              views.toLocaleString('fr-FR')
-            )}
+        {views === null ? (
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-16" />
+            <Skeleton className="h-4 w-24" />
           </div>
-          <span className="font-inter text-xs tracking-wide lowercase">
-            visiteurs uniques
-          </span>
-        </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="font-[JetBrains_Mono] text-2xl text-[#2DD4BF]">
+              {views.toLocaleString('fr-FR')}
+            </span>
+            <span className="font-[Inter] text-sm text-[#8B94A3]">
+              visiteurs uniques
+            </span>
+          </div>
+        )}
 
       </div>
     </section>

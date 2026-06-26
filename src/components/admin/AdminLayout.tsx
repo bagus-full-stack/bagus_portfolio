@@ -130,12 +130,18 @@ export function AdminLayout() {
               end={link.exact}
               onClick={closeMobileMenu}
               className={({ isActive }) => `
-                flex items-center justify-between px-3 py-2.5 rounded text-sm font-medium transition-colors
-                ${isActive 
-                  ? 'bg-accent-ocre/20 text-accent-ocre border-l-2 border-accent-ocre' 
-                  : 'text-text-muted hover:bg-white/5 hover:text-text-primary border-l-2 border-transparent'
+                flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative
+                ${isActive
+                  ? 'bg-[#E08A3E]/20 text-[#EDEFF2]'
+                  : 'text-[#8B94A3] hover:text-[#EDEFF2] hover:bg-[#141B22]'
                 }
               `}
+              style={({ isActive }) => (isActive ? {
+                borderLeft: '3px solid #E08A3E',
+                paddingLeft: 'calc(1rem - 3px)'
+              } : {
+                borderLeft: '3px solid transparent'
+              })}
             >
               <div className="flex items-center">
                 <link.icon size={18} className="mr-3" />

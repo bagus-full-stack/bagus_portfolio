@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Briefcase, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
 import { Experience } from '../../types';
-import { SupabaseService } from '../../services/supabase.service';
+import { supabase } from '../../services/supabase.service';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 
 export function EditExperiences() {
@@ -12,27 +12,78 @@ export function EditExperiences() {
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const fetchExperiences = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('experiences')
+      .select('*')
+      .order('start_date', { ascending: false });
+    if (!error) setExperiences(data || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    let mounted = true;
-    SupabaseService.getExperiences().then(data => {
-      if (mounted) {
-        setExperiences(data);
-        setLoading(false);
-      }
-    });
-    return () => { mounted = false; };
+    fetchExperiences();
   }, []);
 
   const handleDelete = async () => {
     if (!deletingId) return;
     try {
-      // Simulate delete
-      setExperiences(prev => prev.filter(e => e.id !== deletingId));
+      const { error } = await supabase
+        .from('experiences')
+        .delete()
+        .eq('id', deletingId);
+      if (error) throw error;
       toast.success('Expérience supprimée');
+      await fetchExperiences();
     } catch (e) {
-      toast.error('Erreur lors de la suppression');
+      toast.error('Échec de la suppression');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleSave = async (experience: Experience) => {
+    try {
+      if (experience.id) {
+        // Édition
+        const { error } = await supabase
+          .from('experiences')
+          .update({
+            type: experience.type,
+            title: experience.title,
+            organization: experience.organization,
+            location: experience.location,
+            start_date: experience.start_date,
+            end_date: experience.end_date,
+            description: experience.description,
+            stack: experience.stack
+          })
+          .eq('id', experience.id);
+        if (error) throw error;
+      } else {
+        // Ajout
+        const { error } = await supabase
+          .from('experiences')
+          .insert({
+            type: experience.type,
+            title: experience.title,
+            organization: experience.organization,
+            location: experience.location,
+            start_date: experience.start_date,
+            end_date: experience.end_date,
+            description: experience.description,
+            stack: experience.stack
+          });
+        if (error) throw error;
+      }
+      toast.success('Expérience enregistrée');
+      await fetchExperiences(); // recharger la liste
+      setIsAdding(false);
+      setEditingId(null);
+    } catch (err) {
+      toast.error('Échec de la sauvegarde');
+      throw err;
     }
   };
 
@@ -51,12 +102,7 @@ export function EditExperiences() {
       <ExperienceForm 
         initialData={expToEdit} 
         onCancel={() => { setIsAdding(false); setEditingId(null); }}
-        onSave={(saved) => {
-          if (isAdding) setExperiences([saved, ...experiences]);
-          else setExperiences(experiences.map(e => e.id === saved.id ? saved : e));
-          setIsAdding(false);
-          setEditingId(null);
-        }}
+        onSave={handleSave}
       />
     );
   }
@@ -147,14 +193,9 @@ function ExperienceForm({ initialData, onCancel, onSave }: { initialData: Experi
     e.preventDefault();
     setSavingState('saving');
     try {
-      await new Promise(r => setTimeout(r, 800));
-      onSave({ ...formData, id: formData.id || Date.now().toString() } as Experience);
-      setSavingState('success');
-      toast.success('Modifications enregistrées');
-      setTimeout(() => setSavingState('idle'), 2000);
+      await onSave({ ...formData } as Experience);
     } catch (err) {
       setSavingState('error');
-      toast.error('Échec — Réessayer');
       setTimeout(() => setSavingState('idle'), 2000);
     }
   };

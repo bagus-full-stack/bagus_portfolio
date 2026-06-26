@@ -10,6 +10,6 @@ export const setHomeMeta = () => ({
 export const setProjectMeta = (project: Project) => ({
   title: `${project.title} — Assami Baga`,
   description: project.description || "Portfolio d'Assami Baga",
-  image: project.image_url || "[URL_SUPABASE_OG_IMAGE]",
+  image: project.cover_image || "[URL_SUPABASE_OG_IMAGE]",
   url: `https://bagus-full-stack.me/projects/${project.slug}`
 });

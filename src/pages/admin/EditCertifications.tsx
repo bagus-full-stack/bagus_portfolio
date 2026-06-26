@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Award } from 'lucide-react';
 import { toast } from 'sonner';
 import { Certification } from '../../types';
-import { SupabaseService } from '../../services/supabase.service';
+import { SupabaseService, supabase } from '../../services/supabase.service';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 
 export function EditCertifications() {
@@ -12,26 +12,64 @@ export function EditCertifications() {
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const fetchCertifications = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('certifications')
+      .select('*')
+      .order('date', { ascending: false });
+    if (!error) setCertifications(data || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    let mounted = true;
-    SupabaseService.getCertifications().then(data => {
-      if (mounted) {
-        setCertifications(data);
-        setLoading(false);
-      }
-    });
-    return () => { mounted = false; };
+    fetchCertifications();
   }, []);
 
   const handleDelete = async () => {
     if (!deletingId) return;
     try {
-      setCertifications(prev => prev.filter(c => c.id !== deletingId));
+      const { error } = await supabase
+        .from('certifications')
+        .delete()
+        .eq('id', deletingId);
+      if (error) throw error;
       toast.success('Certification supprimée');
+      await fetchCertifications();
     } catch (e) {
-      toast.error('Erreur lors de la suppression');
+      toast.error('Échec de la suppression');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleSave = async (cert: Certification) => {
+    try {
+      const payload = {
+        name: cert.name,
+        issuer: cert.issuer,
+        date: cert.date,
+        verify_url: cert.verify_url
+      };
+      if (cert.id) {
+        const { error } = await supabase
+          .from('certifications')
+          .update(payload)
+          .eq('id', cert.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('certifications')
+          .insert(payload);
+        if (error) throw error;
+      }
+      toast.success('Certification enregistrée');
+      await fetchCertifications();
+      setIsAdding(false);
+      setEditingId(null);
+    } catch {
+      toast.error('Échec de la sauvegarde');
+      throw new Error('Save failed');
     }
   };
 
@@ -50,12 +88,7 @@ export function EditCertifications() {
       <CertificationForm 
         initialData={certToEdit} 
         onCancel={() => { setIsAdding(false); setEditingId(null); }}
-        onSave={(saved) => {
-          if (isAdding) setCertifications([saved, ...certifications]);
-          else setCertifications(certifications.map(c => c.id === saved.id ? saved : c));
-          setIsAdding(false);
-          setEditingId(null);
-        }}
+        onSave={handleSave}
       />
     );
   }
@@ -133,14 +166,9 @@ function CertificationForm({ initialData, onCancel, onSave }: { initialData: Cer
     e.preventDefault();
     setSavingState('saving');
     try {
-      await new Promise(r => setTimeout(r, 600));
-      onSave({ ...formData, id: formData.id || Date.now().toString() } as Certification);
-      setSavingState('success');
-      toast.success('Modifications enregistrées');
-      setTimeout(() => setSavingState('idle'), 2000);
+      await onSave({ ...formData } as Certification);
     } catch (err) {
       setSavingState('error');
-      toast.error('Échec — Réessayer');
       setTimeout(() => setSavingState('idle'), 2000);
     }
   };

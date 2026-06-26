@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X, Send, User } from 'lucide-react';
+import { MessageSquare, X, Send, User, RotateCcw } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChatMessage } from '../types';
 import { supabase } from '../services/supabase.service';
 
-const INITIAL_MESSAGE: ChatMessage = {
+const getInitialMessage = (): ChatMessage => ({
   role: 'assistant',
   content: 'Bonjour ! Je suis l\'assistant d\'Assami. Posez-moi vos questions sur son parcours, ses projets ou sa disponibilité.',
   timestamp: new Date().toISOString()
-};
+});
 
 const SUGGESTIONS = [
   "Quel est ton stack principal ?",
@@ -36,10 +37,10 @@ export function ChatbotWidget() {
       try {
         setMessages(JSON.parse(saved));
       } catch (e) {
-        setMessages([INITIAL_MESSAGE]);
+        setMessages([getInitialMessage()]);
       }
     } else {
-      setMessages([INITIAL_MESSAGE]);
+      setMessages([getInitialMessage()]);
     }
 
     return () => clearTimeout(timer);
@@ -64,6 +65,11 @@ export function ChatbotWidget() {
     setTimeout(scrollToBottom, 100);
   };
 
+  const handleClearChat = () => {
+    setMessages([getInitialMessage()]);
+    sessionStorage.removeItem('chat_history');
+  };
+
   const handleSend = async (text: string) => {
     if (!text.trim() || loading) return;
 
@@ -80,7 +86,7 @@ export function ChatbotWidget() {
 
     try {
       if (!supabase) throw new Error("Supabase not configured");
-      const { data, error: invokeError } = await supabase.functions.invoke('chat', {
+      const { data, error: invokeError } = await supabase.functions.invoke('chat-resume', {
         body: { message: text, history: messages.slice(-10) }
       });
       if (invokeError) throw invokeError;
@@ -134,45 +140,82 @@ export function ChatbotWidget() {
       {isOpen && (
         <div className="w-[320px] h-[480px] bg-bg-card border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-200">
           {/* Header */}
-          <div className="p-4 bg-[#141B22] border-b border-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-accent-ocre/20 text-accent-ocre flex items-center justify-center font-bold text-sm">
-                AB
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#8B94A3]/20 bg-[#141B22]">
+            {/* Gauche : avatar + titre */}
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-[#E08A3E]/20 border border-[#E08A3E]/30 flex items-center justify-center">
+                <span className="text-[#E08A3E] text-xs font-[JetBrains_Mono] font-bold">
+                  AB
+                </span>
               </div>
               <div>
-                <h3 className="font-space font-bold text-sm">Assistant d'Assami</h3>
-                <p className="font-mono text-[10px] text-text-muted">Propulsé par GPT-4o-mini</p>
+                <p className="text-[#EDEFF2] font-[Inter] text-sm font-medium">
+                  Assistant d'Assami
+                </p>
+                <p className="text-[#8B94A3] font-[JetBrains_Mono] text-[10px]">
+                  Propulsé par GPT-4o-mini
+                </p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-text-muted hover:text-text-primary transition-colors p-1"
-            >
-              <X size={20} />
-            </button>
+
+            {/* Droite : reset + fermer */}
+            <div className="flex items-center gap-1">
+              {messages.length > 1 && (
+                <div className="relative group">
+                  <button
+                    onClick={handleClearChat}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-[#8B94A3] hover:text-[#EDEFF2] hover:bg-[#0B0F14] transition-all duration-150"
+                    aria-label="Vider la conversation"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full right-0 mb-2 px-2 py-1 bg-[#0B0F14] rounded-md border border-[#8B94A3]/20 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-10">
+                    <span className="text-[#8B94A3] font-[JetBrains_Mono] text-[10px]">
+                      Vider la conversation
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Bouton fermer existant */}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-[#8B94A3] hover:text-[#EDEFF2] hover:bg-[#0B0F14] transition-all duration-150"
+                aria-label="Fermer le chatbot"
+              >
+                <X size={14} />
+              </button>
+            </div>
           </div>
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth hide-scrollbar bg-bg-primary/50">
-            {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'}`}
-              >
-                <div
-                  className={`p-3 text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-accent-ocre text-white rounded-2xl rounded-tr-sm'
-                      : 'bg-[#141B22] text-[#EDEFF2] border border-white/5 rounded-2xl rounded-tl-sm'
-                  }`}
+            <AnimatePresence>
+              {messages.map((msg, idx) => (
+                <motion.div
+                  key={msg.timestamp + idx}
+                  initial={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'}`}
                 >
-                  {msg.content}
-                </div>
-                <span className="font-mono text-[10px] text-text-muted mt-1 px-1">
-                  {new Date(msg.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-            ))}
+                  <div
+                    className={`p-3 text-sm leading-relaxed ${
+                      msg.role === 'user'
+                        ? 'bg-accent-ocre text-white rounded-2xl rounded-tr-sm'
+                        : 'bg-[#141B22] text-[#EDEFF2] border border-white/5 rounded-2xl rounded-tl-sm'
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                  <span className="font-mono text-[10px] text-text-muted mt-1 px-1">
+                    {new Date(msg.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </motion.div>
+              ))}
+            </AnimatePresence>
 
             {/* Suggestions (only show if it's just the initial message) */}
             {messages.length === 1 && !loading && (

@@ -105,6 +105,10 @@ export function ExperiencesSection() {
     );
   }
 
+  if (!loading && experiences.length === 0) {
+    return null;
+  }
+
   return (
     <section id="experiences" className="py-24 bg-bg-primary">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">

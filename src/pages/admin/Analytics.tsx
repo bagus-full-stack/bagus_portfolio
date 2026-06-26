@@ -136,18 +136,50 @@ export function Analytics() {
     );
   }
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#141B22] border border-white/10 rounded-lg p-3 shadow-xl">
-          <p className="font-mono text-sm text-text-muted mb-1">{label}</p>
-          <p className="font-space font-bold text-accent-cyan">
-            {payload[0].value} <span className="text-text-primary text-sm font-medium">vues</span>
-          </p>
-        </div>
-      );
+  const CustomTooltip = (context: any) => {
+    const { chart, tooltip } = context;
+
+    // Créer ou récupérer le div tooltip
+    let tooltipEl = chart.canvas.parentNode.querySelector('#chartjs-tooltip');
+
+    if (!tooltipEl) {
+      tooltipEl = document.createElement('div');
+      tooltipEl.id = 'chartjs-tooltip';
+      tooltipEl.style.cssText = `
+        background: #141B22;
+        border: 1px solid rgba(139,148,163,0.3);
+        border-radius: 8px;
+        padding: 8px 12px;
+        position: absolute;
+        pointer-events: none;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #EDEFF2;
+        transition: all 0.1s ease;
+      `;
+      chart.canvas.parentNode.appendChild(tooltipEl);
     }
-    return null;
+
+    if (tooltip.opacity === 0) {
+      tooltipEl.style.opacity = '0';
+      return;
+    }
+
+    const dataPoint = tooltip.dataPoints?.[0];
+    if (dataPoint) {
+      tooltipEl.innerHTML = `
+        <div style="color:#8B94A3;margin-bottom:2px">
+          ${dataPoint.label}
+        </div>
+        <div style="color:#2DD4BF;font-weight:bold">
+          ${dataPoint.raw} vues
+        </div>
+      `;
+    }
+
+    tooltipEl.style.opacity = '1';
+    tooltipEl.style.left = tooltip.caretX + 'px';
+    tooltipEl.style.top = tooltip.caretY + 'px';
   };
 
   return (
@@ -215,7 +247,13 @@ export function Analytics() {
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
-                  plugins: { legend: { display: false } },
+                  plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                      enabled: false,
+                      external: CustomTooltip
+                    }
+                  },
                   scales: {
                     x: {
                       ticks: {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, Trash2, AlertTriangle, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Upload, FileText, Trash2, AlertTriangle, ExternalLink, Image as ImageIcon, Eye, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDropzone } from 'react-dropzone';
 import { SupabaseService, supabase } from '../../services/supabase.service';
 import { Profile } from '../../types';
 
@@ -17,15 +18,30 @@ export function MediaManager() {
   const [isUploadingCv, setIsUploadingCv] = useState(false);
   const [cvProgress, setCvProgress] = useState(0);
   const [deletingCv, setDeletingCv] = useState(false);
+  const [cvFileName, setCvFileName] = useState('cv.pdf');
+  const [cvUpdatedAt, setCvUpdatedAt] = useState('Date inconnue');
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-    SupabaseService.getProfile().then(data => {
+    const fetchCVInfo = async () => {
+      const data = await SupabaseService.getProfile();
       if (mounted) {
         setProfile(data);
+        if (data?.cv_url) {
+          setCvFileName(data.cv_url.split('/').pop() || 'cv.pdf');
+          setCvUpdatedAt(data.cv_updated_at
+            ? new Date(data.cv_updated_at).toLocaleDateString('fr-FR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })
+            : 'Date inconnue');
+        }
         setLoading(false);
       }
-    });
+    };
+    fetchCVInfo();
     return () => { mounted = false; };
   }, []);
 
@@ -46,8 +62,7 @@ export function MediaManager() {
     return () => clearInterval(interval);
   }, [isUploadingCv]);
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const uploadAvatar = async (file: File) => {
     if (!file || !profile) return;
 
     if (file.size > 2 * 1024 * 1024) {
@@ -91,6 +106,26 @@ export function MediaManager() {
       }, 500);
     }
   };
+
+  const dropzoneConfig: any = {
+    accept: {
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp']
+    },
+    maxSize: 2 * 1024 * 1024,
+    multiple: false,
+    onDrop: (files: File[]) => uploadAvatar(files[0]),
+    onDropRejected: (fileRejections: any[]) => {
+      const error = fileRejections[0]?.errors[0];
+      if (error?.code === 'file-too-large') {
+        toast.error('Fichier trop lourd (max 2MB)');
+      } else {
+        toast.error('Format non accepté (jpg, png, webp)');
+      }
+    }
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone(dropzoneConfig);
 
   const handleDeletePhoto = async () => {
     if (!profile) return;
@@ -165,6 +200,23 @@ export function MediaManager() {
     }
   };
 
+  const handlePreviewCV = async () => {
+    setPreviewLoading(true);
+    try {
+      const { data, error } = await supabase
+        .storage
+        .from('cv') // bucket PRIVÉ
+        .createSignedUrl('cv.pdf', 3600); // valide 1h
+
+      if (error) throw error;
+      window.open(data.signedUrl, '_blank');
+    } catch {
+      toast.error('Impossible de prévisualiser le CV');
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
   if (loading || !profile) {
     return (
       <div className="space-y-6 animate-pulse">
@@ -201,13 +253,37 @@ export function MediaManager() {
             )}
           </div>
 
-          <div className="flex-1 w-full">
-            <label className="block w-full border-2 border-dashed border-white/10 rounded-lg p-8 text-center hover:bg-white/5 transition-colors cursor-pointer relative overflow-hidden">
-              <input type="file" accept="image/jpeg, image/png, image/webp" className="hidden" onChange={handlePhotoUpload} disabled={isUploadingPhoto} />
-              <Upload size={32} className="mx-auto text-accent-cyan mb-3" />
-              <p className="font-medium text-text-primary mb-1">Cliquez ou glissez une image ici</p>
-              <p className="text-sm text-text-muted">JPG, PNG ou WebP — 2MB max</p>
-
+          <div className="flex-1 w-full relative overflow-hidden">
+            <div
+              {...getRootProps()}
+              className={`
+                border-2 border-dashed rounded-xl p-8
+                text-center cursor-pointer transition-all duration-200
+                ${isDragActive
+                  ? 'border-[#E08A3E] bg-[#E08A3E]/10 scale-[1.02]'
+                  : 'border-[#8B94A3]/30 hover:border-[#8B94A3]/60'
+                }
+              `}
+            >
+              <input {...getInputProps()} />
+              {isDragActive ? (
+                <p className="text-[#E08A3E] font-[Inter]">
+                  Déposez l'image ici...
+                </p>
+              ) : (
+                <>
+                  <Upload className="mx-auto mb-3 text-[#8B94A3]" size={32} />
+                  <p className="text-[#EDEFF2] font-[Inter]">
+                    Glissez une photo ou{' '}
+                    <span className="text-[#E08A3E] underline">
+                      cliquez pour parcourir
+                    </span>
+                  </p>
+                  <p className="text-[#8B94A3] text-sm mt-1 font-[JetBrains_Mono]">
+                    JPG, PNG, WebP — 2MB max
+                  </p>
+                </>
+              )}
               {isUploadingPhoto && (
                 <div className="absolute inset-0 bg-bg-card/90 backdrop-blur-sm flex flex-col items-center justify-center">
                   <div className="w-full max-w-xs h-2 bg-bg-primary rounded-full overflow-hidden mb-2">
@@ -216,7 +292,7 @@ export function MediaManager() {
                   <span className="text-xs font-mono text-accent-cyan">{photoProgress}%</span>
                 </div>
               )}
-            </label>
+            </div>
           </div>
         </div>
       </div>
@@ -227,19 +303,26 @@ export function MediaManager() {
         
         {profile.cv_url ? (
           <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-bg-primary border border-white/10 rounded-lg mb-6 gap-4">
-            <div className="flex items-center gap-4 w-full sm:w-auto">
-              <div className="w-12 h-12 rounded bg-white/5 flex items-center justify-center flex-shrink-0">
-                <FileText size={24} className="text-text-muted" />
-              </div>
-              <div className="overflow-hidden">
-                <p className="font-medium text-text-primary truncate">cv_assami_2026.pdf</p>
-                <p className="text-xs text-text-muted font-mono">Dernière mise à jour : 12/06/2026</p>
+            <div className="flex items-center gap-3 p-3 bg-[#0B0F14] rounded-lg w-full sm:w-auto">
+              <FileText size={16} className="text-[#2DD4BF]" />
+              <div>
+                <p className="text-[#EDEFF2] font-[JetBrains_Mono] text-sm">
+                  {cvFileName}
+                </p>
+                <p className="text-[#8B94A3] font-[JetBrains_Mono] text-xs">
+                  Mis à jour le {cvUpdatedAt}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <a href={profile.cv_url} target="_blank" rel="noreferrer" className="flex items-center px-4 py-2 bg-white/5 hover:bg-white/10 text-text-primary font-medium rounded transition-colors flex-1 sm:flex-none justify-center">
-                <ExternalLink size={16} className="mr-2" /> Prévisualiser
-              </a>
+              <button
+                onClick={handlePreviewCV}
+                disabled={previewLoading}
+                className="flex items-center gap-2 px-4 py-2 border border-[#8B94A3]/30 rounded-lg text-[#8B94A3] hover:text-[#EDEFF2] hover:border-[#8B94A3] transition-colors disabled:opacity-50 font-[Inter] text-sm"
+              >
+                {previewLoading ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+                Prévisualiser
+              </button>
               <button onClick={() => setDeletingCv(true)} className="p-2 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded transition-colors">
                 <Trash2 size={20} />
               </button>

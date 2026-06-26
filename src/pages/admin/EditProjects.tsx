@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Folder, Image as ImageIcon, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDropzone } from 'react-dropzone';
 import { Project } from '../../types';
 import { SupabaseService, supabase } from '../../services/supabase.service';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
@@ -13,24 +14,43 @@ export function EditProjects() {
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const fetchProjects = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error) setProjects(data || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    let mounted = true;
-    SupabaseService.getProjects().then(data => {
-      if (mounted) {
-        setProjects(data);
-        setLoading(false);
-      }
-    });
-    return () => { mounted = false; };
+    fetchProjects();
   }, []);
 
-  const handleDelete = async () => {
-    if (!deletingId) return;
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
     try {
-      setProjects(prev => prev.filter(p => p.id !== deletingId));
+      // Supprimer l'image couverture du Storage si elle existe
+      const project = projects.find(p => p.id === id);
+      if (project?.cover_image) {
+        const path = project.cover_image.split('/').pop();
+        if (path) {
+          await supabase.storage
+            .from('covers')
+            .remove([`projects/${path}`]);
+        }
+      }
+
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
       toast.success('Projet supprimé');
-    } catch (e) {
-      toast.error('Erreur lors de la suppression');
+      await fetchProjects();
+    } catch {
+      toast.error('Échec de la suppression');
     } finally {
       setDeletingId(null);
     }
@@ -122,7 +142,7 @@ export function EditProjects() {
         isOpen={!!deletingId}
         title="Confirmer la suppression"
         message="Cette action est irréversible."
-        onConfirm={handleDelete}
+        onConfirm={() => handleDelete(deletingId!)}
         onCancel={() => setDeletingId(null)}
       />
     </div>
@@ -134,6 +154,44 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
     status: 'production', stack: [], technical_choices: [], challenges: [], results: [] 
   });
   const [stackInput, setStackInput] = useState('');
+  const [coverPreview, setCoverPreview] = useState<string | null>(formData.cover_image || null);
+
+  const dropzoneConfig: any = {
+    accept: { 'image/*': ['.jpg', '.png', '.webp', '.gif'] },
+    maxSize: 5 * 1024 * 1024, // 5MB pour les captures
+    multiple: false,
+    onDrop: async (files: File[]) => {
+      const file = files[0];
+      if (!file) return;
+
+      const preview = URL.createObjectURL(file);
+      setCoverPreview(preview);
+
+      if (!formData.slug) {
+        toast.error("Veuillez d'abord définir un titre pour générer un slug");
+        return;
+      }
+
+      // Upload vers Supabase Storage
+      const ext = file.name.split('.').pop();
+      const path = `projects/${formData.slug}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from('covers') // bucket public
+        .upload(path, file, { upsert: true });
+
+      if (!error) {
+        const { data: urlData } = supabase.storage
+          .from('covers')
+          .getPublicUrl(path);
+        setFormData(prev => ({ ...prev, cover_image: urlData.publicUrl }));
+        triggerSave();
+      } else {
+        toast.error("Erreur lors de l'upload de l'image");
+      }
+    }
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone(dropzoneConfig);
 
   const { triggerSave, saveState } = useAutoSave(async () => {
     if (!formData.title || !formData.slug) return;
@@ -256,16 +314,44 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
         <div className="bg-bg-card border border-white/5 rounded-xl p-6 space-y-6">
           <h2 className="font-space text-xl font-bold">{initialData ? 'Modifier le projet' : 'Ajouter un projet'}</h2>
           
-          <div className="w-full aspect-video md:w-1/2 lg:w-1/3 bg-bg-primary border-2 border-dashed border-white/10 rounded-lg flex flex-col items-center justify-center text-center p-6 hover:bg-white/5 transition-colors cursor-pointer relative overflow-hidden">
-             {formData.cover_image ? (
-               <img src={formData.cover_image} alt="cover" className="absolute inset-0 w-full h-full object-cover" />
-             ) : (
-               <>
-                 <ImageIcon size={32} className="text-accent-cyan mb-2" />
-                 <p className="text-sm font-medium">Image de couverture</p>
-                 <p className="text-xs text-text-muted mt-1">Glissez ou cliquez (16:9)</p>
-               </>
-             )}
+          <div
+            {...getRootProps()}
+            className={`
+              relative aspect-video rounded-xl overflow-hidden
+              border-2 border-dashed cursor-pointer
+              transition-all duration-200
+              ${isDragActive
+                ? 'border-[#E08A3E] bg-[#E08A3E]/10'
+                : 'border-[#8B94A3]/30 hover:border-[#8B94A3]/60'
+              }
+            `}
+          >
+            <input {...getInputProps()} />
+            {coverPreview ? (
+              <>
+                <img src={coverPreview} alt="Couverture"
+                  className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/50
+                  opacity-0 hover:opacity-100 transition-opacity
+                  flex items-center justify-center">
+                  <p className="text-white font-[Inter] text-sm">
+                    Cliquer pour changer
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="absolute inset-0 flex flex-col
+                items-center justify-center gap-2">
+                <ImageIcon size={32} className="text-[#8B94A3]" />
+                <p className="text-[#8B94A3] font-[Inter] text-sm">
+                  Glissez une image ou cliquez
+                </p>
+                <p className="text-[#8B94A3]/60
+                  font-[JetBrains_Mono] text-xs">
+                  JPG, PNG, WebP, GIF — 5MB max
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

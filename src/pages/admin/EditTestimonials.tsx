@@ -19,11 +19,7 @@ import { GripVertical, Edit, Trash2, Plus, MessageSquareQuote, Loader2 } from 'l
 import { Testimonial } from '../../types';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 import { toast } from 'sonner';
-
-const MOCK_TESTIMONIALS: Testimonial[] = [
-  { id: '1', quote: 'Assami a transformé notre vision en une application robuste et évolutive. Sa maîtrise des technologies web et son sens du détail ont fait la différence sur notre projet.', authorName: 'Sophie Laurent', authorRole: 'CTO', authorCompany: 'TechVision', linkedinUrl: 'https://linkedin.com/in/example1', order: 0 },
-  { id: '2', quote: 'Une collaboration exceptionnelle. Non seulement le code est propre et performant, mais la capacité d\'Assami à proposer des solutions innovantes en IA nous a fait gagner un temps précieux.', authorName: 'Marc Dubois', authorRole: 'Product Manager', authorCompany: 'AgroData', linkedinUrl: 'https://linkedin.com/in/example2', order: 1 }
-];
+import { supabase } from '../../services/supabase.service';
 
 function SortableItem({ id, testimonial, onEdit, onDelete }: { key?: string | number, id: string, testimonial: Testimonial, onEdit: (t: Testimonial) => void, onDelete: (id: string) => void }) {
   const {
@@ -88,23 +84,54 @@ export function EditTestimonials() {
     })
   );
 
+  const fetchTestimonials = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('testimonials')
+      .select('*')
+      .order('order', { ascending: true });
+    if (!error) {
+      const mapped = data?.map(d => ({
+        id: d.id,
+        quote: d.quote,
+        authorName: d.author_name,
+        authorRole: d.author_role,
+        authorCompany: d.author_company,
+        linkedinUrl: d.linkedin_url,
+        order: d.order
+      })) as Testimonial[];
+      setItems(mapped || []);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    setTimeout(() => {
-      setItems(MOCK_TESTIMONIALS);
-      setLoading(false);
-    }, 500);
+    fetchTestimonials();
   }, []);
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = async (event: any) => {
     const { active, over } = event;
     
     if (active.id !== over.id) {
-      setItems((items) => {
-        const oldIndex = items.findIndex(i => i.id === active.id);
-        const newIndex = items.findIndex(i => i.id === over.id);
-        const newItems = arrayMove(items, oldIndex, newIndex);
-        return newItems.map((item: Testimonial, index) => ({ ...item, order: index }));
-      });
+      const oldIndex = items.findIndex(i => i.id === active.id);
+      const newIndex = items.findIndex(i => i.id === over.id);
+      const newItems = arrayMove(items, oldIndex, newIndex);
+      const reordered = newItems.map((item: Testimonial, index) => ({ ...item, order: index }));
+      
+      setItems(reordered); // optimistic update
+      try {
+        await Promise.all(
+          reordered.map((t, index) =>
+            supabase
+              .from('testimonials')
+              .update({ order: index })
+              .eq('id', t.id)
+          )
+        );
+      } catch {
+        toast.error('Échec de la réorganisation');
+        await fetchTestimonials(); // rollback
+      }
     }
   };
 
@@ -128,9 +155,19 @@ export function EditTestimonials() {
     setDeletingId(id);
   };
 
-  const handleDelete = () => {
-    if (deletingId) {
-      setItems(items.filter(i => i.id !== deletingId));
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    try {
+      const { error } = await supabase
+        .from('testimonials')
+        .delete()
+        .eq('id', deletingId);
+      if (error) throw error;
+      toast.success('Témoignage supprimé');
+      await fetchTestimonials();
+    } catch {
+      toast.error('Échec de la suppression');
+    } finally {
       setDeletingId(null);
     }
   };
@@ -138,28 +175,36 @@ export function EditTestimonials() {
   const handleSave = async () => {
     setSavingState('saving');
     try {
-      await new Promise(r => setTimeout(r, 600));
-      if (editingId === 'new') {
-        const newItem: Testimonial = {
-          id: Date.now().toString(),
-          quote: formData.quote || '',
-          authorName: formData.authorName || '',
-          authorRole: formData.authorRole || '',
-          authorCompany: formData.authorCompany || '',
-          linkedinUrl: formData.linkedinUrl || '',
-          order: items.length
-        };
-        setItems([...items, newItem]);
+      const payload = {
+        quote: formData.quote,
+        author_name: formData.authorName,
+        author_role: formData.authorRole,
+        author_company: formData.authorCompany,
+        linkedin_url: formData.linkedinUrl,
+        order: formData.order
+      };
+      if (editingId !== 'new' && editingId) {
+        const { error } = await supabase
+          .from('testimonials')
+          .update(payload)
+          .eq('id', editingId);
+        if (error) throw error;
       } else {
-        setItems(items.map(i => i.id === editingId ? { ...i, ...formData } as Testimonial : i));
+        const { error } = await supabase
+          .from('testimonials')
+          .insert({
+            ...payload,
+            order: items.length
+          });
+        if (error) throw error;
       }
+      toast.success('Témoignage enregistré');
+      await fetchTestimonials();
       setEditingId(null);
-      setSavingState('success');
-      toast.success('Modifications enregistrées');
-      setTimeout(() => setSavingState('idle'), 2000);
-    } catch (err) {
+      setSavingState('idle');
+    } catch {
+      toast.error('Échec de la sauvegarde');
       setSavingState('error');
-      toast.error('Échec — Réessayer');
       setTimeout(() => setSavingState('idle'), 2000);
     }
   };

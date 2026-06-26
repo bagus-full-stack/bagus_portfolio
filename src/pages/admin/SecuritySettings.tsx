@@ -9,6 +9,8 @@ export function SecuritySettings() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
 
+  const [sessionInfo, setSessionInfo] = useState({ os: 'Inconnu', browser: 'Inconnu', ip: 'N/A', city: 'Inconnue', country: 'Inconnue' });
+
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -23,8 +25,46 @@ export function SecuritySettings() {
   const [revokeAllModal, setRevokeAllModal] = useState(false);
   const [revoking, setRevoking] = useState(false);
 
+  const parseUserAgent = () => {
+    const ua = navigator.userAgent;
+    let os = 'Inconnu';
+    if (ua.includes('Windows')) os = 'Windows';
+    else if (ua.includes('Mac OS')) os = 'macOS';
+    else if (ua.includes('Linux')) os = 'Linux';
+    else if (ua.includes('Android')) os = 'Android';
+    else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+    let browser = 'Inconnu';
+    if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+    else if (ua.includes('Firefox')) browser = 'Firefox';
+    else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+    else if (ua.includes('Edg')) browser = 'Edge';
+
+    return { os, browser };
+  };
+
+  const fetchIPInfo = async () => {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      return {
+        ip: data.ip,
+        city: data.city,
+        country: data.country_name
+      };
+    } catch {
+      return { ip: 'N/A', city: 'Inconnue', country: 'Inconnue' };
+    }
+  };
+
   useEffect(() => {
     loadSessions();
+    const initSessionInfo = async () => {
+      const { os, browser } = parseUserAgent();
+      const { ip, city, country } = await fetchIPInfo();
+      setSessionInfo({ os, browser, ip, city, country });
+    };
+    initSessionInfo();
   }, []);
 
   const loadSessions = async () => {
@@ -110,10 +150,19 @@ export function SecuritySettings() {
       </div>
 
       {currentSession && (
-        <div className="flex items-center p-4 bg-accent-cyan/10 border border-accent-cyan/20 rounded-lg text-accent-cyan">
-          <Shield size={20} className="mr-3" />
-          <div className="text-sm">
-            Dernière connexion : <span className="font-mono font-medium">{new Date(currentSession.lastActive).toLocaleString('fr-FR')}</span> depuis <span className="font-medium">{currentSession.location}</span>
+        <div className="flex items-center gap-3 p-4 bg-[#0B0F14] rounded-xl border border-[#2DD4BF]/20">
+          <Shield size={16} className="text-[#2DD4BF] shrink-0" />
+          <div className="font-[JetBrains_Mono] text-xs text-[#8B94A3] flex flex-wrap gap-x-4 gap-y-1">
+            <span className="text-[#2DD4BF]">Session active</span>
+            <span>{sessionInfo.os} — {sessionInfo.browser}</span>
+            <span>{sessionInfo.city}, {sessionInfo.country}</span>
+            <span>IP : {sessionInfo.ip}</span>
+            <span>
+              Connecté le {new Date(currentSession.createdAt).toLocaleDateString('fr-FR', {
+                day: 'numeric', month: 'long',
+                hour: '2-digit', minute: '2-digit'
+              })}
+            </span>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { Mailbox, Trash2, Check, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Message } from '../../types';
@@ -7,7 +8,101 @@ import { SupabaseService } from '../../services/supabase.service';
 
 type FilterType = 'all' | 'unread' | 'read';
 
+const formatDate = (isoStr: string) => {
+  const date = new Date(isoStr);
+  const today = new Date();
+  if (date.toDateString() === today.toDateString()) {
+    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
+  return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+
+const getInitials = (name: string) => {
+  return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+};
+
+const MessageRow: React.FC<{ message: Message, onDelete: (id: string) => void, onClick: (id: string) => void }> = ({ message, onDelete, onClick }) => {
+  const x = useMotionValue(0);
+  const background = useTransform(
+    x,
+    [-100, -50, 0],
+    ['rgba(239,68,68,0.3)', 'rgba(239,68,68,0.1)', 'rgba(0,0,0,0)']
+  );
+  const deleteOpacity = useTransform(
+    x, [-100, -60], [1, 0]
+  );
+
+  const handleDragEnd = (_: any, info: any) => {
+    if (info.offset.x < -80) {
+      onDelete(message.id);
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden border-b border-white/5 last:border-0 group">
+      {/* Fond rouge révélé au swipe */}
+      <motion.div
+        className="absolute inset-0 flex items-center justify-end px-4 bg-red-500/20"
+        style={{ opacity: deleteOpacity }}
+      >
+        <div className="flex items-center gap-2 text-red-400">
+          <Trash2 size={16} />
+          <span className="font-[JetBrains_Mono] text-xs">Supprimer</span>
+        </div>
+      </motion.div>
+
+      {/* Ligne draggable */}
+      <motion.div
+        style={{ x, background }}
+        drag="x"
+        dragConstraints={{ left: -120, right: 0 }}
+        dragElastic={0.1}
+        onDragEnd={handleDragEnd}
+        className="relative cursor-pointer active:cursor-grabbing flex items-start gap-3 p-4 hover:bg-[#141B22] transition-colors"
+        onClick={() => onClick(message.id)}
+      >
+        {/* Point non lu — position absolute haut droite */}
+        {!message.read && (
+          <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[#E08A3E] animate-pulse" />
+        )}
+
+        {/* Avatar initiales */}
+        <div className="w-9 h-9 rounded-full bg-[#E08A3E]/20 border border-[#E08A3E]/30 flex items-center justify-center shrink-0">
+          <span className="text-[#E08A3E] text-xs font-[JetBrains_Mono] font-bold">
+            {getInitials(message.name)}
+          </span>
+        </div>
+
+        {/* Contenu */}
+        <div className="flex-1 min-w-0 pr-8">
+          <div className="flex items-center justify-between mb-1">
+            <span className={`font-[Inter] text-sm ${message.read ? 'text-[#8B94A3]' : 'text-[#EDEFF2] font-semibold'}`}>
+              {message.name}
+            </span>
+            <span className="text-[#8B94A3] text-xs font-[JetBrains_Mono] shrink-0 ml-2">
+              {formatDate(message.created_at)}
+            </span>
+          </div>
+          <p className="text-[#8B94A3] text-sm font-[Inter] truncate">
+            {message.message.slice(0, 50)}
+            {message.message.length > 50 ? '...' : ''}
+          </p>
+        </div>
+        
+        <button 
+          onClick={(e) => { e.stopPropagation(); onDelete(message.id); }}
+          className="absolute bottom-4 right-4 p-2 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+          aria-label="Supprimer"
+        >
+          <Trash2 size={16} />
+        </button>
+      </motion.div>
+    </div>
+  );
+};
+
 export function MessagesInbox() {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
@@ -68,19 +163,6 @@ export function MessagesInbox() {
   );
 
   const totalPages = Math.ceil(filteredMessages.length / PAGE_SIZE);
-
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-  };
-
-  const formatDate = (isoStr: string) => {
-    const date = new Date(isoStr);
-    const today = new Date();
-    if (date.toDateString() === today.toDateString()) {
-      return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    }
-    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  };
 
   return (
     <div className="space-y-6 pb-12 max-w-5xl mx-auto">
@@ -153,42 +235,17 @@ export function MessagesInbox() {
         ) : (
           <div className="divide-y divide-white/5">
             {paginatedMessages.map(msg => (
-              <Link 
+              <MessageRow 
                 key={msg.id} 
-                to={`/admin/messages/${msg.id}`}
-                className={`flex items-center gap-4 p-4 hover:bg-[#141B22] transition-colors group relative ${!msg.read ? 'bg-white/[0.02]' : ''}`}
-              >
-                {!msg.read && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent-ocre" />
-                )}
-                
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${!msg.read ? 'bg-accent-ocre/20 text-accent-ocre' : 'bg-white/5 text-text-muted'}`}>
-                  {getInitials(msg.name)}
-                </div>
-
-                <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                  <div className={`font-medium truncate sm:w-48 flex-shrink-0 ${!msg.read ? 'text-text-primary' : 'text-text-muted'}`}>
-                    {msg.name}
-                  </div>
-                  <div className={`text-sm truncate flex-1 ${!msg.read ? 'text-text-primary' : 'text-text-muted'}`}>
-                    <span className="font-medium mr-2">{msg.subject || 'Sans objet'}</span>
-                    <span className="opacity-70">— {msg.message.substring(0, 50)}...</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 flex-shrink-0">
-                  <div className={`font-mono text-xs ${!msg.read ? 'text-accent-ocre font-bold' : 'text-text-muted'}`}>
-                    {formatDate(msg.created_at)}
-                  </div>
-                  <button 
-                    onClick={(e) => handleDelete(e, msg.id)}
-                    className="p-2 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                    aria-label="Supprimer"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </Link>
+                message={msg}
+                onDelete={(id) => handleDelete({ preventDefault: () => {}, stopPropagation: () => {} } as React.MouseEvent, id)}
+                onClick={(id) => navigate(`/admin/messages/${id}`, {
+                  state: {
+                    messageIds: messages.map(m => m.id),
+                    currentIndex: messages.findIndex(m => m.id === id)
+                  }
+                })}
+              />
             ))}
           </div>
         )}

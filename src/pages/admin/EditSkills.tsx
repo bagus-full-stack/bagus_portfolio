@@ -8,22 +8,35 @@ import { useAutoSave } from '../../hooks/useAutoSave';
 
 export function EditSkills() {
   const [skills, setSkills] = useState<Skill[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingSkill, setDeletingSkill] = useState<{ id: string, category: string } | null>(null);
   const [inputs, setInputs] = useState<Record<string, string>>({});
+  
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+
+  const DEFAULT_CATEGORIES = ['Frontend', 'Backend', 'IA-ML', 'DevOps', 'Mobile'];
 
   useEffect(() => {
     let mounted = true;
-    SupabaseService.getSkills().then(data => {
+    const fetchData = async () => {
+      const { data: skillsData } = await supabase.from('skills').select('*');
+      const { data: catsData, error: catsError } = await supabase.from('skill_categories').select('*');
+      
       if (mounted) {
-        setSkills(data);
+        setSkills(skillsData || []);
+        if (!catsError && catsData && catsData.length > 0) {
+          setCategories(catsData.map(c => c.name));
+        } else {
+          setCategories(DEFAULT_CATEGORIES);
+        }
         setLoading(false);
       }
-    });
+    };
+    fetchData();
     return () => { mounted = false; };
   }, []);
-
-  const categories = Array.from(new Set<string>(skills.map(s => s.category)));
 
   const { triggerSave, saveState } = useAutoSave(async () => {
     const { error } = await supabase.from('skills').upsert(skills);
@@ -70,11 +83,19 @@ export function EditSkills() {
     }
   };
 
-  const handleNewCategory = () => {
-    const name = window.prompt("Nom de la nouvelle catégorie :");
-    if (name && name.trim()) {
-      setSkills([...skills, { id: crypto.randomUUID(), name: "", category: name.trim() }]);
-    }
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    const newCategory = newCategoryName.trim();
+  
+    // Ajouter la catégorie en base si elle n'existe pas
+    await supabase
+      .from('skill_categories')
+      .upsert({ name: newCategory });
+  
+    setCategories(prev => [...prev, newCategory]);
+    setNewCategoryName('');
+    setShowNewCategoryInput(false);
+    toast.success(`Catégorie "${newCategory}" ajoutée`);
   };
 
   if (loading) {
@@ -90,13 +111,49 @@ export function EditSkills() {
     <div className="space-y-6 pb-12 relative">
       <div className="flex justify-between items-center mb-6">
         <h2 className="font-space text-2xl font-bold text-text-primary">Compétences</h2>
-        <button 
-          onClick={handleNewCategory}
-          className="flex items-center px-4 py-2 bg-white/5 text-text-primary font-medium rounded hover:bg-white/10 transition-colors border border-white/10"
-        >
-          <Plus size={18} className="mr-2" />
-          Nouvelle catégorie
-        </button>
+        {showNewCategoryInput ? (
+          <div className="flex items-center gap-2 mt-3">
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddCategory();
+                if (e.key === 'Escape') {
+                  setShowNewCategoryInput(false);
+                  setNewCategoryName('');
+                }
+              }}
+              placeholder="Nom de la catégorie..."
+              autoFocus
+              className="flex-1 bg-[#0B0F14] border border-[#8B94A3]/30 rounded-lg px-3 py-2 text-[#EDEFF2] font-[Inter] text-sm focus:outline-none focus:border-[#2DD4BF] placeholder:text-[#8B94A3]"
+            />
+            <button
+              onClick={handleAddCategory}
+              disabled={!newCategoryName.trim()}
+              className="px-3 py-2 bg-[#E08A3E] text-white rounded-lg text-sm font-[Inter] disabled:opacity-40 hover:bg-[#C97A35] transition-colors"
+            >
+              Ajouter
+            </button>
+            <button
+              onClick={() => {
+                setShowNewCategoryInput(false);
+                setNewCategoryName('');
+              }}
+              className="px-3 py-2 border border-[#8B94A3]/30 text-[#8B94A3] rounded-lg text-sm hover:text-[#EDEFF2] transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowNewCategoryInput(true)}
+            className="flex items-center px-4 py-2 bg-white/5 text-text-primary font-medium rounded hover:bg-white/10 transition-colors border border-white/10"
+          >
+            <Plus size={18} className="mr-2" />
+            Nouvelle catégorie
+          </button>
+        )}
       </div>
 
       <p className="text-text-muted text-sm mb-8 flex items-center">
@@ -180,7 +237,7 @@ export function EditSkills() {
         {categories.length === 0 && (
           <div className="bg-bg-card border border-white/5 rounded-xl p-12 text-center text-text-muted">
             <p className="font-inter mb-4">Aucune catégorie existante</p>
-            <button onClick={handleNewCategory} className="text-accent-cyan hover:underline">Créer la première catégorie</button>
+            <button onClick={() => setShowNewCategoryInput(true)} className="text-accent-cyan hover:underline">Créer la première catégorie</button>
           </div>
         )}
       </div>

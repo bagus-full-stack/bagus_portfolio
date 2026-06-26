@@ -4,9 +4,11 @@ import { Mail, Calendar, Linkedin, Github, Loader2 } from 'lucide-react';
 import { ContactForm } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { useTranslation } from '../hooks/useTranslation';
+import { BookingModal } from './BookingModal';
 
 export function ContactSection() {
   const { t } = useTranslation();
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [honeypot, setHoneypot] = useState('');
   const [formData, setFormData] = useState<ContactForm>({
     name: '',
@@ -68,15 +70,17 @@ export function ContactSection() {
                 contact@example.com
               </a>
               <br />
-              <a 
-                href="https://calendly.com" 
-                target="_blank" 
-                rel="noreferrer"
-                className="inline-flex items-center text-accent-ocre hover:text-accent-ocre/80 transition-colors font-inter font-medium"
+                <BookingModal 
+                  isOpen={bookingModalOpen}
+                  onClose={() => setBookingModalOpen(false)}
+                />
+              <button 
+                onClick={() => setBookingModalOpen(true)}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#E08A3E] text-white rounded-lg hover:bg-[#C97A35] transition-colors font-inter font-medium"
               >
-                <Calendar size={20} className="mr-3" />
+                <Calendar size={18} />
                 Réserver un appel
-              </a>
+              </button>
             </div>
             
             <div className="pt-8 border-t border-white/5">

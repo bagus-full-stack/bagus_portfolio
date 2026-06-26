@@ -3,6 +3,8 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './app.routes';
 import { Toaster } from 'sonner';
 import { CookieBanner } from './components/CookieBanner';
+import PWAInstallBanner from './components/PWAInstallBanner';
+import PWAUpdateBanner from './components/PWAUpdateBanner';
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
         }} 
       />
       <CookieBanner />
+      <PWAInstallBanner />
+      <PWAUpdateBanner />
     </>
   );
 }

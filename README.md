@@ -98,6 +98,15 @@ L'application sera accessible sur `http://localhost:3000` (ou le port spécifié
 
 ---
 
+## 🔒 Accès à l'Administration
+
+Le portfolio intègre un espace d'administration sécurisé pour gérer dynamiquement votre contenu (projets, expériences, compétences, etc.).
+
+*   **Page de connexion (Login)** : Accédez à `/admin/login` pour vous authentifier.
+*   **Tableau de bord principal** : Accédez à `/admin` pour gérer votre contenu. (Si vous n'êtes pas connecté, vous serez automatiquement redirigé vers `/admin/login`).
+
+---
+
 ## 🤝 Comment contribuer ?
 
 Les contributions, signalements de bugs (issues), et demandes de fonctionnalités (feature requests) sont les bienvenues ! 

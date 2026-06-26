@@ -18,11 +18,14 @@ Ce projet est un portfolio professionnel interactif conçu pour les développeur
 
 ### ✨ Fonctionnalités clés
 
-*   **🎨 Design Moderne & Réactif** : Interface UI/UX soignée avec Tailwind CSS.
-*   **🔒 Dashboard Admin Sécurisé** : Gérez vos projets, compétences, expériences et CV (via Supabase Auth).
+*   **🎨 Design Moderne & Réactif** : Interface UI/UX soignée avec Tailwind CSS et support complet du Thème Clair / Sombre.
+*   **🤖 Chatbot IA Intégré** : Un assistant virtuel intelligent propulsé par l'API Google Gemini, avec support de la dictée vocale (Speech-to-Text).
+*   **🔒 Dashboard Admin Sécurisé** : Gérez vos projets, compétences, expériences, certifications, témoignages et votre CV depuis un back-office complet (via Supabase Auth).
 *   **📅 Prise de rendez-vous intégrée** : Réservation d'appels directement reliée à Google Meet et Google Calendar.
+*   **📱 Support PWA (Progressive Web App)** : Application installable fonctionnant comme une application native.
 *   **📄 Export de CV en PDF** : Génération automatique de votre profil au format PDF via html2canvas et jsPDF.
-*   **🌐 Internationalisation** : Architecture et support multi-langues prêt à l'emploi.
+*   **🌐 Internationalisation (i18n)** : Support multi-langues prêt à l'emploi (Français et Anglais).
+*   **🔍 Recherche Globale** : Moteur de recherche unifié pour trouver rapidement des projets, compétences ou expériences.
 
 ---
 

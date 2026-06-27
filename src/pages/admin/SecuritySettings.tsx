@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Key, Monitor, Smartphone, Eye, EyeOff, AlertTriangle, CheckCircle2, X, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { SupabaseService } from '../../services/supabase.service';
+import { AuthService } from '../../services/auth.service';
 import { Session } from '../../types';
 import { PasswordStrength } from '../../components/PasswordStrength';
 
@@ -97,14 +98,29 @@ export function SecuritySettings() {
     
     setSavingPassword(true);
     try {
-      // Simulate API call
-      await new Promise(r => setTimeout(r, 1000));
+      const session = await AuthService.getCurrentSession();
+      if (!session?.user?.email) throw new Error('Non connecté');
+
+      // 1. Verify current password by signing in again
+      const { error: signInError } = await AuthService.signIn(
+        session.user.email,
+        currentPassword
+      );
+
+      if (signInError) {
+        throw new Error('Mot de passe actuel incorrect');
+      }
+
+      // 2. Update to new password
+      const { error: updateError } = await AuthService.updatePassword(newPassword);
+      if (updateError) throw updateError;
+
       toast.success('Mot de passe mis à jour avec succès');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (err) {
-      toast.error('Erreur lors de la mise à jour du mot de passe');
+    } catch (err: any) {
+      toast.error(err.message || 'Erreur lors de la mise à jour du mot de passe');
     } finally {
       setSavingPassword(false);
     }

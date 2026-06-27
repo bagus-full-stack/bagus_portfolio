@@ -24,7 +24,7 @@ export function ShareButtons() {
       const { data: profile } = await supabase
         .from('profiles')
         .select('cv_url')
-        .single();
+        .maybeSingle();
 
       if (!profile?.cv_url) {
         toast.error('CV non disponible pour le moment');

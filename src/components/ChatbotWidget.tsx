@@ -135,7 +135,7 @@ export function ChatbotWidget() {
         console.log('Request cancelled due to unmount');
         return;
       }
-      console.error(e);
+      // console.error(e);
       setError(true);
       // We don't add an error message to the history as requested, just show inline error
     } finally {
@@ -297,6 +297,7 @@ export function ChatbotWidget() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  maxLength={500}
                   placeholder={
                     isListening
                       ? t('chatbot.listening')

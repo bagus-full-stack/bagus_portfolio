@@ -23,7 +23,7 @@ export function ExportData() {
   useEffect(() => {
     let mounted = true;
     Promise.all([
-      supabase.from('profiles').select('*').single(),
+      supabase.from('profiles').select('*').maybeSingle(),
       supabase.from('experiences').select('*').order('start_date', { ascending: false }),
       supabase.from('skills').select('*'),
       supabase.from('certifications').select('*')
@@ -104,7 +104,7 @@ export function ExportData() {
     setJsonState('generating');
     try {
       const [profile, experiences, projects, skills, certs] = await Promise.all([
-        supabase.from('profiles').select('*').single(),
+        supabase.from('profiles').select('*').maybeSingle(),
         supabase.from('experiences').select('*'),
         supabase.from('projects').select('*'),
         supabase.from('skills').select('*'),

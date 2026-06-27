@@ -44,7 +44,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         setResults(res);
         setActiveIndex(0);
       } catch (e) {
-        console.error(e);
+        // console.error(e);
       } finally {
         setIsLoading(false);
       }

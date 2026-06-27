@@ -27,7 +27,7 @@ export function HeroSection() {
           setViews(data);
         }
       } catch (err) {
-        console.error('Failed to increment view count', err);
+        // console.error('Failed to increment view count', err);
         if (mounted) setViews(1348);
       }
     };
@@ -51,7 +51,7 @@ export function HeroSection() {
       if (data) window.open(data.signedUrl, '_blank');
     } catch (err) {
       toast.error('Erreur lors du téléchargement du CV.');
-      console.error(err);
+      // console.error(err);
     } finally {
       setIsDownloading(false);
     }

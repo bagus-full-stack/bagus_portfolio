@@ -62,7 +62,7 @@ export function AdminDashboard() {
           setLoading(false);
         }
       } catch (err) {
-        console.error("Error fetching dashboard data:", err);
+        // console.error("Error fetching dashboard data:", err);
         if (mounted) {
           setError(true);
           setLoading(false);

@@ -70,7 +70,7 @@ export function AdminLayout() {
         const unread = messages.filter(m => !m.read).length;
         setMessagesUnreadCount(unread);
       } catch (e) {
-        console.error('Failed to load messages count', e);
+        // console.error('Failed to load messages count', e);
       }
     };
     fetchMessages();

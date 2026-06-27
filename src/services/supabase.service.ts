@@ -51,7 +51,7 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit): Promis
 
     if (!response.ok) {
       if (response.status !== 404 && response.status !== 401) {
-        console.error(`[Supabase HTTP Error] ${response.status} ${response.statusText}`, response.url);
+        // console.error(`[Supabase HTTP Error] ${response.status} ${response.statusText}`, response.url);
       }
       if (response.status >= 500) {
         toast.error('Erreur serveur réseau. Veuillez réessayer plus tard.');
@@ -59,9 +59,12 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit): Promis
     }
     return response;
   } catch (error) {
-    console.error('[Supabase Network Error]', error);
-    toast.error('Erreur réseau de connexion à Supabase.');
-    throw error;
+    // Return a fake 503 response so supabase-js returns { error } instead of throwing
+    return new Response(JSON.stringify({ error: { message: 'Network error', details: error } }), {
+      status: 503,
+      statusText: 'Service Unavailable',
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 };
 
@@ -80,8 +83,8 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export const SupabaseService = {
   async getProfile(): Promise<Profile> {
     if (supabase) {
-      const { data, error } = await supabase.from('profiles').select('*').single();
-      if (error) {
+      const { data, error } = await supabase.from('profiles').select('*').maybeSingle();
+      if (error || !data) {
         return mockProfile;
       }
       return data as Profile;
@@ -116,8 +119,8 @@ export const SupabaseService = {
 
   async getProjectBySlug(slug: string): Promise<Project | null> {
     if (supabase) {
-      const { data, error } = await supabase.from('projects').select('*').eq('slug', slug).single();
-      if (error) {
+      const { data, error } = await supabase.from('projects').select('*').eq('slug', slug).maybeSingle();
+      if (error || !data) {
         return mockProjects.find(p => p.slug === slug) || null;
       }
       return data as Project;
@@ -164,8 +167,8 @@ export const SupabaseService = {
 
   async getMessageById(id: string): Promise<Message | null> {
     if (supabase) {
-      const { data, error } = await supabase.from('messages').select('*').eq('id', id).single();
-      if (error) {
+      const { data, error } = await supabase.from('messages').select('*').eq('id', id).maybeSingle();
+      if (error || !data) {
         return mockMessages.find(m => m.id === id) || null;
       }
       return data as Message;
@@ -208,7 +211,7 @@ export const SupabaseService = {
         }
       ]);
       if (error) {
-        console.error('Supabase submitContactForm error:', error);
+        // console.error('Supabase submitContactForm error:', error);
         throw error;
       }
       return;

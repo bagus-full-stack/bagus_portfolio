@@ -104,6 +104,7 @@ export function ContactSection() {
                     id="name"
                     name="name"
                     required
+                    maxLength={100}
                     placeholder={t('contact.form.placeholder.name')}
                     value={formData.name}
                     onChange={handleChange}
@@ -119,6 +120,7 @@ export function ContactSection() {
                     id="email"
                     name="email"
                     required
+                    maxLength={150}
                     placeholder={t('contact.form.placeholder.email')}
                     value={formData.email}
                     onChange={handleChange}
@@ -134,6 +136,7 @@ export function ContactSection() {
                   type="text"
                   id="subject"
                   name="subject"
+                  maxLength={200}
                   placeholder={t('contact.form.placeholder.subject')}
                   value={formData.subject}
                   onChange={handleChange}
@@ -149,6 +152,7 @@ export function ContactSection() {
                   name="message"
                   required
                   rows={5}
+                  maxLength={2000}
                   placeholder={t('contact.form.placeholder.message')}
                   value={formData.message}
                   onChange={handleChange}

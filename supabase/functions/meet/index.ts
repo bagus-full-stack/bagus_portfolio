@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { google } from "npm:googleapis"
+import {
+  getCorsHeaders,
+  isOriginAllowed,
+  handlePreflight
+} from "../_shared/cors.ts"
 
 const auth = new google.auth.GoogleAuth({
   credentials: JSON.parse(Deno.env.get('GOOGLE_CREDENTIALS') || '{}'),
@@ -13,15 +18,30 @@ serve(async (req) => {
   const { method } = req
   const url = new URL(req.url)
 
-  // Gestion CORS
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  const origin = req.headers.get('origin')
+
+  // Gérer le preflight OPTIONS
+  const preflightResponse = handlePreflight(req)
+  if (preflightResponse) return preflightResponse
+
+  // Vérifier l'origine en production
+  if (!isOriginAllowed(origin)) {
+    return new Response(
+      JSON.stringify({
+        error: 'Accès non autorisé'
+      }),
+      {
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          ...getCorsHeaders(origin)
+        }
+      }
+    )
   }
-  
-  if (method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
+
+  // Headers CORS à inclure dans TOUTES les réponses
+  const corsHeaders = getCorsHeaders(origin)
 
   try {
     // GET ?date=2024-06-23 → créneaux disponibles
@@ -178,6 +198,8 @@ serve(async (req) => {
 
     return new Response('Method not allowed', { status: 405, headers: corsHeaders })
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    // Erreur générique — pas de détails techniques
+    return new Response(JSON.stringify({ error: 'Une erreur est survenue' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 })
+

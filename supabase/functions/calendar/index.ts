@@ -1,15 +1,36 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { google } from "npm:googleapis"
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-date',
-}
+import {
+  getCorsHeaders,
+  isOriginAllowed,
+  handlePreflight
+} from "../_shared/cors.ts"
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  const origin = req.headers.get('origin')
+
+  // Gérer le preflight OPTIONS
+  const preflightResponse = handlePreflight(req)
+  if (preflightResponse) return preflightResponse
+
+  // Vérifier l'origine en production
+  if (!isOriginAllowed(origin)) {
+    return new Response(
+      JSON.stringify({
+        error: 'Accès non autorisé'
+      }),
+      {
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          ...getCorsHeaders(origin)
+        }
+      }
+    )
   }
+
+  // Headers CORS à inclure dans TOUTES les réponses
+  const corsHeaders = getCorsHeaders(origin)
 
   try {
     const SCOPES = ['https://www.googleapis.com/auth/calendar']
@@ -129,6 +150,8 @@ serve(async (req) => {
     
     return new Response('Not found', { status: 404, headers: corsHeaders });
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: corsHeaders })
+    // Erreur générique — pas de détails techniques
+    return new Response(JSON.stringify({ error: 'Une erreur est survenue' }), { status: 500, headers: corsHeaders })
   }
 })
+

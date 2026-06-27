@@ -1,6 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import { corsHeaders } from '../_shared/cors.ts'
+import {
+  getCorsHeaders,
+  isOriginAllowed,
+  handlePreflight
+} from "../_shared/cors.ts"
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -27,10 +31,30 @@ const rateLimit = new Map<string, number>();
 const RATE_LIMIT_WINDOW = 3000; // 3 seconds
 
 serve(async (req) => {
-  // Gestion CORS (Preflight request)
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  const origin = req.headers.get('origin')
+
+  // Gérer le preflight OPTIONS
+  const preflightResponse = handlePreflight(req)
+  if (preflightResponse) return preflightResponse
+
+  // Vérifier l'origine en production
+  if (!isOriginAllowed(origin)) {
+    return new Response(
+      JSON.stringify({
+        error: 'Accès non autorisé'
+      }),
+      {
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          ...getCorsHeaders(origin)
+        }
+      }
+    )
   }
+
+  // Headers CORS à inclure dans TOUTES les réponses
+  const corsHeaders = getCorsHeaders(origin)
 
   try {
     // Basic Rate Limiting using in-memory Map based on IP
@@ -80,7 +104,7 @@ serve(async (req) => {
       { data: projects },
       { data: skills }
     ] = await Promise.all([
-      supabase.from('profiles').select('*').single(),
+      supabase.from('profiles').select('*').maybeSingle(),
       supabase.from('experiences').select('*').order('start_date', { ascending: false }),
       supabase.from('projects').select('*'),
       supabase.from('skills').select('*')
@@ -186,8 +210,8 @@ CV : ${CV_JSON}`;
     })
 
   } catch (error: any) {
-    console.error(error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    // Erreur générique — pas de détails techniques
+    return new Response(JSON.stringify({ error: 'Une erreur est survenue' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     })

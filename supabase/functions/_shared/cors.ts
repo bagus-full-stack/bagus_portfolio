@@ -1,6 +1,6 @@
 const ALLOWED_ORIGINS = [
-  'https://bagus-full-stack.me',       // production
-  'https://www.bagus-full-stack.me',   // variante www
+  'https://assami.dev',       // production
+  'https://www.assami.dev',   // variante www
   'http://localhost:5173',             // dev Vite
   'http://localhost:4173',             // preview Vite
   'http://localhost:3000',             // dev alternatif
@@ -31,7 +31,7 @@ export const getCorsHeaders = (
   return {
     'Access-Control-Allow-Origin': isAllowed
       ? requestOrigin!
-      : 'https://bagus-full-stack.me', // fallback domaine prod
+      : 'https://assami.dev', // fallback domaine prod
     'Access-Control-Allow-Headers':
       'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods':

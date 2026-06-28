@@ -9,7 +9,7 @@ import { SupabaseService } from './services/supabase.service';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { ChatbotWidget } from './components/ChatbotWidget';
-import { AgroSahelPage } from './pages/AgroSahelPage';
+import { SimpsonsAIPage } from './pages/SimpsonsAIPage';
 
 // Lazy loaded admin pages
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(module => ({ default: module.AdminLogin })));
@@ -29,6 +29,7 @@ const Analytics = lazy(() => import('./pages/admin/Analytics').then(module => ({
 const ActivityLog = lazy(() => import('./pages/admin/ActivityLog').then(module => ({ default: module.ActivityLog })));
 const SecuritySettings = lazy(() => import('./pages/admin/SecuritySettings').then(module => ({ default: module.SecuritySettings })));
 const ExportData = lazy(() => import('./pages/admin/ExportData').then(module => ({ default: module.ExportData })));
+const ImportData = lazy(() => import('./pages/admin/ImportData').then(module => ({ default: module.ImportDataPage })));
 
 const Layout = () => {
   return (
@@ -66,8 +67,8 @@ export const router = createBrowserRouter([
         element: <Home />
       },
       {
-        path: '/projects/agrosahel-ai',
-        element: <AgroSahelPage />
+        path: '/projects/simpsons-ai',
+        element: <SimpsonsAIPage />
       },
       {
         path: '/projects/:slug',
@@ -159,6 +160,10 @@ export const router = createBrowserRouter([
               {
                 path: '/admin/export',
                 element: <ExportData />
+              },
+              {
+                path: '/admin/import',
+                element: <ImportData />
               }
             ]
           }

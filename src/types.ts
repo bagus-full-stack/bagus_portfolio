@@ -38,7 +38,7 @@ export interface Project {
   results: { metric: string; value: string }[];
   github_url?: string;
   live_url?: string;
-  status: 'production' | 'beta' | 'archived';
+  status: 'production' | 'beta' | 'archived' | 'conception';
   architecture?: string;
   architecture_nodes?: any[];
   architecture_edges?: any[];

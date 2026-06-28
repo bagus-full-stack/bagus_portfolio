@@ -102,18 +102,17 @@ export function SecuritySettings() {
       if (!session?.user?.email) throw new Error('Non connecté');
 
       // 1. Verify current password by signing in again
-      const { error: signInError } = await AuthService.signIn(
-        session.user.email,
-        currentPassword
-      );
-
-      if (signInError) {
+      try {
+        await AuthService.signIn({
+          email: session.user.email,
+          password: currentPassword
+        });
+      } catch (err) {
         throw new Error('Mot de passe actuel incorrect');
       }
 
       // 2. Update to new password
-      const { error: updateError } = await AuthService.updatePassword(newPassword);
-      if (updateError) throw updateError;
+      await AuthService.updatePassword(newPassword);
 
       toast.success('Mot de passe mis à jour avec succès');
       setCurrentPassword('');

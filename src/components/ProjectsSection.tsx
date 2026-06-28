@@ -141,24 +141,38 @@ export function ProjectsSection() {
                   </div>
                   
                   <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
-                    <Link
-                      to={`/projects/${project.slug}`}
-                      className="text-sm font-inter font-medium text-text-primary hover:text-accent-ocre transition-colors"
-                    >
-                      {t('projects.card.case')} →
-                    </Link>
-                    
-                    {project.github_url && (
-                      <a
-                        href={project.github_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-text-muted hover:text-text-primary transition-colors"
-                        title={t('projects.card.github')}
+                    {project.status === 'conception' ? (
+                      <span className="text-sm font-inter text-text-muted italic">
+                        En cours de développement
+                      </span>
+                    ) : (
+                      <Link
+                        to={`/projects/${project.slug}`}
+                        className="text-sm font-inter font-medium text-text-primary hover:text-accent-ocre transition-colors"
                       >
-                        <ExternalLink size={18} />
-                      </a>
+                        {t('projects.card.case')} →
+                      </Link>
                     )}
+                    
+                    <div className="flex items-center gap-4">
+                      {project.status === 'conception' && (
+                        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-[JetBrains_Mono] bg-[#8B94A3]/20 border border-[#8B94A3]/40 text-[#8B94A3]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#8B94A3] animate-pulse" />
+                          En conception
+                        </span>
+                      )}
+                      {project.github_url && (
+                        <a
+                          href={project.github_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-text-muted hover:text-text-primary transition-colors"
+                          title={t('projects.card.github')}
+                        >
+                          <ExternalLink size={18} />
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

@@ -1,0 +1,115 @@
+{
+  "version": "1.0",
+  "exportDate": "2026-06-28T00:00:00.000Z",
+
+  "profile": {
+    "name": "Assami Baga",
+    "title": "Full Stack & AI Engineer",
+    "bio_short": "Ingénieur Full Stack & IA basé en Île-de-France.",
+    "bio_full": "Description complète...",
+    "location": "Île-de-France, France",
+    "email": "ton-email@gmail.com",
+    "linkedin_url": "https://linkedin.com/in/ton-profil",
+    "github_url": "https://github.com/bagus-full-stack",
+    "calendly_url": "https://calendly.com/ton-lien"
+  },
+
+  "experiences": [
+    {
+      "type": "pro",
+      "title": "Développeur Full Stack",
+      "organization": "CDC Informatique",
+      "location": "Île-de-France",
+      "start_date": "2024-09",
+      "end_date": null,
+      "description": "Description du poste...",
+      "stack": ["React", "TypeScript", "Supabase"]
+    },
+    {
+      "type": "education",
+      "title": "Bac+5 Ingénierie Informatique",
+      "organization": "Nom de l'école",
+      "location": "France",
+      "start_date": "2021-09",
+      "end_date": "2026-09",
+      "description": "Description de la formation...",
+      "stack": []
+    }
+  ],
+
+  "projects": [
+    {
+      "slug": "agrosahel-ai",
+      "title": "AgroSahel AI",
+      "description": "Diagnostic agricole IA...",
+      "stack": ["Flutter", "FastAPI", "PyTorch"],
+      "context": "Contexte du projet...",
+      "technical_choices": [
+        {
+          "choice": "FastAPI",
+          "reason": "Performance et typage Python"
+        }
+      ],
+      "challenges": [
+        "Collecte de données agricoles rares"
+      ],
+      "results": [
+        {
+          "metric": "Précision modèle",
+          "value": "94.2%"
+        }
+      ],
+      "github_url": "https://github.com/...",
+      "live_url": "",
+      "status": "production",
+      "architecture_nodes": [
+        {
+          "id": "app",
+          "label": "Flutter App",
+          "tech": "Dart · TFLite",
+          "x": 15,
+          "y": 50
+        }
+      ],
+      "architecture_edges": [
+        {
+          "from": "app",
+          "to": "api",
+          "label": "HTTP/JSON"
+        }
+      ]
+    }
+  ],
+
+  "skills": [
+    { "name": "React", "category": "Frontend" },
+    { "name": "TypeScript", "category": "Frontend" },
+    { "name": "Angular", "category": "Frontend" },
+    { "name": "FastAPI", "category": "Backend" },
+    { "name": "Python", "category": "Backend" },
+    { "name": "PyTorch", "category": "IA-ML" },
+    { "name": "TensorFlow", "category": "IA-ML" },
+    { "name": "Docker", "category": "DevOps" },
+    { "name": "Flutter", "category": "Mobile" }
+  ],
+
+  "certifications": [
+    {
+      "name": "AWS Cloud Practitioner",
+      "issuer": "Amazon Web Services",
+      "date": "2024-03",
+      "verify_url": "https://aws.amazon.com/verify/..."
+    }
+  ],
+
+  "testimonials": [
+    {
+      "quote": "Assami est un développeur rigoureux...",
+      "author_name": "Jean Dupont",
+      "author_role": "Tech Lead",
+      "author_company": "Entreprise XYZ",
+      "linkedin_url": "https://linkedin.com/in/...",
+      "order": 0
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Testimonial } from '../types';
 import DOMPurify from 'dompurify';
+import { useLocalizedField } from '../hooks/useLocalizedField';
 
 const MOCK_TESTIMONIALS: Testimonial[] = [
   {
@@ -43,6 +44,7 @@ const MOCK_TESTIMONIALS: Testimonial[] = [
 ];
 
 export function TestimonialsSection() {
+  const { t } = useLocalizedField();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -152,7 +154,7 @@ export function TestimonialsSection() {
                       <span className="font-space text-6xl text-[#E08A3E] opacity-40 absolute top-4 left-6 leading-none">"</span>
                       
                       <p className="font-inter text-[16px] text-[var(--text-primary)] leading-[1.7] relative z-10 mb-8 pt-4 flex-grow">
-                        {DOMPurify.sanitize(testimonial.quote || '', { ALLOWED_TAGS: [] })}
+                        {DOMPurify.sanitize(t(testimonial, 'quote') || '', { ALLOWED_TAGS: [] })}
                       </p>
                       
                       <div className="h-[1px] w-full bg-[var(--border-subtle)] opacity-30 mb-6"></div>
@@ -161,7 +163,7 @@ export function TestimonialsSection() {
                         <div>
                           <h4 className="font-space font-bold text-[var(--text-primary)]">{DOMPurify.sanitize(testimonial.authorName || '', { ALLOWED_TAGS: [] })}</h4>
                           <p className="font-inter text-sm text-[var(--text-muted)]">
-                            {DOMPurify.sanitize(testimonial.authorRole || '', { ALLOWED_TAGS: [] })}, {DOMPurify.sanitize(testimonial.authorCompany || '', { ALLOWED_TAGS: [] })}
+                            {DOMPurify.sanitize(t(testimonial, 'authorRole') || '', { ALLOWED_TAGS: [] })}, {DOMPurify.sanitize(testimonial.authorCompany || '', { ALLOWED_TAGS: [] })}
                           </p>
                         </div>
                         {safeUrl !== '#' && (

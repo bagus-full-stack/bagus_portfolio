@@ -3,12 +3,15 @@ import { Experience } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
 import { useTranslation } from '../hooks/useTranslation';
+import { useLocalizedField } from '../hooks/useLocalizedField';
 
 const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, isEven }) => {
-  const { t } = useTranslation();
+  const { t: translate } = useTranslation();
+  const { t } = useLocalizedField();
   const [isExpanded, setIsExpanded] = useState(false);
   const isPro = exp.type === 'pro';
-  const showToggle = exp.description && exp.description.length > 120; // heuristic for > 3 lines
+  const desc = t(exp, 'description');
+  const showToggle = desc && desc.length > 120; // heuristic for > 3 lines
 
   return (
     <div className={`relative flex flex-col md:flex-row ${isEven ? '' : 'md:flex-row-reverse'} items-start`}>
@@ -24,19 +27,19 @@ const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, i
       {/* Content Card */}
       <div className={`w-full md:w-1/2 pl-16 md:pl-0 ${isEven ? 'md:pr-16 md:text-right' : 'md:pl-16 md:text-left'}`}>
         <div className={`font-mono text-sm text-text-muted mb-2 flex justify-start ${isEven ? 'md:justify-end' : 'md:justify-start'}`}>
-           {exp.start_date} — {exp.end_date || t('experiences.present')}
+           {exp.start_date} — {exp.end_date || translate('experiences.present')}
         </div>
         
         <h3 className="font-space text-xl font-semibold text-text-primary mb-1">
-          {exp.title}
+          {t(exp, 'title')}
         </h3>
         
         <div className="font-inter text-base text-text-muted mb-4 font-medium">
-          {exp.organization} {exp.location && `• ${exp.location}`}
+          {t(exp, 'organization')} {exp.location && `• ${exp.location}`}
         </div>
         
         <p className={`font-inter text-sm text-text-muted leading-relaxed transition-all duration-300 ${isExpanded ? '' : 'line-clamp-3'}`}>
-          {exp.description}
+          {desc}
         </p>
 
         {showToggle && (
@@ -45,7 +48,7 @@ const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, i
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-accent-cyan font-inter text-[14px] bg-transparent mt-2 hover:underline"
             >
-              {isExpanded ? t('experiences.see_less') : t('experiences.see_more')}
+              {isExpanded ? translate('experiences.see_less') : translate('experiences.see_more')}
             </button>
           </div>
         )}

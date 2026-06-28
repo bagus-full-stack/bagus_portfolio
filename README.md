@@ -40,6 +40,284 @@ Ce projet est un portfolio professionnel interactif conçu pour les développeur
 
 ---
 
+## 📥 Import de données (CMS Admin)
+
+L'interface d'administration (`/admin/import`) permet d'alimenter toute la base de données en une seule opération via un fichier JSON structuré.
+
+### Comment ça marche ?
+
+1. **Modèle JSON (`import-template.json`)** : Un gabarit complet est fourni dans le dossier `public/`. Il définit la structure exacte attendue pour importer en masse votre profil, vos expériences, vos projets, vos compétences et vos certifications. Les champs supportent l'internationalisation (clés suffixées par `_fr` et `_en`).
+2. **Validation & Sécurité** : Le module d'import vérifie rigoureusement le schéma du fichier, sa taille (max 5 Mo) et son format (`application/json`) avant de traiter les données.
+3. **Mise à jour atomique** : L'importation effectue des opérations de type "upsert" (mise à jour si existant, création sinon) sur l'ensemble de votre base de données Supabase, vous évitant ainsi la saisie manuelle.
+
+### Instructions d'accès
+
+1. Connectez-vous à votre espace d'administration (`/admin/login`).
+2. Naviguez vers l'onglet **Import** (`/admin/import`) depuis le menu latéral.
+3. Cliquez sur "Télécharger le modèle JSON" pour récupérer la structure de base.
+4. Complétez le fichier avec vos informations dans un éditeur de texte.
+5. Glissez-déposez le fichier finalisé dans la zone d'import pour synchroniser votre portfolio instantanément.
+
+### Fonctionnalités
+
+- **Upload drag-and-drop** du fichier JSON
+- **Validation** du format avant import
+- **Aperçu** du nombre d'items détectés par section
+- **Sélection** des sections à importer
+- **Deux stratégies** : Fusionner ou Remplacer
+- **Rapport détaillé** après import (succès / erreurs par item)
+
+---
+
+### Format JSON requis
+
+Le fichier doit respecter ce format exact. Toutes les sections sont optionnelles — importer uniquement ce dont vous avez besoin.
+
+> ⬇️ **[Télécharger le template JSON](https://assami.dev/import-template.json)**
+
+```json
+{
+  "version": "1.0",
+  "exportDate": "2026-06-28T00:00:00.000Z",
+
+  "profile": {
+    "name": "Assami Baga",
+    "title_fr": "Full Stack & AI Engineer",
+    "title_en": "Full Stack & AI Engineer",
+    "bio_short_fr": "Bio courte en français (200 chars max)",
+    "bio_short_en": "Short bio in English (200 chars max)",
+    "bio_full_fr": "Biographie complète en français...",
+    "bio_full_en": "Full biography in English...",
+    "location": "Île-de-France, France",
+    "email": "email@exemple.com",
+    "linkedin_url": "https://linkedin.com/in/profil",
+    "github_url": "https://github.com/username",
+    "calendly_url": "https://calendly.com/lien"
+  },
+
+  "experiences": [
+    {
+      "type": "pro",
+      "title_fr": "Développeur Full Stack",
+      "title_en": "Full Stack Developer",
+      "organization_fr": "Nom de l'entreprise",
+      "organization_en": "Company name",
+      "location": "Île-de-France",
+      "start_date": "2024-09",
+      "end_date": null,
+      "description_fr": "Description du poste en français...",
+      "description_en": "Job description in English...",
+      "stack": ["React", "TypeScript", "Supabase"]
+    },
+    {
+      "type": "education",
+      "title_fr": "Bac+5 Ingénierie Informatique",
+      "title_en": "Master's Degree in Computer Science",
+      "organization_fr": "Nom de l'école",
+      "organization_en": "School name",
+      "location": "France",
+      "start_date": "2021-09",
+      "end_date": "2026-09",
+      "description_fr": "Description de la formation...",
+      "description_en": "Program description...",
+      "stack": []
+    }
+  ],
+
+  "projects": [
+    {
+      "slug": "nom-du-projet",
+      "title_fr": "Nom du projet en français",
+      "title_en": "Project name in English",
+      "description_fr": "Description courte en français (200 chars max)",
+      "description_en": "Short description in English (200 chars max)",
+      "cover_image": "https://url-de-limage.com/cover.png",
+      "stack": ["FastAPI", "React", "PyTorch"],
+      "context_fr": "Contexte complet du projet en français...",
+      "context_en": "Full project context in English...",
+      "technical_choices": [
+        {
+          "choice": "FastAPI",
+          "reason": "Performance et typage Python natif"
+        },
+        {
+          "choice": "Supabase",
+          "reason": "Backend as a Service avec RLS intégré"
+        }
+      ],
+      "challenges_fr": [
+        "Premier défi rencontré",
+        "Deuxième défi rencontré"
+      ],
+      "challenges_en": [
+        "First challenge encountered",
+        "Second challenge encountered"
+      ],
+      "results": [
+        {
+          "metric": "Précision modèle",
+          "value": "94.2%"
+        },
+        {
+          "metric": "Temps d'inférence",
+          "value": "340ms"
+        }
+      ],
+      "github_url": "https://github.com/username/repo",
+      "live_url": "https://demo.exemple.com",
+      "status": "production",
+      "architecture_nodes": [
+        {
+          "id": "frontend",
+          "label": "React Frontend",
+          "tech": "TypeScript · Vite",
+          "x": 15,
+          "y": 50
+        },
+        {
+          "id": "api",
+          "label": "FastAPI Backend",
+          "tech": "Python · Pydantic",
+          "x": 50,
+          "y": 50
+        },
+        {
+          "id": "db",
+          "label": "Supabase",
+          "tech": "PostgreSQL · RLS",
+          "x": 85,
+          "y": 50
+        }
+      ],
+      "architecture_edges": [
+        {
+          "from": "frontend",
+          "to": "api",
+          "label": "HTTP/JSON"
+        },
+        {
+          "from": "api",
+          "to": "db",
+          "label": "SQL"
+        }
+      ]
+    }
+  ],
+
+  "skills": [
+    { "name": "React",
+      "name_fr": "React",
+      "name_en": "React",
+      "category": "Frontend" },
+    { "name": "TypeScript",
+      "name_fr": "TypeScript",
+      "name_en": "TypeScript",
+      "category": "Frontend" },
+    { "name": "FastAPI",
+      "name_fr": "FastAPI",
+      "name_en": "FastAPI",
+      "category": "Backend" },
+    { "name": "PyTorch",
+      "name_fr": "PyTorch",
+      "name_en": "PyTorch",
+      "category": "IA-ML" },
+    { "name": "Docker",
+      "name_fr": "Docker",
+      "name_en": "Docker",
+      "category": "DevOps" },
+    { "name": "Flutter",
+      "name_fr": "Flutter",
+      "name_en": "Flutter",
+      "category": "Mobile" }
+  ],
+
+  "certifications": [
+    {
+      "name_fr": "Nom de la certification",
+      "name_en": "Certification name",
+      "issuer_fr": "Organisme émetteur",
+      "issuer_en": "Issuing organization",
+      "date": "2024-03",
+      "verify_url": "https://lien-verification.com"
+    }
+  ],
+
+  "testimonials": [
+    {
+      "quote_fr": "Témoignage en français. Assami est...",
+      "quote_en": "Testimonial in English. Assami is...",
+      "author_name": "Jean Dupont",
+      "author_role_fr": "Tech Lead",
+      "author_role_en": "Tech Lead",
+      "author_company": "Entreprise XYZ",
+      "linkedin_url": "https://linkedin.com/in/profil",
+      "order": 0
+    }
+  ]
+}
+```
+
+---
+
+### Règles de validation
+
+| Champ | Type | Requis | Contrainte |
+| :--- | :--- | :--- | :--- |
+| `version` | string | ✅ | Doit être `"1.0"` |
+| `experiences[].type` | string | ✅ | `"pro"` ou `"education"` |
+| `experiences[].start_date` | string | ✅ | Format `"YYYY-MM"` |
+| `experiences[].end_date` | string \| null | ✅ | `null` si poste actuel |
+| `projects[].slug` | string | ✅ | Unique, minuscules, tirets |
+| `projects[].status` | string | ✅ | `"production"`, `"beta"`, `"archived"` ou `"conception"` |
+| `certifications[].verify_url` | string | ✅ | URL valide |
+| `testimonials[].linkedin_url` | string | ✅ | URL LinkedIn valide |
+| `architecture_nodes[].x` | number | ✅ | Entre 0 et 100 (%) |
+| `architecture_nodes[].y` | number | ✅ | Entre 0 et 100 (%) |
+
+### Stratégies d'import
+
+| Stratégie | Comportement |
+| :--- | :--- |
+| **Fusionner** | Ajoute les nouveaux items sans toucher à l'existant. Les projets avec le même `slug` sont mis à jour. |
+| **Remplacer** | Vide la section sélectionnée puis réimporte. **Irréversible** — faire une sauvegarde avant. |
+
+### Valeurs acceptées par champ
+
+### Notes importantes
+
+> ⚠️ **Champs bilingues** : Pour chaque champ traduisible, fournir la version `_fr` ET `_en`. Si la version `_en` est absente, le contenu français sera affiché en fallback pour les visiteurs anglophones.
+
+> 💡 **Images** : Le champ `cover_image` accepte une URL externe. Pour utiliser Supabase Storage, uploader l'image d'abord via `/admin/media` puis coller l'URL publique dans le JSON.
+
+> 🔒 **Sécurité** : L'import est réservé aux comptes admin authentifiés. Aucune donnée sensible (mots de passe, tokens) ne doit figurer dans le fichier JSON.
+
+---
+
+### Exemple minimal fonctionnel
+
+Pour tester rapidement l'import avec le strict minimum requis :
+
+```json
+{
+  "version": "1.0",
+  "exportDate": "2026-06-28T00:00:00.000Z",
+  "projects": [
+    {
+      "slug": "mon-projet",
+      "title_fr": "Mon Premier Projet",
+      "title_en": "My First Project",
+      "description_fr": "Description courte.",
+      "description_en": "Short description.",
+      "stack": ["React", "TypeScript"],
+      "status": "production",
+      "github_url": "https://github.com/user/repo"
+    }
+  ]
+}
+```
+
+---
+
 ## 🚀 Prérequis
 
 Avant de commencer, assurez-vous d'avoir installé sur votre machine locale :

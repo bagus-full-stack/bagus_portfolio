@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Briefcase, GraduationCap } from 'lucide-react';
+import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Briefcase, GraduationCap, Languages } from 'lucide-react';
 import { toast } from 'sonner';
 import { Experience } from '../../types';
 import { supabase } from '../../services/supabase.service';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
+import BilingualField from '../../components/admin/BilingualField';
+import useTranslate from '../../hooks/useTranslate';
 
 export function EditExperiences() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -52,11 +54,17 @@ export function EditExperiences() {
           .update({
             type: experience.type,
             title: experience.title,
+            title_fr: experience.title_fr,
+            title_en: experience.title_en,
             organization: experience.organization,
+            organization_fr: experience.organization_fr,
+            organization_en: experience.organization_en,
             location: experience.location,
             start_date: experience.start_date,
             end_date: experience.end_date,
             description: experience.description,
+            description_fr: experience.description_fr,
+            description_en: experience.description_en,
             stack: experience.stack
           })
           .eq('id', experience.id);
@@ -68,11 +76,17 @@ export function EditExperiences() {
           .insert({
             type: experience.type,
             title: experience.title,
+            title_fr: experience.title_fr,
+            title_en: experience.title_en,
             organization: experience.organization,
+            organization_fr: experience.organization_fr,
+            organization_en: experience.organization_en,
             location: experience.location,
             start_date: experience.start_date,
             end_date: experience.end_date,
             description: experience.description,
+            description_fr: experience.description_fr,
+            description_en: experience.description_en,
             stack: experience.stack
           });
         if (error) throw error;
@@ -172,6 +186,22 @@ function ExperienceForm({ initialData, onCancel, onSave }: { initialData: Experi
   const [formData, setFormData] = useState<Partial<Experience>>(initialData || { type: 'pro', stack: [] });
   const [savingState, setSavingState] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [stackInput, setStackInput] = useState('');
+  const { translateBatch, translating } = useTranslate();
+
+  const handleTranslateAll = async () => {
+    const results = await translateBatch(
+      [
+        { key: 'title_en', text: formData.title_fr || '' },
+        { key: 'organization_en', text: formData.organization_fr || '' },
+        { key: 'description_en', text: formData.description_fr || '' }
+      ],
+      'fr',
+      'en'
+    );
+
+    setFormData(prev => ({ ...prev, ...results }));
+    toast.success('Tous les champs traduits !');
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -210,7 +240,21 @@ function ExperienceForm({ initialData, onCancel, onSave }: { initialData: Experi
 
       <div className="flex-1 space-y-6 pb-8">
         <div className="bg-bg-card border border-white/5 rounded-xl p-6 space-y-6">
-          <h2 className="font-space text-xl font-bold">{initialData ? 'Modifier l\'expérience' : 'Ajouter une expérience'}</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="font-space text-xl font-bold">{initialData ? 'Modifier l\'expérience' : 'Ajouter une expérience'}</h2>
+            <button
+              type="button"
+              onClick={handleTranslateAll}
+              disabled={translating}
+              className="flex items-center gap-2 px-4 py-2 border border-[var(--accent-cyan)]/40 rounded-lg text-[var(--accent-cyan)] font-[JetBrains_Mono] text-xs hover:bg-[var(--accent-cyan)]/10 disabled:opacity-40 transition-all"
+            >
+              {translating ? (
+                <><Loader2 size={12} className="animate-spin" /> Traduction en cours...</>
+              ) : (
+                <><Languages size={12} /> Tout traduire FR → EN</>
+              )}
+            </button>
+          </div>
           
           <div>
             <label className="block text-sm font-medium text-text-muted mb-3">Type *</label>
@@ -232,14 +276,24 @@ function ExperienceForm({ initialData, onCancel, onSave }: { initialData: Experi
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-text-muted mb-1.5">Titre *</label>
-              <input type="text" name="title" required value={formData.title || ''} onChange={handleChange} className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors" />
+              <BilingualField
+                label="Titre *"
+                fieldFr={formData.title_fr || formData.title || ''}
+                fieldEn={formData.title_en || ''}
+                onChangeFr={v => setFormData({ ...formData, title_fr: v, title: v })}
+                onChangeEn={v => setFormData({ ...formData, title_en: v })}
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-muted mb-1.5">Organisation *</label>
-              <input type="text" name="organization" required value={formData.organization || ''} onChange={handleChange} className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors" />
+              <BilingualField
+                label="Organisation *"
+                fieldFr={formData.organization_fr || formData.organization || ''}
+                fieldEn={formData.organization_en || ''}
+                onChangeFr={v => setFormData({ ...formData, organization_fr: v, organization: v })}
+                onChangeEn={v => setFormData({ ...formData, organization_en: v })}
+              />
             </div>
           </div>
 
@@ -259,8 +313,14 @@ function ExperienceForm({ initialData, onCancel, onSave }: { initialData: Experi
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-1.5">Description *</label>
-            <textarea name="description" required rows={5} value={formData.description || ''} onChange={handleChange} className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors resize-y" />
+            <BilingualField
+              label="Description *"
+              fieldFr={formData.description_fr || formData.description || ''}
+              fieldEn={formData.description_en || ''}
+              onChangeFr={v => setFormData({ ...formData, description_fr: v, description: v })}
+              onChangeEn={v => setFormData({ ...formData, description_en: v })}
+              multiline={true}
+            />
           </div>
 
           {formData.type === 'pro' && (

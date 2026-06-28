@@ -5,9 +5,11 @@ import { Project } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
 import { useTranslation } from '../hooks/useTranslation';
+import { useLocalizedField } from '../hooks/useLocalizedField';
 
 export function ProjectsSection() {
-  const { t } = useTranslation();
+  const { t: translate } = useTranslation();
+  const { t } = useLocalizedField();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -27,17 +29,17 @@ export function ProjectsSection() {
         if (mounted) {
           setError(true);
           setLoading(false);
-          toast.error(t('projects.error'));
+          toast.error(translate('projects.error'));
         }
       }
     }
     
     loadProjects();
     return () => { mounted = false; };
-  }, [t]);
+  }, [translate]);
 
   const allStacks = useMemo(() => Array.from(new Set(projects.flatMap(p => p.stack))), [projects]);
-  const filters = [{ id: 'all', label: t('projects.filter.all') }, ...allStacks.map(s => ({ id: s, label: s }))];
+  const filters = [{ id: 'all', label: translate('projects.filter.all') }, ...allStacks.map(s => ({ id: s, label: s }))];
 
   const filteredProjects = projects.filter(
     p => filter === 'all' || p.stack.includes(filter)
@@ -48,7 +50,7 @@ export function ProjectsSection() {
       <section id="projects" className="py-24 bg-bg-card/20 border-t border-white/5">
          <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-sm text-sm font-inter">
-            {t('projects.error')}
+            {translate('projects.error')}
           </div>
         </div>
       </section>
@@ -59,7 +61,7 @@ export function ProjectsSection() {
     <section id="projects" className="py-24 bg-bg-card/20 border-t border-white/5">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary">{t('projects.title')}</h2>
+          <h2 className="font-space text-3xl md:text-4xl font-bold text-text-primary">{translate('projects.title')}</h2>
           
           {!loading && (
             <div className="flex flex-wrap gap-2">
@@ -101,7 +103,7 @@ export function ProjectsSection() {
           </div>
         ) : filteredProjects.length === 0 ? (
           <div className="py-20 text-center text-text-muted font-inter italic">
-            {t('projects.empty.filter')}
+            {translate('projects.empty.filter')}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -120,11 +122,11 @@ export function ProjectsSection() {
                 
                 <div className="flex flex-col flex-grow p-6">
                   <h3 className="font-space text-xl font-semibold text-text-primary mb-3 group-hover:text-accent-cyan transition-colors">
-                    {project.title}
+                    {t(project, 'title')}
                   </h3>
                   
                   <p className="font-inter text-text-muted text-sm line-clamp-2 mb-6 flex-grow">
-                    {project.description}
+                    {t(project, 'description')}
                   </p>
                   
                   <div className="flex flex-wrap gap-2 mb-6">
@@ -150,7 +152,7 @@ export function ProjectsSection() {
                         to={`/projects/${project.slug}`}
                         className="text-sm font-inter font-medium text-text-primary hover:text-accent-ocre transition-colors"
                       >
-                        {t('projects.card.case')} →
+                        {translate('projects.card.case')} →
                       </Link>
                     )}
                     
@@ -167,7 +169,7 @@ export function ProjectsSection() {
                           target="_blank"
                           rel="noreferrer"
                           className="text-text-muted hover:text-text-primary transition-colors"
-                          title={t('projects.card.github')}
+                          title={translate('projects.card.github')}
                         >
                           <ExternalLink size={18} />
                         </a>

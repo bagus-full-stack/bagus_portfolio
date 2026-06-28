@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Folder, Image as ImageIcon, Check } from 'lucide-react';
+import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Folder, Image as ImageIcon, Check, Languages } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDropzone } from 'react-dropzone';
 import { Project } from '../../types';
 import { SupabaseService, supabase } from '../../services/supabase.service';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 import { useAutoSave } from '../../hooks/useAutoSave';
+import BilingualField from '../../components/admin/BilingualField';
+import useTranslate from '../../hooks/useTranslate';
 
 export function EditProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -155,6 +157,25 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
   });
   const [stackInput, setStackInput] = useState('');
   const [coverPreview, setCoverPreview] = useState<string | null>(formData.cover_image || null);
+  const { translateBatch, translating } = useTranslate();
+
+  const handleTranslateAll = async () => {
+    const results = await translateBatch(
+      [
+        { key: 'title_en', text: formData.title_fr || '' },
+        { key: 'description_en', text: formData.description_fr || '' },
+        { key: 'context_en', text: formData.context_fr || '' }
+      ],
+      'fr',
+      'en'
+    );
+
+    setFormData(prev => {
+      const newData = { ...prev, ...results };
+      return newData;
+    });
+    toast.success('Tous les champs traduits !');
+  };
 
   const dropzoneConfig: any = {
     accept: { 'image/*': ['.jpg', '.png', '.webp', '.gif'] },
@@ -312,7 +333,21 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
         
         {/* Basic Info */}
         <div className="bg-bg-card border border-white/5 rounded-xl p-6 space-y-6">
-          <h2 className="font-space text-xl font-bold">{initialData ? 'Modifier le projet' : 'Ajouter un projet'}</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="font-space text-xl font-bold">{initialData ? 'Modifier le projet' : 'Ajouter un projet'}</h2>
+            <button
+              type="button"
+              onClick={handleTranslateAll}
+              disabled={translating}
+              className="flex items-center gap-2 px-4 py-2 border border-[var(--accent-cyan)]/40 rounded-lg text-[var(--accent-cyan)] font-[JetBrains_Mono] text-xs hover:bg-[var(--accent-cyan)]/10 disabled:opacity-40 transition-all"
+            >
+              {translating ? (
+                <><Loader2 size={12} className="animate-spin" /> Traduction en cours...</>
+              ) : (
+                <><Languages size={12} /> Tout traduire FR → EN</>
+              )}
+            </button>
+          </div>
           
           <div
             {...getRootProps()}
@@ -354,10 +389,15 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-text-muted mb-1.5">Titre *</label>
-              <input type="text" name="title" required value={formData.title || ''} onChange={(e) => handleTitleChange(e.target.value)} onBlur={triggerSave} className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors" />
+              <BilingualField
+                label="Titre *"
+                fieldFr={formData.title_fr || formData.title || ''}
+                fieldEn={formData.title_en || ''}
+                onChangeFr={v => { handleTitleChange(v); setFormData(prev => ({ ...prev, title_fr: v })); }}
+                onChangeEn={v => { setFormData(prev => ({ ...prev, title_en: v })); triggerSave(); }}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-text-muted mb-1.5">Slug *</label>
@@ -378,11 +418,15 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-1.5 flex justify-between">
-              <span>Description courte *</span>
-              <span className={`text-xs ${(formData.description?.length || 0) > 200 ? 'text-red-400' : ''}`}>{(formData.description?.length || 0)}/200</span>
-            </label>
-            <textarea name="description" required maxLength={200} rows={2} value={formData.description || ''} onChange={handleChange} onBlur={triggerSave} className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors resize-none" />
+            <BilingualField
+              label="Description courte *"
+              fieldFr={formData.description_fr || formData.description || ''}
+              fieldEn={formData.description_en || ''}
+              onChangeFr={v => { setFormData(prev => ({ ...prev, description_fr: v, description: v })); triggerSave(); }}
+              onChangeEn={v => { setFormData(prev => ({ ...prev, description_en: v })); triggerSave(); }}
+              multiline={true}
+              maxLength={200}
+            />
           </div>
 
           <div>
@@ -403,8 +447,14 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
           <h2 className="font-space text-xl font-bold">Détails de l'étude de cas</h2>
           
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-1.5">Contexte *</label>
-            <textarea name="context" required rows={4} value={formData.context || ''} onChange={handleChange} onBlur={triggerSave} className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors resize-y" />
+            <BilingualField
+              label="Contexte *"
+              fieldFr={formData.context_fr || formData.context || ''}
+              fieldEn={formData.context_en || ''}
+              onChangeFr={v => { setFormData(prev => ({ ...prev, context_fr: v, context: v })); triggerSave(); }}
+              onChangeEn={v => { setFormData(prev => ({ ...prev, context_en: v })); triggerSave(); }}
+              multiline={true}
+            />
           </div>
 
           {/* Technical Choices */}

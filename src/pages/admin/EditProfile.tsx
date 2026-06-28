@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Profile } from '../../types';
 import { SupabaseService, supabase } from '../../services/supabase.service';
 import { useDropzone } from 'react-dropzone';
+import BilingualField from '../../components/admin/BilingualField';
 
 export function EditProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -133,24 +134,25 @@ export function EditProfile() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-muted mb-1.5">Titre professionnel *</label>
-              <input 
-                type="text" name="title" required value={formData.title || ''} onChange={handleChange}
-                className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors" 
+              <BilingualField
+                label="Titre professionnel *"
+                fieldFr={formData.title_fr || formData.title || ''}
+                fieldEn={formData.title_en || ''}
+                onChangeFr={v => setFormData({ ...formData, title_fr: v, title: v })}
+                onChangeEn={v => setFormData({ ...formData, title_en: v })}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-1.5 flex justify-between">
-              <span>Bio *</span>
-              <span className={`text-xs ${(formData.bio?.length || 0) > 500 ? 'text-red-400' : ''}`}>
-                {formData.bio?.length || 0}/500
-              </span>
-            </label>
-            <textarea 
-              name="bio" required value={formData.bio || ''} onChange={handleChange} maxLength={500} rows={5}
-              className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors resize-none" 
+            <BilingualField
+              label="Bio *"
+              fieldFr={formData.bio_full_fr || formData.bio || ''}
+              fieldEn={formData.bio_full_en || ''}
+              onChangeFr={v => setFormData({ ...formData, bio_full_fr: v, bio: v })}
+              onChangeEn={v => setFormData({ ...formData, bio_full_en: v })}
+              multiline={true}
+              maxLength={500}
             />
           </div>
 

@@ -3,8 +3,10 @@ import { MapPin, Linkedin } from 'lucide-react';
 import { Profile } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
+import { useLocalizedField } from '../hooks/useLocalizedField';
 
 export function AboutSection() {
+  const { t } = useLocalizedField();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -75,7 +77,7 @@ export function AboutSection() {
             ) : (
               <>
                 <p className="font-inter text-lg text-text-muted leading-relaxed">
-                  {profile.bio}
+                  {t(profile, 'bio')}
                 </p>
                 
                 <div className="flex flex-wrap items-center gap-x-8 gap-y-4 py-2">

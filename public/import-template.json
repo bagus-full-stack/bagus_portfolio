@@ -4,9 +4,12 @@
 
   "profile": {
     "name": "Assami Baga",
-    "title": "Full Stack & AI Engineer",
-    "bio_short": "Ingénieur Full Stack & IA basé en Île-de-France.",
-    "bio_full": "Description complète...",
+    "title_fr": "Ingénieur Full Stack & IA",
+    "title_en": "Full Stack & AI Engineer",
+    "bio_short_fr": "Ingénieur Full Stack & IA basé en Île-de-France.",
+    "bio_short_en": "Full Stack & AI Engineer based in Île-de-France.",
+    "bio_full_fr": "Description complète en français...",
+    "bio_full_en": "Full description in English...",
     "location": "Île-de-France, France",
     "email": "ton-email@gmail.com",
     "linkedin_url": "https://linkedin.com/in/ton-profil",
@@ -17,22 +20,28 @@
   "experiences": [
     {
       "type": "pro",
-      "title": "Développeur Full Stack",
-      "organization": "CDC Informatique",
+      "title_fr": "Développeur Full Stack",
+      "title_en": "Full Stack Developer",
+      "organization_fr": "CDC Informatique",
+      "organization_en": "CDC Informatique",
       "location": "Île-de-France",
       "start_date": "2024-09",
       "end_date": null,
-      "description": "Description du poste...",
+      "description_fr": "Description du poste...",
+      "description_en": "Job description...",
       "stack": ["React", "TypeScript", "Supabase"]
     },
     {
       "type": "education",
-      "title": "Bac+5 Ingénierie Informatique",
-      "organization": "Nom de l'école",
+      "title_fr": "Bac+5 Ingénierie Informatique",
+      "title_en": "Master's Degree in Computer Engineering",
+      "organization_fr": "Nom de l'école",
+      "organization_en": "School Name",
       "location": "France",
       "start_date": "2021-09",
       "end_date": "2026-09",
-      "description": "Description de la formation...",
+      "description_fr": "Description de la formation...",
+      "description_en": "Education description...",
       "stack": []
     }
   ],
@@ -40,10 +49,13 @@
   "projects": [
     {
       "slug": "agrosahel-ai",
-      "title": "AgroSahel AI",
-      "description": "Diagnostic agricole IA...",
+      "title_fr": "AgroSahel AI",
+      "title_en": "AgroSahel AI",
+      "description_fr": "Diagnostic agricole IA...",
+      "description_en": "AI agricultural diagnostic...",
       "stack": ["Flutter", "FastAPI", "PyTorch"],
-      "context": "Contexte du projet...",
+      "context_fr": "Contexte du projet...",
+      "context_en": "Project context...",
       "technical_choices": [
         {
           "choice": "FastAPI",
@@ -95,7 +107,8 @@
 
   "certifications": [
     {
-      "name": "AWS Cloud Practitioner",
+      "name_fr": "AWS Cloud Practitioner",
+      "name_en": "AWS Cloud Practitioner",
       "issuer": "Amazon Web Services",
       "date": "2024-03",
       "verify_url": "https://aws.amazon.com/verify/..."
@@ -104,9 +117,11 @@
 
   "testimonials": [
     {
-      "quote": "Assami est un développeur rigoureux...",
+      "quote_fr": "Assami est un développeur rigoureux...",
+      "quote_en": "Assami is a rigorous developer...",
       "author_name": "Jean Dupont",
-      "author_role": "Tech Lead",
+      "author_role_fr": "Tech Lead",
+      "author_role_en": "Tech Lead",
       "author_company": "Entreprise XYZ",
       "linkedin_url": "https://linkedin.com/in/...",
       "order": 0

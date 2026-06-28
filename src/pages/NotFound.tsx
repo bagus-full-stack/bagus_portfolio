@@ -1,8 +1,16 @@
 import { Link } from 'react-router-dom';
+import { SEOHead } from '../components/SEOHead';
 
 export function NotFoundPage() {
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-text-primary flex flex-col font-inter selection:bg-accent-cyan/30 overflow-hidden relative">
+      <SEOHead meta={{
+        title: "Page introuvable | Assami Baga",
+        description: "Cette page n'existe pas.",
+        url: "https://assami.dev/404"
+      }} />
+      <meta name="robots" content="noindex, nofollow" />
+      
       {/* Background SVG Graph Pattern (simplified) */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">

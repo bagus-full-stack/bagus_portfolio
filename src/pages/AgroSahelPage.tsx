@@ -1,8 +1,26 @@
 import { Github, ExternalLink, Download } from 'lucide-react';
+import { SEOHead } from '../components/SEOHead';
 
 export function AgroSahelPage() {
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary selection:bg-accent-cyan/30 pt-24 pb-32">
+      <SEOHead meta={{
+        title: "AgroSahel AI — Diagnostic agricole IA pour le Sahel | Assami Baga",
+        description: "AgroSahel AI (PlantDoc) : plateforme de diagnostic de maladies agricoles par IA pour les cultures du Sahel. Flutter, FastAPI, EfficientNetV2.",
+        url: "https://assami.dev/projects/agrosahel-ai",
+        structuredData: {
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "AgroSahel AI",
+          "description": "Diagnostic agricole par IA pour les cultures du Sahel",
+          "url": "https://assami.dev/projects/agrosahel-ai",
+          "author": {
+            "@type": "Person",
+            "name": "Assami Baga"
+          },
+          "applicationCategory": "AgricultureApplication"
+        }
+      }} />
       
       {/* Section Hero */}
       <section className="relative px-6 md:px-12 lg:px-24 mb-32">

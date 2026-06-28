@@ -37,7 +37,11 @@ export function Home() {
 
   return (
     <div ref={containerRef} className={containerClasses}>
-      <SEOHead meta={setHomeMeta()} />
+      <SEOHead meta={{
+        title: "Assami Baga — Ingénieur Full Stack & IA | Île-de-France",
+        description: "Portfolio d'Assami Baga, ingénieur Full Stack & IA basé en Île-de-France. Expert React, FastAPI, PyTorch. Créateur d'AgroSahel AI. Disponible pour CDI.",
+        url: "https://assami.dev"
+      }} />
       <div id="hero" className={sectionClasses}><HeroSection /></div>
       <div id="about" className={sectionClasses}><AboutSection /></div>
       <div id="skills" className={sectionClasses}><SkillsSection /></div>

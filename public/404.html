@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Assami Baga</title>
+  <script>
+    // Rediriger vers index.html en conservant
+    // le chemin pour que React Router le gère
+    const path = window.location.pathname
+    const search = window.location.search
+    const hash = window.location.hash
+    const redirect = path + search + hash
+    window.sessionStorage.setItem(
+      'redirect', redirect
+    )
+    window.location.replace('/')
+  </script>
+</head>
+<body></body>
+</html>

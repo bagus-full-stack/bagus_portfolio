@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin/*
+
+# Bloquer les robots sur les pages admin
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://assami.dev/sitemap.xml
+
+# Crawl delay (optionnel)
+Crawl-delay: 1

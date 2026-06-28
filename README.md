@@ -14,6 +14,8 @@
 
 ## 📖 À propos
 
+🌐 **Site en production : [assami.dev](https://assami.dev)**
+
 Ce projet est un portfolio professionnel interactif conçu pour les développeurs. Il présente non seulement vos expériences, projets et compétences au monde entier, mais il intègre également **un espace d'administration complet** vous permettant de gérer dynamiquement votre contenu sans toucher au code.
 
 ### ✨ Fonctionnalités clés

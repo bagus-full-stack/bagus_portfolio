@@ -2,17 +2,40 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
+import compression from 'vite-plugin-compression';
 
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
   return {
+    base: '/',
     build: {
+      outDir: 'dist',
       sourcemap: false,
+      minify: 'terser',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            supabase: ['@supabase/supabase-js'],
+            router: ['react-router-dom'],
+            charts: ['chart.js', 'react-chartjs-2'],
+            motion: ['framer-motion']
+          }
+        }
+      }
     },
     plugins: [
       react(), 
       tailwindcss(),
+      compression({
+        algorithm: 'gzip',
+        ext: '.gz'
+      }),
+      compression({
+        algorithm: 'brotliCompress',
+        ext: '.br'
+      }),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: [
@@ -30,8 +53,8 @@ export default defineConfig(() => {
           background_color: '#0B0F14',
           display: 'standalone',
           orientation: 'portrait-primary',
-          scope: '/',
-          start_url: '/',
+          scope: 'https://assami.dev/',
+          start_url: 'https://assami.dev',
           icons: [
             {
               src: '/icons/pwa-192x192.png',

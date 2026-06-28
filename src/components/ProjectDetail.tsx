@@ -25,7 +25,27 @@ export function ProjectDetail() {
 
   return (
     <div className="min-h-screen bg-bg-primary pt-24 pb-32 selection:bg-accent-cyan/30">
-      <SEOHead meta={setProjectMeta(project)} />
+      <SEOHead meta={{
+        title: `${project.title} — Assami Baga`,
+        description: project.description.slice(0, 155),
+        url: `https://assami.dev/projects/${project.slug}`,
+        image: project.cover_image || undefined,
+        type: 'article',
+        structuredData: {
+          "@context": "https://schema.org",
+          "@type": "SoftwareSourceCode",
+          "name": project.title,
+          "description": project.description,
+          "url": `https://assami.dev/projects/${project.slug}`,
+          "author": {
+            "@type": "Person",
+            "name": "Assami Baga",
+            "url": "https://assami.dev"
+          },
+          "programmingLanguage": project.stack,
+          "codeRepository": project.github_url
+        }
+      }} />
       <div className="max-w-3xl mx-auto px-6">
         
         {/* Navigation */}

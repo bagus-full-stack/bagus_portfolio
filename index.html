@@ -1,11 +1,58 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://*.supabase.co; img-src 'self' data: https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
-    <title>My Google AI Studio App</title>
+
+    <!-- Titre principal -->
+    <title>
+      Assami Baga — Ingénieur Full Stack & IA
+      | Île-de-France
+    </title>
+
+    <!-- Description principale (155 chars max) -->
+    <meta name="description"
+      content="Assami Baga, ingénieur Full Stack & IA basé en Île-de-France. Expert React, Angular, FastAPI, PyTorch, MLOps. Créateur d'AgroSahel AI. Disponible pour CDI." />
+
+    <!-- Mots-clés (secondaire mais utile) -->
+    <meta name="keywords"
+      content="développeur full stack, ingénieur IA, React, Angular, Python, FastAPI, PyTorch, MLOps, Île-de-France, Paris, CDI, Assami Baga, AgroSahel AI" />
+
+    <!-- Auteur -->
+    <meta name="author" content="Assami Baga" />
+
+    <!-- Langue -->
+    <meta http-equiv="content-language" content="fr" />
+    <link rel="alternate" hreflang="fr" href="https://assami.dev" />
+    <link rel="alternate" hreflang="en" href="https://assami.dev?lang=en" />
+
+    <!-- Canonical (évite le duplicate content) -->
+    <link rel="canonical" href="https://assami.dev" />
+
+    <!-- Robots -->
+    <meta name="robots"
+      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+    <!-- Open Graph (LinkedIn, Facebook, WhatsApp) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Assami Baga — Portfolio" />
+    <meta property="og:title" content="Assami Baga — Ingénieur Full Stack & IA" />
+    <meta property="og:description"
+      content="Portfolio d'Assami Baga, ingénieur Full Stack & IA basé en Île-de-France. Disponible pour CDI en France." />
+    <meta property="og:url" content="https://assami.dev" />
+    <meta property="og:image" content="https://assami.dev/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Assami Baga — Full Stack & AI Engineer" />
+    <meta property="og:locale" content="fr_FR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Assami Baga — Ingénieur Full Stack & IA" />
+    <meta name="twitter:description"
+      content="Portfolio d'Assami Baga, ingénieur Full Stack & IA. React, FastAPI, PyTorch, MLOps." />
+    <meta name="twitter:image" content="https://assami.dev/og-image.png" />
+
     <!-- PWA Meta -->
     <meta name="application-name" content="Assami Baga" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -19,6 +66,24 @@
 
     <!-- Splash screens iOS (optionnel) -->
     <link rel="apple-touch-startup-image" href="/icons/pwa-512x512.png" />
+
+    <!-- Préconnexions pour la performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://*.supabase.co; img-src 'self' data: https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
+
+    <!-- Préchargement des fonts critiques -->
+    <link rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript>
+      <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+    </noscript>
+
     <script>
       // Appliquer le thème avant le rendu React
       // pour éviter le flash blanc/noir au chargement
@@ -33,10 +98,103 @@
         )
       })()
     </script>
+    <script>
+      // Restaurer l'URL après redirection 404
+      (function() {
+        const redirect = window.sessionStorage
+          .getItem('redirect')
+        if (redirect && redirect !== '/') {
+          window.sessionStorage.removeItem('redirect')
+          window.history.replaceState(
+            null, null, redirect
+          )
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://assami.dev/#person",
+          "name": "Assami Baga",
+          "alternateName": "Assami Baga",
+          "jobTitle": "Ingénieur Full Stack & IA",
+          "description": "Ingénieur Full Stack & IA basé en Île-de-France, spécialisé en React, Angular, FastAPI, PyTorch et MLOps. Créateur d'AgroSahel AI.",
+          "url": "https://assami.dev",
+          "image": "https://assami.dev/og-image.png",
+          "email": "bagaassami009@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "addressRegion": "Île-de-France",
+            "addressCountry": "FR"
+          },
+          "sameAs": [
+            "https://github.com/bagus-full-stack"
+          ],
+          "knowsAbout": [
+            "React", "Angular", "TypeScript",
+            "FastAPI", "Python", "PyTorch",
+            "TensorFlow", "MLOps", "Docker",
+            "Supabase", "Intelligence Artificielle",
+            "Machine Learning"
+          ],
+          "seeks": {
+            "@type": "JobPosting",
+            "title": "Ingénieur Full Stack ou AI Engineer",
+            "jobLocationType": "INPERSON",
+            "addressLocality": "Île-de-France",
+            "addressCountry": "FR",
+            "employmentType": "FULL_TIME"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://assami.dev/#website",
+          "url": "https://assami.dev",
+          "name": "Assami Baga — Portfolio",
+          "description": "Portfolio professionnel d'Assami Baga, ingénieur Full Stack & IA",
+          "author": {
+            "@id": "https://assami.dev/#person"
+          },
+          "inLanguage": ["fr", "en"],
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://assami.dev/?search={query}"
+            },
+            "query-input": "required name=query"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "AgroSahel AI",
+          "alternateName": "PlantDoc",
+          "description": "Plateforme de diagnostic agricole par intelligence artificielle pour les cultures du Sahel. Détection de maladies sur pearl millet, sorghum, maize, groundnut et cassava.",
+          "url": "https://assami.dev/projects/agrosahel-ai",
+          "author": {
+            "@id": "https://assami.dev/#person"
+          },
+          "applicationCategory": "AgricultureApplication",
+          "operatingSystem": "Android, iOS",
+          "programmingLanguage": [
+            "Python", "Dart", "TypeScript"
+          ],
+          "keywords": [
+            "agriculture", "IA", "Sahel",
+            "diagnostic agricole", "machine learning",
+            "Flutter", "FastAPI"
+          ]
+        }
+      ]
+    }
+    </script>
   </body>
 </html>
 

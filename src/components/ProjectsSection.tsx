@@ -112,7 +112,7 @@ export function ProjectsSection() {
               >
                 <div className="aspect-video bg-bg-primary relative flex items-center justify-center overflow-hidden">
                   {project.cover_image ? (
-                    <img src={project.cover_image} alt={project.title} className="w-full h-full object-cover" />
+                    <img src={project.cover_image} alt={`${project.title} — projet de Assami Baga`} className="w-full h-full object-cover" loading="lazy" width={400} height={225} />
                   ) : (
                     <Code2 className="w-12 h-12 text-text-muted/30" />
                   )}

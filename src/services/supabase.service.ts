@@ -251,6 +251,25 @@ export const SupabaseService = {
   },
 
   async getVisitorLogs(): Promise<VisitorLog[]> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('analytics')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      
+      if (error) return mockVisitorLogs;
+      
+      return data.map(log => ({
+        id: log.id,
+        date: log.created_at,
+        country: log.country || 'Inconnu',
+        countryCode: log.country_code || '',
+        city: log.city || '—',
+        page: log.page,
+        duration: 0 // Cannot reliably calculate duration currently
+      }));
+    }
     await delay(600);
     return mockVisitorLogs;
   },

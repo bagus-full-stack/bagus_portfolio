@@ -14,25 +14,44 @@ export function HeroSection() {
   const { isDark } = useTheme();
 
   useEffect(() => {
-    let mounted = true;
-    const fetchAndIncrement = async () => {
+    const trackAndCount = async () => {
       if (!supabase) {
-        if (mounted) setViews(1348);
+        setViews(null);
         return;
       }
+      
       try {
-        await supabase.rpc('increment_visitors');
-        const { data } = await supabase.rpc('get_visitor_count');
-        if (mounted) {
-          setViews(data);
+        // Appeler la Edge Function qui gère
+        // la déduplication côté serveur
+        const { data, error } =
+          await supabase.functions.invoke(
+            'track-visitor',
+            {
+              body: {
+                page: window.location.pathname
+              }
+            }
+          )
+
+        if (error) throw error
+
+        // Afficher le total retourné par le serveur
+        setViews(data.total)
+
+      } catch {
+        // Fallback : récupérer juste le total
+        // sans incrémenter
+        try {
+          const { data } = await supabase
+            .rpc('get_visitor_count')
+          setViews(data)
+        } catch {
+          setViews(null)
         }
-      } catch (err) {
-        // console.error('Failed to increment view count', err);
-        if (mounted) setViews(1348);
       }
     };
-    fetchAndIncrement();
-    return () => { mounted = false; };
+
+    trackAndCount();
   }, []);
 
   const getCvUrl = async () => {

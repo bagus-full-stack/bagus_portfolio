@@ -106,12 +106,14 @@ export function Analytics() {
     currentPage * itemsPerPage
   );
 
-  const getEmojiFlag = (countryCode: string) => {
-    const codePoints = countryCode
+  const getFlagEmoji = (countryCode: string) => {
+    if (!countryCode || countryCode.length !== 2)
+      return '🌍';
+    return countryCode
       .toUpperCase()
       .split('')
-      .map(char => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
+      .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
+      .join('');
   };
 
   const formatDuration = (seconds: number) => {
@@ -375,10 +377,16 @@ export function Analytics() {
                         })}
                       </td>
                       <td className="py-3 px-6 whitespace-nowrap">
-                        <span className="mr-2">{getEmojiFlag(log.countryCode)}</span>
-                        {log.country}
+                        <span className="mr-2">
+                          {getFlagEmoji(log.countryCode)}
+                        </span>
+                        <span className="font-[Inter] text-[var(--text-primary)]">
+                          {log.country || 'Inconnu'}
+                        </span>
                       </td>
-                      <td className="py-3 px-6 whitespace-nowrap text-text-muted">{log.city}</td>
+                      <td className="py-3 px-6 whitespace-nowrap text-[var(--text-muted)] font-[Inter]">
+                        {log.city || '—'}
+                      </td>
                       <td className="py-3 px-6 whitespace-nowrap">
                         <span className="px-2 py-1 bg-white/5 rounded font-mono text-xs text-text-primary">{log.page}</span>
                       </td>

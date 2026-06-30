@@ -365,11 +365,13 @@ L'application sera accessible sur `http://localhost:3000` (ou le port spécifié
 
 1.  **Base de données** : Exécutez vos scripts SQL initiaux pour créer les tables nécessaires (`profiles`, `projects`, `experiences`, `skills`, `certifications`).
 2.  **Storage** : Créez les buckets `avatars` (public) et `cv` (privé).
-3.  **Edge Functions** : Déployez les fonctions Serverless (ex. `meet` pour la création des événements Calendar/Meet).
-    ```bash
-    supabase functions deploy meet
-    ```
-4.  **Secrets Edge Functions** : Configurez les identifiants d'API Google dans les secrets Supabase.
+3.  **Edge Functions** : Le projet inclut plusieurs fonctions Serverless (`meet`, `chat-resume`, `translate`, `track-visitor`).
+    *   **Déploiement CI/CD** : Le déploiement de ces fonctions est automatisé via **GitHub Actions** lors des pushs sur la branche principale. Assurez-vous d'avoir configuré les secrets GitHub nécessaires (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`).
+    *   **Déploiement manuel** : Vous pouvez également les déployer manuellement via le CLI Supabase :
+        ```bash
+        supabase functions deploy --all
+        ```
+4.  **Secrets Edge Functions** : Configurez les clés d'API (Google, Gemini) dans les secrets Supabase.
     ```bash
     supabase secrets set GOOGLE_CREDENTIALS='{"type": "service_account", ...}'
     supabase secrets set GOOGLE_CALENDAR_ID='votre_id_calendrier@group.calendar.google.com'

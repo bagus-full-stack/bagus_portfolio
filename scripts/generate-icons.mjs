@@ -1,0 +1,22 @@
+import sharp from 'sharp'
+import { writeFileSync } from 'fs'
+
+const svg = `<svg xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 512 512">
+  <rect width="512" height="512"
+    rx="100" fill="#0B0F14"/>
+  <text x="256" y="340"
+    font-family="Arial, sans-serif"
+    font-weight="bold"
+    font-size="280"
+    fill="#E08A3E"
+    text-anchor="middle">A</text>
+  <circle cx="400" cy="130" r="50"
+    fill="#2DD4BF"/>
+</svg>`
+
+writeFileSync('public/favicon.svg', svg)
+
+await sharp('public/favicon.svg').resize(192, 192).png().toFile('public/icons/pwa-192x192.png')
+await sharp('public/favicon.svg').resize(512, 512).png().toFile('public/icons/pwa-512x512.png')
+await sharp('public/favicon.svg').resize(180, 180).png().toFile('public/icons/apple-touch-icon.png')

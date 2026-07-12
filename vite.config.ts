@@ -104,11 +104,23 @@ export default defineConfig(() => {
 
         workbox: {
           navigateFallback: '/offline.html',
-          navigateFallbackDenylist: [/^\/admin/],
+          navigateFallbackDenylist: [
+            /^\/s\//,
+            /^\/admin/,
+            /^\/api\//
+          ],
           globPatterns: [
             '**/*.{js,css,html,ico,png,svg,woff2}'
           ],
           runtimeCaching: [
+            {
+              urlPattern: ({ url }) => url.pathname.startsWith('/s/'),
+              handler: 'NetworkOnly'
+            },
+            {
+              urlPattern: ({ url }) => url.pathname.startsWith('/admin'),
+              handler: 'NetworkOnly'
+            },
             {
               urlPattern: /^https:\/\/bagus-full-stack\.me\//,
               handler: 'NetworkFirst',

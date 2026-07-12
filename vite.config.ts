@@ -53,9 +53,12 @@ export default defineConfig(() => {
           background_color: '#0B0F14',
           display: 'standalone',
           orientation: 'portrait-primary',
-          scope: 'https://assami.dev/',
-          start_url: 'https://assami.dev',
           icons: [
+            {
+              src: '/favicon-96x96.png',
+              sizes: '96x96',
+              type: 'image/png'
+            },
             {
               src: '/icons/pwa-192x192.png',
               sizes: '192x192',

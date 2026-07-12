@@ -53,26 +53,32 @@
       content="Portfolio d'Assami Baga, ingénieur Full Stack & IA. React, FastAPI, PyTorch, MLOps." />
     <meta name="twitter:image" content="https://assami.dev/og-image.png" />
 
-    <!-- PWA Meta -->
-    <meta name="application-name" content="Assami Baga" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Assami Baga" />
-    <meta name="mobile-web-app-capable" content="yes" />
+    <!-- Favicon standard -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- Favicon SVG (navigateurs modernes) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Favicon PNG par taille -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+
+    <!-- Apple Touch Icon (iOS) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Couleur de thème onglet mobile -->
     <meta name="theme-color" content="#0B0F14" />
-
-    <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-
-    <!-- Splash screens iOS (optionnel) -->
-    <link rel="apple-touch-startup-image" href="/icons/pwa-512x512.png" />
+    <meta name="msapplication-TileColor" content="#0B0F14" />
+    <meta name="msapplication-TileImage" content="/icons/pwa-192x192.png" />
 
     <!-- Préconnexions pour la performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://*.supabase.co; img-src 'self' data: https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data: https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
 
     <!-- Préchargement des fonts critiques -->
     <link rel="preload"

@@ -3,7 +3,7 @@ import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-do
 import { 
   LayoutGrid, User, Clock, Folder, Tag, Award, 
   Image as ImageIcon, Mail, BarChart2, Shield, 
-  Menu, Bell, X, LogOut, Activity, MessageSquareQuote, Download, Upload
+  Menu, Bell, X, LogOut, Activity, MessageSquareQuote, Download, Upload, Link as LinkIcon
 } from 'lucide-react';
 import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase.service';
@@ -33,6 +33,7 @@ export function AdminLayout() {
     { path: '/admin/activity', label: 'Activité', icon: Activity },
     { path: '/admin/security', label: 'Sécurité', icon: Shield },
     { path: '/admin/export', label: 'Export', icon: Download },
+    { path: '/admin/short-urls', label: 'Liens courts', icon: LinkIcon },
     { path: '/admin/import', label: 'Importer', icon: Upload },
   ];
 

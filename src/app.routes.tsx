@@ -30,6 +30,8 @@ const ActivityLog = lazy(() => import('./pages/admin/ActivityLog').then(module =
 const SecuritySettings = lazy(() => import('./pages/admin/SecuritySettings').then(module => ({ default: module.SecuritySettings })));
 const ExportData = lazy(() => import('./pages/admin/ExportData').then(module => ({ default: module.ExportData })));
 const ImportData = lazy(() => import('./pages/admin/ImportData').then(module => ({ default: module.ImportDataPage })));
+const ShortUrlRedirect = lazy(() => import('./pages/ShortUrlRedirect').then(module => ({ default: module.default })));
+const ShortUrlsManager = lazy(() => import('./pages/admin/ShortUrlsManager').then(module => ({ default: module.default })));
 
 const Layout = () => {
   return (
@@ -164,10 +166,18 @@ export const router = createBrowserRouter([
               {
                 path: '/admin/import',
                 element: <ImportData />
+              },
+              {
+                path: '/admin/short-urls',
+                element: <ShortUrlsManager />
               }
             ]
           }
         ]
+      },
+      {
+        path: '/s/:slug',
+        element: <ShortUrlRedirect />
       },
       {
         path: '/404',

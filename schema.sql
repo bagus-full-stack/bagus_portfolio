@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS projects (
   github_url text DEFAULT '',
   live_url text DEFAULT '',
   status text DEFAULT 'production'
-    CHECK (status IN ('production', 'beta', 'archived')),
+    CHECK (status IN ('production', 'beta', 'archived', 'conception')),
   architecture_nodes jsonb DEFAULT '[]',
   architecture_edges jsonb DEFAULT '[]',
   created_at timestamptz DEFAULT now(),

@@ -65,12 +65,15 @@ export function EditProfile() {
     }
     setSavingState('saving');
     try {
-      // simulate save
-      await new Promise(r => setTimeout(r, 1000));
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({ id: profile?.id, ...formData });
+      if (error) throw error;
       setSavingState('success');
       toast.success('Modifications enregistrées');
       setTimeout(() => setSavingState('idle'), 2000);
     } catch (error) {
+      console.error(error);
       setSavingState('error');
       toast.error('Échec — Réessayer', {
         action: { label: 'Réessayer', onClick: () => handleSubmit(e as any) }
@@ -208,9 +211,36 @@ export function EditProfile() {
               <div className="flex-1">
                 <p className="text-sm font-medium text-text-primary">{formData.cv_url ? 'cv_actuel.pdf' : 'Aucun CV téléchargé'}</p>
               </div>
-              <button type="button" className="px-4 py-2 bg-white/5 hover:bg-white/10 text-sm font-medium rounded transition-colors">
+              <input 
+                type="file" 
+                accept=".pdf" 
+                className="hidden" 
+                id="cv-upload"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    toast.loading('Téléchargement du CV...', { id: 'cv-upload' });
+                    const { error } = await supabase.storage
+                      .from('cv')
+                      .upload(`cv.pdf`, file, { upsert: true });
+                      
+                    if (error) throw error;
+                    
+                    const { data: { publicUrl } } = supabase.storage.from('cv').getPublicUrl(`cv.pdf`);
+                    setFormData(prev => ({ ...prev, cv_url: publicUrl }));
+                    toast.success('CV téléchargé avec succès', { id: 'cv-upload' });
+                  } catch (err) {
+                    toast.error('Erreur lors du téléchargement du CV', { id: 'cv-upload' });
+                  }
+                }}
+              />
+              <label 
+                htmlFor="cv-upload"
+                className="cursor-pointer px-4 py-2 bg-white/5 hover:bg-white/10 text-sm font-medium rounded transition-colors"
+              >
                 Remplacer
-              </button>
+              </label>
             </div>
           </div>
         </div>

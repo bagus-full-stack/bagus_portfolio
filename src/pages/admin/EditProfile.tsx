@@ -74,7 +74,7 @@ export function EditProfile() {
 
       const { error } = await supabase
         .from('profiles')
-        .upsert({ id: user.id, ...formData });
+        .upsert({ ...formData, id: user.id });
       if (error) throw error;
       setSavingState('success');
       toast.success('Modifications enregistrées');

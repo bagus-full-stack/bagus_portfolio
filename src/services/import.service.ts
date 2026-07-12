@@ -28,9 +28,10 @@ export const importJSON = async (
   // PROFIL
   if (sections.includes('profile') && data.profile) {
     try {
-      const profileData = { ...data.profile };
-      // Handle the bio_short / bio_full mapping to bio if needed, but assuming data structure is what the DB expects or mapping is required.
-      // Based on prompt "profile" format and DB schema: it's better to just upsert.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Utilisateur non connecté');
+      
+      const profileData = { ...data.profile, id: user.id };
       
       const { error } = await supabase
         .from('profiles')

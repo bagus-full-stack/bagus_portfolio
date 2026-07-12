@@ -63,42 +63,58 @@ export function MediaManager() {
   }, [isUploadingCv]);
 
   const uploadAvatar = async (file: File) => {
-    if (!file || !profile) return;
+    if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("L'image dépasse la taille maximale de 2MB");
-      return;
-    }
-
-    setIsUploadingPhoto(true);
-    setPhotoProgress(0);
     try {
-      const ext = file.name.split('.').pop();
-      const path = `profile/avatar.${ext}`;
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) throw new Error('Utilisateur non connecté')
+      
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('Format non supporté. Utilisez JPG, PNG, WEBP ou GIF.')
+      }
+      
+      const maxSize = 5 * 1024 * 1024 // 5MB
+      if (file.size > maxSize) {
+        throw new Error('Fichier trop volumineux. Maximum 5MB.')
+      }
 
-      const { error } = await supabase.storage
+      setIsUploadingPhoto(true);
+      setPhotoProgress(0);
+      
+      const fileExt = file.name.split('.').pop()?.toLowerCase()
+      const filePath = `avatars/${user.id}.${fileExt}`
+      
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(path, file, {
+        .upload(filePath, file, {
           upsert: true,
           contentType: file.type
-        });
-
-      if (error) throw error;
-
+        })
+      
+      if (uploadError) throw new Error(`Échec upload : ${uploadError.message}`)
+      
       const { data: urlData } = supabase.storage
         .from('avatars')
-        .getPublicUrl(path);
-
-      await supabase
+        .getPublicUrl(filePath)
+      
+      const publicUrl = urlData.publicUrl
+      
+      const { error: updateError } = await supabase
         .from('profiles')
-        .update({ photo_url: urlData.publicUrl })
-        .eq('id', profile.id);
+        .update({
+          photo_url: publicUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+      
+      if (updateError) throw new Error(`Échec mise à jour profil : ${updateError.message}`)
 
       setPhotoProgress(100);
-      setProfile(prev => prev ? { ...prev, photo_url: urlData.publicUrl } : prev);
+      setProfile(prev => prev ? { ...prev, photo_url: publicUrl } : prev);
       toast.success('Photo mise à jour');
-    } catch (err) {
-      toast.error("Erreur lors de l'upload de l'image");
+    } catch (err: any) {
+      toast.error(err.message || "Erreur lors de l'upload de l'image");
     } finally {
       setTimeout(() => {
         setIsUploadingPhoto(false);
@@ -130,10 +146,13 @@ export function MediaManager() {
   const handleDeletePhoto = async () => {
     if (!profile) return;
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Utilisateur non connecté')
+
       await supabase
         .from('profiles')
         .update({ photo_url: null })
-        .eq('id', profile.id);
+        .eq('id', user.id);
         
       setProfile(prev => prev ? { ...prev, photo_url: undefined } : prev);
       toast.success('Photo supprimée');
@@ -156,6 +175,9 @@ export function MediaManager() {
     setIsUploadingCv(true);
     setCvProgress(0);
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Utilisateur non connecté')
+
       const { error } = await supabase.storage
         .from('cv')
         .upload('cv.pdf', file, {
@@ -168,7 +190,7 @@ export function MediaManager() {
       await supabase
         .from('profiles')
         .update({ cv_url: 'cv.pdf' })
-        .eq('id', profile.id);
+        .eq('id', user.id);
 
       setCvProgress(100);
       setProfile(prev => prev ? { ...prev, cv_url: 'cv.pdf' } : prev);
@@ -186,10 +208,13 @@ export function MediaManager() {
   const handleDeleteCv = async () => {
     if (!profile) return;
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Utilisateur non connecté')
+
       await supabase
         .from('profiles')
         .update({ cv_url: null })
-        .eq('id', profile.id);
+        .eq('id', user.id);
 
       setProfile(prev => prev ? { ...prev, cv_url: undefined } : prev);
       toast.success('CV supprimé');

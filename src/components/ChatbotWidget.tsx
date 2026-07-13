@@ -117,13 +117,15 @@ export function ChatbotWidget() {
     abortControllerRef.current = new AbortController();
 
     try {
-      if (!supabase) throw new Error("Supabase not configured");
-      const { data, error: invokeError } = await supabase.functions.invoke('chat-resume', {
-        body: { message: trimmedText, history: messages.slice(-10) },
+      const res = await fetch('/api/chat-resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: trimmedText, history: messages.slice(-10) }),
         signal: abortControllerRef.current.signal
-      } as any);
+      });
       
-      if (invokeError) throw invokeError;
+      if (!res.ok) throw new Error('API Error');
+      const data = await res.json();
       
       const assistantMsg: ChatMessage = {
         role: 'assistant',

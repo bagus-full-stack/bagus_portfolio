@@ -15,14 +15,8 @@ export function HeroSection() {
 
   useEffect(() => {
     const trackAndCount = async () => {
-      if (!supabase) {
-        setViews(null);
-        return;
-      }
-      
       try {
-        // Appeler la Edge Function qui gère
-        // la déduplication côté serveur
+        // Tentative 1 : Edge Function complète
         const { data, error } =
           await supabase.functions.invoke(
             'track-visitor',
@@ -33,25 +27,45 @@ export function HeroSection() {
             }
           )
 
-        if (error) throw error
+        if (!error && data?.total) {
+          setViews(data.total)
+          return
+        }
 
-        // Afficher le total retourné par le serveur
-        setViews(data.total)
+        throw new Error('Function failed')
 
       } catch {
-        // Fallback : récupérer juste le total
-        // sans incrémenter
+        // Tentative 2 : Fallback direct Supabase
+        // sans Edge Function
         try {
-          const { data } = await supabase
-            .rpc('get_visitor_count')
-          setViews(data)
+          const alreadyCounted =
+            sessionStorage.getItem('visitor_counted')
+
+          if (!alreadyCounted) {
+            await supabase.rpc('increment_visitors', {
+              p_fingerprint: crypto.randomUUID()
+                .slice(0, 32),
+              p_page: window.location.pathname,
+              p_country: '',
+              p_city: ''
+            })
+            sessionStorage.setItem(
+              'visitor_counted', 'true'
+            )
+          }
+
+          const { data: countData } =
+            await supabase.rpc('get_visitor_count')
+          setViews(countData || 0)
+
         } catch {
-          setViews(null)
+          // Fallback silencieux — afficher 0
+          setViews(0)
         }
       }
-    };
+    }
 
-    trackAndCount();
+    trackAndCount()
   }, []);
 
   const getCvUrl = async () => {

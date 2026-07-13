@@ -57,7 +57,7 @@ export function AboutSection() {
             ) : (
               <div className="relative w-48 h-48 rounded-full border-2 border-accent-ocre bg-bg-card flex items-center justify-center overflow-hidden">
                 {profile.photo_url ? (
-                  <img src={profile.photo_url} alt={profile.name} className="w-full h-full object-cover" loading="eager" fetchpriority="high" width={192} height={192} />
+                  <img src={profile.photo_url} alt={profile.name} className="w-full h-full object-cover" loading="eager" fetchPriority="high" width={192} height={192} />
                 ) : (
                   <span className="font-space text-5xl font-bold text-text-muted">AB</span>
                 )}

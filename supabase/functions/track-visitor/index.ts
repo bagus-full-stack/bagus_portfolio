@@ -1,46 +1,68 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-import { getCorsHeaders, isOriginAllowed, handlePreflight } from "../_shared/cors.ts"
+import { serve } from
+  "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from
+  "https://esm.sh/@supabase/supabase-js@2"
+
+// Headers CORS — accepter assami.dev
+// ET localhost pour le développement
+const getAllowedOrigin = (origin: string | null) => {
+  const allowed = [
+    'https://assami.dev',
+    'https://www.assami.dev',
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'http://localhost:3000'
+  ]
+  if (origin && allowed.includes(origin)) {
+    return origin
+  }
+  return 'https://assami.dev'
+}
+
+const getCorsHeaders = (origin: string | null) => ({
+  'Access-Control-Allow-Origin':
+    getAllowedOrigin(origin),
+  'Access-Control-Allow-Methods':
+    'POST, OPTIONS',
+  'Access-Control-Allow-Headers':
+    'content-type, authorization, x-client-info',
+  'Access-Control-Max-Age': '86400'
+})
 
 serve(async (req: Request) => {
   const origin = req.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
 
-  // Gérer le preflight OPTIONS
-  const preflightResponse = handlePreflight(req)
-  if (preflightResponse) return preflightResponse
+  // CRITIQUE : répondre immédiatement au preflight
+  // avec status 200 (pas 204)
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,  // ← 200 obligatoire, pas 204
+      headers: corsHeaders
+    })
+  }
 
-  // Vérifier l'origine en production
-  if (!isOriginAllowed(origin)) {
+  // Vérifier la méthode
+  if (req.method !== 'POST') {
     return new Response(
-      JSON.stringify({
-        error: 'Accès non autorisé'
-      }),
+      JSON.stringify({ error: 'Method not allowed' }),
       {
-        status: 403,
+        status: 405,
         headers: {
-          'Content-Type': 'application/json',
-          ...getCorsHeaders(origin)
+          ...corsHeaders,
+          'Content-Type': 'application/json'
         }
       }
     )
   }
 
-  const corsHeaders = getCorsHeaders(origin)
-
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('Supabase credentials missing')
-    }
-
     const supabase = createClient(
-      supabaseUrl,
-      supabaseServiceKey
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Récupérer les infos de la requête
+    // Récupérer l'IP
     const ip =
       req.headers.get('x-forwarded-for')
         ?.split(',')[0].trim() ||
@@ -50,95 +72,69 @@ serve(async (req: Request) => {
     const userAgent =
       req.headers.get('user-agent') || ''
 
-    // Récupérer la localisation via l'IP
-    // Tentative 1 : headers Cloudflare (production)
+    // Localisation via headers Cloudflare
     let country =
       req.headers.get('cf-ipcountry') || ''
     let city =
       req.headers.get('cf-ipcity') || ''
 
-    // Tentative 2 : headers Vercel/autres CDN
-    if (!country) {
-      country =
-        req.headers.get('x-vercel-ip-country') || ''
-      city =
-        req.headers.get('x-vercel-ip-city') || ''
-    }
-
-    // Tentative 3 : API de géolocalisation
-    // en fallback si toujours vide
+    // Fallback API géolocalisation si vide
     if (!country && ip !== 'unknown') {
       try {
-        const geoResponse = await fetch(
+        const geoRes = await fetch(
           `https://ipapi.co/${ip}/json/`,
-          {
-            headers: {
-              'User-Agent': 'portfolio-tracker/1.0'
-            },
-            signal: AbortSignal.timeout(2000) // 2s max
-          }
+          { signal: AbortSignal.timeout(2000) }
         )
-
-        if (geoResponse.ok) {
-          const geoData = await geoResponse.json()
-          country = geoData.country_name || ''
-          city = geoData.city || ''
+        if (geoRes.ok) {
+          const geo = await geoRes.json()
+          country = geo.country_name || ''
+          city = geo.city || ''
         }
       } catch {
-        // Géolocalisation non critique
-        // Continuer sans localisation
-        country = ''
-        city = ''
+        // Non critique — continuer sans localisation
       }
     }
 
-    // Stocker aussi le code pays (plus fiable)
-    // pour afficher le drapeau emoji
-    const countryCode =
-      req.headers.get('cf-ipcountry') || ''
+    // Body de la requête
+    let page = '/'
+    try {
+      const body = await req.json()
+      page = body.page || '/'
+    } catch {
+      // Body vide ou invalide — utiliser défaut
+    }
 
-    const body = await req.json().catch(() => ({}))
-    const page = body.page || '/'
-
-    // Générer une empreinte anonyme et non
-    // réversible : hash(IP + UserAgent + Date)
-    // On ne stocke JAMAIS l'IP brute
+    // Générer le fingerprint anonyme
     const today = new Date()
       .toISOString().split('T')[0]
-
-    const rawFingerprint =
-      `${ip}-${userAgent}-${today}`
-
-    // Hasher avec l'API Web Crypto (Deno natif)
+    const raw = `${ip}-${userAgent}-${today}`
     const encoder = new TextEncoder()
-    const data = encoder.encode(rawFingerprint)
     const hashBuffer = await crypto.subtle.digest(
-      'SHA-256', data
+      'SHA-256',
+      encoder.encode(raw)
     )
-    const hashArray = Array.from(
+    const fingerprint = Array.from(
       new Uint8Array(hashBuffer)
     )
-    const fingerprint = hashArray
       .map(b => b.toString(16).padStart(2, '0'))
       .join('')
-      .slice(0, 32) // 32 chars suffisent
+      .slice(0, 32)
 
-    // Passer countryCode à la RPC
-    const { data: result, error } =
+    // Appel RPC Supabase
+    const { data, error } =
       await supabase.rpc('increment_visitors', {
         p_fingerprint: fingerprint,
         p_page: page,
         p_country: country,
-        p_city: city,
-        p_country_code: countryCode
+        p_city: city
       })
 
     if (error) throw error
 
     return new Response(
       JSON.stringify({
-        total: result.total,
-        is_new: result.is_new
+        total: data?.total ?? 0,
+        is_new: data?.is_new ?? false
       }),
       {
         status: 200,
@@ -150,9 +146,14 @@ serve(async (req: Request) => {
     )
 
   } catch (error) {
-    console.error('Tracking error:', error)
+    console.error('track-visitor error:', error)
+
     return new Response(
-      JSON.stringify({ total: 0, is_new: false }),
+      JSON.stringify({
+        total: 0,
+        is_new: false,
+        error: 'Internal error'
+      }),
       {
         status: 500,
         headers: {

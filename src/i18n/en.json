@@ -5,7 +5,8 @@
     "skills": "Skills",
     "certifications": "Certifications",
     "contact": "Contact",
-    "hire": "Hire me"
+    "hire": "Hire me",
+    "news": "News"
   },
   "hero": {
     "badge": "AVAILABLE FOR FULL-TIME",
@@ -224,5 +225,11 @@
     "network": "Connection issue. Check your network.",
     "generic": "An error occurred.",
     "retry": "Retry"
+  },
+  "tech_news": {
+    "title": "Tech News",
+    "error": "Unable to load news.",
+    "read_more": "Read more",
+    "minutes_read": "min read"
   }
 }

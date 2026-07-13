@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { SearchOverlay } from './SearchOverlay';
 import { LanguageSelector } from './LanguageSelector';
 import ThemeToggle from './ui/ThemeToggle';
@@ -32,10 +33,11 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
-    { key: 'nav.projects', id: 'projects' }, 
-    { key: 'nav.experiences', id: 'experiences' }, 
-    { key: 'nav.skills', id: 'skills' }, 
-    { key: 'nav.contact', id: 'contact' }
+    { key: 'nav.projects', path: '/#projects' }, 
+    { key: 'nav.experiences', path: '/#experiences' }, 
+    { key: 'nav.skills', path: '/#skills' }, 
+    { key: 'nav.news', path: '/news' },
+    { key: 'nav.contact', path: '/#contact' }
   ];
 
   return (
@@ -48,7 +50,7 @@ export function Navbar() {
         }`}
       >
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-3">
+          <a href="/" className="flex items-center gap-3">
             {profile?.photo_url ? (
               <img src={profile.photo_url} alt="Logo" className="w-10 h-10 rounded-full object-cover border border-[var(--border-subtle)]" />
             ) : (
@@ -59,8 +61,8 @@ export function Navbar() {
           <div className="hidden md:flex items-center space-x-10">
             {navLinks.map((item) => (
               <a 
-                key={item.id} 
-                href={`#${item.id}`} 
+                key={item.key} 
+                href={item.path} 
                 className="font-inter text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
                 {t(item.key)}
@@ -80,7 +82,7 @@ export function Navbar() {
             <LanguageSelector />
             <ThemeToggle />
             <a 
-              href="#contact" 
+              href="/#contact" 
               className="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-sm bg-accent-ocre text-[var(--bg-primary)] font-space font-semibold transition-opacity hover:opacity-90"
             >
               {t('nav.hire')}

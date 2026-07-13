@@ -10,6 +10,104 @@ async function startServer() {
   app.use(express.json());
 
   // Supabase Edge Function logic ported to Express for AI Studio
+  app.get("/api/news", async (req, res) => {
+    try {
+      const lang = req.query.lang as string;
+      const response = await fetch('https://dev.to/api/articles?tag=tech&per_page=100');
+      if (!response.ok) {
+        throw new Error('Failed to fetch from dev.to');
+      }
+      const data = await response.json();
+      
+      let filtered = data.filter((article: any) => 
+        article.language === 'en' || article.language === 'fr'
+      );
+      
+      if (lang) {
+        const matching = filtered.filter((a: any) => a.language === lang);
+        if (matching.length >= 3) {
+            filtered = matching;
+        }
+      }
+      
+      res.json(filtered.slice(0, 10));
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.post("/api/translate", async (req, res) => {
+    try {
+      const { text, from, to } = req.body;
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("GEMINI_API_KEY is not set.");
+      }
+      
+      const prompt = `You are a professional translator specializing in technical and professional content.
+Translate the following text from ${from} to ${to}.
+STRICT RULES :
+- Return ONLY the translated text
+- No explanations, no quotes, no preamble
+- Preserve ALL technical terms exactly as-is (React, TypeScript, FastAPI, Docker, etc.)
+- Preserve proper nouns and brand names
+- Preserve the exact same formatting (line breaks, punctuation, capitalization)
+- Preserve the same professional tone
+- If a term has no good translation, keep the original term
+
+TEXT TO TRANSLATE :
+${text}`;
+
+      const MODELS = [
+        "gemini-3.5-flash",
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-pro-preview",
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
+        "gemini-1.5-flash"
+      ];
+      
+      let translated = null;
+      let lastError = null;
+      
+      for (const modelName of MODELS) {
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.1, maxOutputTokens: 2000 }
+              })
+            }
+          );
+          const aiData = await response.json();
+          if (!response.ok || aiData.error) {
+            lastError = aiData.error?.message || `HTTP ${response.status}`;
+            continue;
+          }
+          translated = aiData.candidates[0].content.parts[0].text.trim();
+          break;
+        } catch (err: any) {
+          lastError = err.message;
+          continue;
+        }
+      }
+      
+      if (!translated) {
+        throw new Error(`All models failed. Last error: ${lastError}`);
+      }
+      
+      res.json({ translated });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
   app.post("/api/chat-resume", async (req, res) => {
     try {
       const { message, history } = req.body;

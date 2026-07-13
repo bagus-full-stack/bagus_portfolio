@@ -3,6 +3,7 @@ import { createBrowserRouter, Outlet } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
+import { NewsPage } from './pages/News';
 import { ProjectDetail } from './components/ProjectDetail';
 import { NotFoundPage } from './pages/NotFound';
 import { SupabaseService } from './services/supabase.service';
@@ -67,6 +68,10 @@ export const router = createBrowserRouter([
       {
         path: '/',
         element: <Home />
+      },
+      {
+        path: '/news',
+        element: <NewsPage />
       },
       {
         path: '/projects/simpsons-ai',

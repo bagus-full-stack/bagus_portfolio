@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useProfile } from '../../hooks/useProfile';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Loader2 } from 'lucide-react';
 import { AuthService } from '../../services/auth.service';
 import { LoginForm } from '../../types';
 
 export function AdminLogin() {
+  const { profile } = useProfile();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginForm>({ email: '', password: '' });
   const [status, setStatus] = useState<'idle' | 'submitting' | 'error'>('idle');

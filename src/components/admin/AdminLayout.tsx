@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useProfile } from '../../hooks/useProfile';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutGrid, User, Clock, Folder, Tag, Award, 
@@ -18,6 +19,7 @@ export function AdminLayout() {
   const [notificationsUnreadCount, setNotificationsUnreadCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+  const { profile } = useProfile();
 
   const NAV_LINKS = [
     { path: '/admin', label: 'Dashboard', icon: LayoutGrid, exact: true },

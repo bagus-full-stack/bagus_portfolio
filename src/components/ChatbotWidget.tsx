@@ -5,6 +5,7 @@ import { ChatMessage } from '../types';
 import { supabase } from '../services/supabase.service';
 import useSpeechToText from '../hooks/useSpeechToText';
 import { useTranslation } from '../hooks/useTranslation';
+import { useProfile } from '../hooks/useProfile';
 
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,7 @@ export function ChatbotWidget() {
   const lastMessageTime = useRef<number>(0);
 
   const { t, lang: language } = useTranslation();
+  const { profile } = useProfile();
   const speechLang = language === 'en' ? 'en-US' : 'fr-FR';
 
   const getInitialMessage = (): ChatMessage => ({
@@ -179,10 +181,12 @@ export function ChatbotWidget() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)]/20 bg-[var(--bg-card)]">
             {/* Gauche : avatar + titre */}
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#E08A3E]/20 border border-[#E08A3E]/30 flex items-center justify-center">
-                <span className="text-[#E08A3E] text-xs font-[JetBrains_Mono] font-bold">
-                  AB
-                </span>
+              <div className="w-8 h-8 rounded-full bg-[#E08A3E]/20 border border-[#E08A3E]/30 flex items-center justify-center overflow-hidden">
+                {profile?.photo_url ? (
+                  <img src={profile.photo_url} alt="Bot" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[#E08A3E] text-xs font-[JetBrains_Mono] font-bold">AB</span>
+                )}
               </div>
               <div>
                 <p className="text-[var(--text-primary)] font-[Inter] text-sm font-medium">

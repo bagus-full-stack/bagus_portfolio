@@ -4,11 +4,13 @@ import { SearchOverlay } from './SearchOverlay';
 import { LanguageSelector } from './LanguageSelector';
 import ThemeToggle from './ui/ThemeToggle';
 import { useTranslation } from '../hooks/useTranslation';
+import { useProfile } from '../hooks/useProfile';
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { t } = useTranslation();
+  const { profile } = useProfile();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,8 +48,12 @@ export function Navbar() {
         }`}
       >
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24 flex items-center justify-between">
-          <a href="#" className="font-space font-bold text-3xl text-text-primary tracking-tighter">
-            AB
+          <a href="#" className="flex items-center gap-3">
+            {profile?.photo_url ? (
+              <img src={profile.photo_url} alt="Logo" className="w-10 h-10 rounded-full object-cover border border-[var(--border-subtle)]" />
+            ) : (
+              <span className="font-space font-bold text-3xl text-text-primary tracking-tighter">AB</span>
+            )}
           </a>
 
           <div className="hidden md:flex items-center space-x-10">

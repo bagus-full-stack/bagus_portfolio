@@ -15,6 +15,10 @@ export interface Profile {
   photo_url?: string;
   cv_url?: string;
   cv_updated_at?: string;
+  cv_fullstack_url?: string;
+  cv_fullstack_updated_at?: string;
+  cv_ai_url?: string;
+  cv_ai_updated_at?: string;
   email?: string;
   linkedin_url?: string;
   github_url?: string;

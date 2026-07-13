@@ -21,6 +21,22 @@ const ShortUrlRedirect = () => {
       }
 
       try {
+        // Logique spéciale pour les CV
+        if (slug === 'cv-fullstack' || slug === 'cv-ai') {
+          const filename = slug === 'cv-fullstack' ? 'cv-fullstack.pdf' : 'cv-ai-engineer.pdf';
+          const { data: signedData, error: signedError } = await supabase
+            .storage
+            .from('cv')
+            .createSignedUrl(filename, 3600);
+
+          if (!signedError && signedData) {
+            // Incrémenter clics si le lien existe en base
+            supabase.rpc('increment_short_url_clicks', { p_slug: slug }).catch(() => {});
+            window.location.href = signedData.signedUrl;
+            return;
+          }
+        }
+
         const { data, error } = await supabase
           .from('short_urls')
           .select('target_url, slug')

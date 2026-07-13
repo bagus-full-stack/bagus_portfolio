@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, Trash2, AlertTriangle, ExternalLink, Image as ImageIcon, Eye, Loader2 } from 'lucide-react';
+import { Upload, FileText, Trash2, AlertTriangle, ExternalLink, Image as ImageIcon, Eye, Loader2, Code, Brain } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDropzone } from 'react-dropzone';
 import { SupabaseService, supabase } from '../../services/supabase.service';
 import { Profile } from '../../types';
+import { ConfirmModal } from '../../components/admin/ConfirmModal';
 
 export function MediaManager() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -14,52 +15,51 @@ export function MediaManager() {
   const [photoProgress, setPhotoProgress] = useState(0);
   const [deletingPhoto, setDeletingPhoto] = useState(false);
 
-  // states pour CV Full Stack
-  const [isUploadingCvFS, setIsUploadingCvFS] = useState(false);
-  const [cvFSProgress, setCvFSProgress] = useState(0);
-  const [deletingCvFS, setDeletingCvFS] = useState(false);
-  const [cvFSFileName, setCvFSFileName] = useState('cv-fullstack.pdf');
-  const [cvFSUpdatedAt, setCvFSUpdatedAt] = useState('Date inconnue');
-  const [previewLoadingFS, setPreviewLoadingFS] = useState(false);
-
-  // states pour CV AI
-  const [isUploadingCvAI, setIsUploadingCvAI] = useState(false);
-  const [cvAIProgress, setCvAIProgress] = useState(0);
-  const [deletingCvAI, setDeletingCvAI] = useState(false);
-  const [cvAIFileName, setCvAIFileName] = useState('cv-ai-engineer.pdf');
-  const [cvAIUpdatedAt, setCvAIUpdatedAt] = useState('Date inconnue');
-  const [previewLoadingAI, setPreviewLoadingAI] = useState(false);
+  // États pour les 2 CV
+  const [cvFullStackName, setCvFullStackName] = useState('')
+  const [cvFullStackDate, setCvFullStackDate] = useState('')
+  const [cvAIName, setCvAIName] = useState('')
+  const [cvAIDate, setCvAIDate] = useState('')
+  const [uploadingCV, setUploadingCV] = useState<'fullstack' | 'ai' | null>(null)
+  const [cvProgress, setCvProgress] = useState(0)
+  const [confirmDelete, setConfirmDelete] = useState<'fullstack' | 'ai' | null>(null)
 
   useEffect(() => {
     let mounted = true;
-    const fetchCVInfo = async () => {
+    const fetchProfileData = async () => {
       const data = await SupabaseService.getProfile();
       if (mounted) {
         setProfile(data);
-        if (data?.cv_fullstack_url) {
-          setCvFSFileName(data.cv_fullstack_url.split('/').pop() || 'cv-fullstack.pdf');
-          setCvFSUpdatedAt(data.cv_fullstack_updated_at
-            ? new Date(data.cv_fullstack_updated_at).toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })
-            : 'Date inconnue');
-        }
-        if (data?.cv_ai_url) {
-          setCvAIFileName(data.cv_ai_url.split('/').pop() || 'cv-ai-engineer.pdf');
-          setCvAIUpdatedAt(data.cv_ai_updated_at
-            ? new Date(data.cv_ai_updated_at).toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })
-            : 'Date inconnue');
+        if (data) {
+          if (data.cv_fullstack_url) {
+            setCvFullStackName(data.cv_fullstack_url.split('/').pop() || 'cv-fullstack.pdf');
+            setCvFullStackDate(
+              data.cv_fullstack_updated_at
+                ? new Date(data.cv_fullstack_updated_at).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })
+                : ''
+            );
+          }
+          if (data.cv_ai_url) {
+            setCvAIName(data.cv_ai_url.split('/').pop() || 'cv-ai-engineer.pdf');
+            setCvAIDate(
+              data.cv_ai_updated_at
+                ? new Date(data.cv_ai_updated_at).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })
+                : ''
+            );
+          }
         }
         setLoading(false);
       }
     };
-    fetchCVInfo();
+    fetchProfileData();
     return () => { mounted = false; };
   }, []);
 
@@ -71,24 +71,6 @@ export function MediaManager() {
     }, 200);
     return () => clearInterval(interval);
   }, [isUploadingPhoto]);
-
-  // Simuler la progression (CV FS)
-  useEffect(() => {
-    if (!isUploadingCvFS) return;
-    const interval = setInterval(() => {
-      setCvFSProgress(p => Math.min(p + 10, 90));
-    }, 200);
-    return () => clearInterval(interval);
-  }, [isUploadingCvFS]);
-
-  // Simuler la progression (CV AI)
-  useEffect(() => {
-    if (!isUploadingCvAI) return;
-    const interval = setInterval(() => {
-      setCvAIProgress(p => Math.min(p + 10, 90));
-    }, 200);
-    return () => clearInterval(interval);
-  }, [isUploadingCvAI]);
 
   const uploadAvatar = async (file: File) => {
     if (!file) return;
@@ -200,172 +182,180 @@ export function MediaManager() {
     }
   };
 
-  const uploadCVFullStack = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  // Fonction upload générique pour les 2 CV
+  const uploadCV = async (
+    file: File,
+    type: 'fullstack' | 'ai'
+  ) => {
+    // Vérifier que c'est bien un PDF
     if (file.type !== 'application/pdf') {
-      toast.error('Veuillez sélectionner un fichier PDF');
-      return;
+      toast.error('Format PDF uniquement')
+      return
     }
 
-    setIsUploadingCvFS(true);
-    setCvFSProgress(0);
+    // Vérifier la taille (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Fichier trop lourd (max 10MB)')
+      return
+    }
+
+    setUploadingCV(type)
+    setCvProgress(0)
+
+    // Simuler la progression
+    const progressInterval = setInterval(() => {
+      setCvProgress(p => Math.min(p + 15, 85))
+    }, 200)
+
     try {
-      const { error } = await supabase.storage
-        .from('cv')
-        .upload('cv-fullstack.pdf', file, {
-          upsert: true,
-          contentType: 'application/pdf'
-        });
+      const filename = type === 'fullstack'
+        ? 'cv-fullstack.pdf'
+        : 'cv-ai-engineer.pdf'
 
-      if (error) throw error;
-
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('id')
-        .single();
-        
-      if (!fetchError && existingProfile) {
-        const updateDate = new Date().toISOString();
-        await supabase
-          .from('profiles')
-          .update({ 
-            cv_fullstack_url: 'cv-fullstack.pdf',
-            cv_fullstack_updated_at: updateDate
+      // Upload dans le bucket cv privé
+      const { error: uploadError } =
+        await supabase.storage
+          .from('cv')
+          .upload(filename, file, {
+            upsert: true,
+            contentType: 'application/pdf'
           })
-          .eq('id', existingProfile.id);
-          
-        setCvFSUpdatedAt(new Date(updateDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }));
-      }
 
-      setCvFSProgress(100);
-      setProfile(prev => prev ? { ...prev, cv_fullstack_url: 'cv-fullstack.pdf' } : prev);
-      toast.success('CV Full Stack mis à jour');
-    } catch (err) {
-      toast.error("Erreur lors de l'upload du CV");
-    } finally {
-      setTimeout(() => {
-        setIsUploadingCvFS(false);
-        setCvFSProgress(0);
-      }, 500);
-    }
-  };
+      if (uploadError) throw uploadError
 
-  const uploadCVAI = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.type !== 'application/pdf') {
-      toast.error('Veuillez sélectionner un fichier PDF');
-      return;
-    }
-
-    setIsUploadingCvAI(true);
-    setCvAIProgress(0);
-    try {
-      const { error } = await supabase.storage
-        .from('cv')
-        .upload('cv-ai-engineer.pdf', file, {
-          upsert: true,
-          contentType: 'application/pdf'
-        });
-
-      if (error) throw error;
-
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('id')
-        .single();
-        
-      if (!fetchError && existingProfile) {
-        const updateDate = new Date().toISOString();
-        await supabase
-          .from('profiles')
-          .update({ 
-            cv_ai_url: 'cv-ai-engineer.pdf',
-            cv_ai_updated_at: updateDate
-          })
-          .eq('id', existingProfile.id);
-          
-        setCvAIUpdatedAt(new Date(updateDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }));
-      }
-
-      setCvAIProgress(100);
-      setProfile(prev => prev ? { ...prev, cv_ai_url: 'cv-ai-engineer.pdf' } : prev);
-      toast.success('CV AI Engineer mis à jour');
-    } catch (err) {
-      toast.error("Erreur lors de l'upload du CV");
-    } finally {
-      setTimeout(() => {
-        setIsUploadingCvAI(false);
-        setCvAIProgress(0);
-      }, 500);
-    }
-  };
-
-  const handleDeleteCvFS = async () => {
-    try {
       const { data: existingProfile } = await supabase
         .from('profiles')
         .select('id')
         .single();
-        
-      if (!existingProfile) return;
+
+      if (!existingProfile) throw new Error('Profile not found');
+
+      // Mettre à jour le profil
+      const updateField = type === 'fullstack'
+        ? {
+            cv_fullstack_url: filename,
+            cv_fullstack_updated_at: new Date().toISOString()
+          }
+        : {
+            cv_ai_url: filename,
+            cv_ai_updated_at: new Date().toISOString()
+          }
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update(updateField)
+        .eq('id', existingProfile.id)
+
+      if (updateError) throw updateError
+
+      setCvProgress(100)
+
+      // Mettre à jour l'affichage
+      const dateStr = new Date()
+        .toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        })
+
+      if (type === 'fullstack') {
+        setCvFullStackName(filename)
+        setCvFullStackDate(dateStr)
+        toast.success('CV Full Stack mis à jour ✅')
+      } else {
+        setCvAIName(filename)
+        setCvAIDate(dateStr)
+        toast.success('CV AI Engineer mis à jour ✅')
+      }
+
+    } catch (err) {
+      console.error('CV upload error:', err)
+      toast.error('Échec de l\'upload')
+      setCvProgress(0)
+    } finally {
+      clearInterval(progressInterval)
+      setUploadingCV(null)
+    }
+  }
+
+  // Prévisualiser un CV via URL signée
+  const previewCV = async (
+    type: 'fullstack' | 'ai'
+  ) => {
+    const filename = type === 'fullstack'
+      ? 'cv-fullstack.pdf'
+      : 'cv-ai-engineer.pdf'
+
+    const { data, error } = await supabase
+      .storage
+      .from('cv')
+      .createSignedUrl(filename, 3600)
+
+    if (error || !data) {
+      toast.error('Prévisualisation impossible')
+      return
+    }
+
+    window.open(data.signedUrl, '_blank')
+  }
+
+  // Supprimer un CV
+  const deleteCV = async (
+    type: 'fullstack' | 'ai'
+  ) => {
+    const filename = type === 'fullstack'
+      ? 'cv-fullstack.pdf'
+      : 'cv-ai-engineer.pdf'
+
+    await supabase.storage
+      .from('cv')
+      .remove([filename])
+
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .single();
+
+    if (existingProfile) {
+      const updateField = type === 'fullstack'
+        ? { cv_fullstack_url: '', cv_fullstack_updated_at: null }
+        : { cv_ai_url: '', cv_ai_updated_at: null }
 
       await supabase
         .from('profiles')
-        .update({ cv_fullstack_url: null, cv_fullstack_updated_at: null })
-        .eq('id', existingProfile.id);
-
-      setProfile(prev => prev ? { ...prev, cv_fullstack_url: undefined } : prev);
-      toast.success('CV Full Stack supprimé');
-    } catch (e) {
-      toast.error('Erreur lors de la suppression');
-    } finally {
-      setDeletingCvFS(false);
+        .update(updateField)
+        .eq('id', existingProfile.id)
     }
-  };
 
-  const handleDeleteCvAI = async () => {
-    try {
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .single();
-        
-      if (!existingProfile) return;
-
-      await supabase
-        .from('profiles')
-        .update({ cv_ai_url: null, cv_ai_updated_at: null })
-        .eq('id', existingProfile.id);
-
-      setProfile(prev => prev ? { ...prev, cv_ai_url: undefined } : prev);
-      toast.success('CV AI Engineer supprimé');
-    } catch (e) {
-      toast.error('Erreur lors de la suppression');
-    } finally {
-      setDeletingCvAI(false);
+    if (type === 'fullstack') {
+      setCvFullStackName('')
+      setCvFullStackDate('')
+    } else {
+      setCvAIName('')
+      setCvAIDate('')
     }
-  };
 
-  const handlePreviewCV = async (filename: string, setLoadingState: (val: boolean) => void) => {
-    setLoadingState(true);
-    try {
-      const { data, error } = await supabase
-        .storage
-        .from('cv')
-        .createSignedUrl(filename, 3600);
+    toast.success('CV supprimé')
+    setConfirmDelete(null)
+  }
 
-      if (error) throw error;
-      window.open(data.signedUrl, '_blank');
-    } catch {
-      toast.error('Impossible de prévisualiser le CV');
-    } finally {
-      setLoadingState(false);
-    }
-  };
+  // Hook dropzone réutilisable
+  const useCVDropzone = (type: 'fullstack' | 'ai') =>
+    useDropzone({
+      accept: { 'application/pdf': ['.pdf'] } as any,
+      maxSize: 10 * 1024 * 1024,
+      multiple: false,
+      disabled: uploadingCV !== null,
+      onDrop: (files) => {
+        if (files[0]) uploadCV(files[0], type)
+      },
+      onDropRejected: () => {
+        toast.error('PDF uniquement, max 10MB')
+      }
+    })
+
+  const fullStackDropzone = useCVDropzone('fullstack')
+  const aiDropzone = useCVDropzone('ai')
 
   if (loading || !profile) {
     return (
@@ -447,112 +437,170 @@ export function MediaManager() {
         </div>
       </div>
 
-      {/* Section 2: CV Full Stack */}
-      <div className="bg-bg-card border border-white/5 rounded-xl p-6">
-        <h3 className="font-space text-lg font-semibold text-accent-ocre mb-6">CV Full Stack Engineer</h3>
-        
-        {profile.cv_fullstack_url ? (
-          <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-bg-primary border border-white/10 rounded-lg mb-6 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-lg w-full sm:w-auto">
-              <FileText size={16} className="text-[#E08A3E]" />
-              <div>
-                <p className="text-[var(--text-primary)] font-[JetBrains_Mono] text-sm">
-                  {cvFSFileName}
-                </p>
-                <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
-                  Mis à jour le {cvFSUpdatedAt}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={() => handlePreviewCV('cv-fullstack.pdf', setPreviewLoadingFS)}
-                disabled={previewLoadingFS}
-                className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)]/30 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] transition-colors disabled:opacity-50 font-[Inter] text-sm"
-              >
-                {previewLoadingFS ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
-                Prévisualiser
-              </button>
-              <button onClick={() => setDeletingCvFS(true)} className="p-2 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded transition-colors">
-                <Trash2 size={20} />
-              </button>
-            </div>
+      {/* Section CV Full Stack */}
+      <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-subtle)]">
+        {/* En-tête */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-[#E08A3E]/15 border border-[#E08A3E]/30 flex items-center justify-center">
+            <Code size={18} className="text-[#E08A3E]" />
           </div>
-        ) : (
-          <div className="mb-6 p-4 bg-accent-ocre/10 border border-accent-ocre/20 rounded-lg text-accent-ocre text-sm">
-            Vous n'avez pas encore uploadé de CV Full Stack.
+          <div>
+            <h3 className="text-[var(--text-primary)] font-[Space_Grotesk] font-semibold">
+              CV Full Stack Engineer
+            </h3>
+            <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
+              Angular · React · NestJS · Spring Boot
+            </p>
+          </div>
+        </div>
+
+        {/* Fichier actuel */}
+        {cvFullStackName && (
+          <div className="flex items-center gap-3 p-3 bg-[var(--bg-elevated)] rounded-lg mb-4 border border-[var(--border-subtle)]">
+            <FileText size={16} className="text-[#E08A3E] shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[var(--text-primary)] font-[JetBrains_Mono] text-sm truncate">
+                {cvFullStackName}
+              </p>
+              {cvFullStackDate && (
+                <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
+                  Mis à jour le {cvFullStackDate}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => previewCV('fullstack')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] transition-colors font-[Inter]"
+              >
+                <Eye size={12} />
+                Voir
+              </button>
+              <button
+                onClick={() => setConfirmDelete('fullstack')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors font-[Inter]"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
           </div>
         )}
 
-        <label className="block w-full border-2 border-dashed border-white/10 rounded-lg p-8 text-center hover:bg-white/5 transition-colors cursor-pointer relative overflow-hidden">
-          <input type="file" accept="application/pdf" className="hidden" onChange={uploadCVFullStack} disabled={isUploadingCvFS} />
-          <Upload size={32} className="mx-auto text-text-muted mb-3" />
-          <p className="font-medium text-text-primary mb-1">{profile.cv_fullstack_url ? 'Remplacer le CV Full Stack actuel' : 'Uploader un nouveau CV Full Stack'}</p>
-          <p className="text-sm text-text-muted">Format PDF uniquement</p>
+        {/* Zone drag-and-drop */}
+        <div
+          {...fullStackDropzone.getRootProps()}
+          className={`
+            border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200
+            ${fullStackDropzone.isDragActive ? 'border-[#E08A3E] bg-[#E08A3E]/10' : 'border-[var(--border-subtle)] hover:border-[#E08A3E]/50'}
+            ${uploadingCV === 'fullstack' ? 'pointer-events-none opacity-70' : ''}
+          `}
+        >
+          <input {...fullStackDropzone.getInputProps()} />
 
-          {isUploadingCvFS && (
-            <div className="absolute inset-0 bg-bg-card/90 backdrop-blur-sm flex flex-col items-center justify-center">
-              <div className="w-full max-w-xs h-2 bg-bg-primary rounded-full overflow-hidden mb-2">
-                <div className="h-full bg-[#E08A3E] transition-all duration-200" style={{ width: `${cvFSProgress}%` }} />
+          {uploadingCV === 'fullstack' ? (
+            <div className="space-y-3">
+              <Loader2 size={24} className="text-[#E08A3E] animate-spin mx-auto" />
+              <p className="text-[var(--text-muted)] font-[Inter] text-sm">Upload en cours...</p>
+              <div className="w-full h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+                <div className="h-full bg-[#E08A3E] rounded-full transition-all duration-300" style={{ width: `${cvProgress}%` }} />
               </div>
-              <span className="text-xs font-mono text-[#E08A3E]">{cvFSProgress}%</span>
+              <p className="text-[#E08A3E] font-[JetBrains_Mono] text-xs">{cvProgress}%</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Upload size={24} className="text-[var(--text-muted)] mx-auto" />
+              <p className="text-[var(--text-primary)] font-[Inter] text-sm">
+                {cvFullStackName ? 'Glissez pour remplacer' : 'Glissez le CV Full Stack ici'}
+              </p>
+              <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
+                PDF uniquement · Max 10MB
+              </p>
             </div>
           )}
-        </label>
+        </div>
       </div>
 
-      {/* Section 3: CV AI Engineer */}
-      <div className="bg-bg-card border border-white/5 rounded-xl p-6">
-        <h3 className="font-space text-lg font-semibold text-accent-cyan mb-6">CV AI Engineer</h3>
-        
-        {profile.cv_ai_url ? (
-          <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-bg-primary border border-white/10 rounded-lg mb-6 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-[var(--bg-primary)] rounded-lg w-full sm:w-auto">
-              <FileText size={16} className="text-[#2DD4BF]" />
-              <div>
-                <p className="text-[var(--text-primary)] font-[JetBrains_Mono] text-sm">
-                  {cvAIFileName}
-                </p>
-                <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
-                  Mis à jour le {cvAIUpdatedAt}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={() => handlePreviewCV('cv-ai-engineer.pdf', setPreviewLoadingAI)}
-                disabled={previewLoadingAI}
-                className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)]/30 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] transition-colors disabled:opacity-50 font-[Inter] text-sm"
-              >
-                {previewLoadingAI ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
-                Prévisualiser
-              </button>
-              <button onClick={() => setDeletingCvAI(true)} className="p-2 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded transition-colors">
-                <Trash2 size={20} />
-              </button>
-            </div>
+      {/* Section CV AI Engineer */}
+      <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border-subtle)]">
+        {/* En-tête */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-[#2DD4BF]/15 border border-[#2DD4BF]/30 flex items-center justify-center">
+            <Brain size={18} className="text-[#2DD4BF]" />
           </div>
-        ) : (
-          <div className="mb-6 p-4 bg-accent-cyan/10 border border-accent-cyan/20 rounded-lg text-accent-cyan text-sm">
-            Vous n'avez pas encore uploadé de CV AI Engineer.
+          <div>
+            <h3 className="text-[var(--text-primary)] font-[Space_Grotesk] font-semibold">
+              CV AI Engineer
+            </h3>
+            <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
+              PyTorch · YOLO · HuggingFace
+            </p>
+          </div>
+        </div>
+
+        {/* Fichier actuel */}
+        {cvAIName && (
+          <div className="flex items-center gap-3 p-3 bg-[var(--bg-elevated)] rounded-lg mb-4 border border-[var(--border-subtle)]">
+            <FileText size={16} className="text-[#2DD4BF] shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[var(--text-primary)] font-[JetBrains_Mono] text-sm truncate">
+                {cvAIName}
+              </p>
+              {cvAIDate && (
+                <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
+                  Mis à jour le {cvAIDate}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => previewCV('ai')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] transition-colors font-[Inter]"
+              >
+                <Eye size={12} />
+                Voir
+              </button>
+              <button
+                onClick={() => setConfirmDelete('ai')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors font-[Inter]"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
           </div>
         )}
 
-        <label className="block w-full border-2 border-dashed border-white/10 rounded-lg p-8 text-center hover:bg-white/5 transition-colors cursor-pointer relative overflow-hidden">
-          <input type="file" accept="application/pdf" className="hidden" onChange={uploadCVAI} disabled={isUploadingCvAI} />
-          <Upload size={32} className="mx-auto text-text-muted mb-3" />
-          <p className="font-medium text-text-primary mb-1">{profile.cv_ai_url ? 'Remplacer le CV AI Engineer actuel' : 'Uploader un nouveau CV AI Engineer'}</p>
-          <p className="text-sm text-text-muted">Format PDF uniquement</p>
+        {/* Zone drag-and-drop */}
+        <div
+          {...aiDropzone.getRootProps()}
+          className={`
+            border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200
+            ${aiDropzone.isDragActive ? 'border-[#2DD4BF] bg-[#2DD4BF]/10' : 'border-[var(--border-subtle)] hover:border-[#2DD4BF]/50'}
+            ${uploadingCV === 'ai' ? 'pointer-events-none opacity-70' : ''}
+          `}
+        >
+          <input {...aiDropzone.getInputProps()} />
 
-          {isUploadingCvAI && (
-            <div className="absolute inset-0 bg-bg-card/90 backdrop-blur-sm flex flex-col items-center justify-center">
-              <div className="w-full max-w-xs h-2 bg-bg-primary rounded-full overflow-hidden mb-2">
-                <div className="h-full bg-[#2DD4BF] transition-all duration-200" style={{ width: `${cvAIProgress}%` }} />
+          {uploadingCV === 'ai' ? (
+            <div className="space-y-3">
+              <Loader2 size={24} className="text-[#2DD4BF] animate-spin mx-auto" />
+              <p className="text-[var(--text-muted)] font-[Inter] text-sm">Upload en cours...</p>
+              <div className="w-full h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+                <div className="h-full bg-[#2DD4BF] rounded-full transition-all duration-300" style={{ width: `${cvProgress}%` }} />
               </div>
-              <span className="text-xs font-mono text-[#2DD4BF]">{cvAIProgress}%</span>
+              <p className="text-[#2DD4BF] font-[JetBrains_Mono] text-xs">{cvProgress}%</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Upload size={24} className="text-[var(--text-muted)] mx-auto" />
+              <p className="text-[var(--text-primary)] font-[Inter] text-sm">
+                {cvAIName ? 'Glissez pour remplacer' : 'Glissez le CV AI Engineer ici'}
+              </p>
+              <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
+                PDF uniquement · Max 10MB
+              </p>
             </div>
           )}
-        </label>
+        </div>
       </div>
 
       {/* Modals Suppression */}
@@ -572,36 +620,14 @@ export function MediaManager() {
         </div>
       )}
 
-      {deletingCvFS && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-bg-card border border-white/10 rounded-xl p-6 max-w-sm w-full">
-            <div className="flex items-center text-red-400 mb-4">
-              <AlertTriangle size={24} className="mr-3" />
-              <h3 className="font-space font-semibold text-lg">Confirmer la suppression</h3>
-            </div>
-            <p className="text-text-muted mb-6">Cette action est irréversible. Voulez-vous vraiment supprimer ce CV Full Stack ?</p>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setDeletingCvFS(false)} className="px-4 py-2 text-text-primary hover:bg-white/5 rounded transition-colors">Annuler</button>
-              <button onClick={handleDeleteCvFS} className="px-4 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded font-medium transition-colors">Supprimer</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {deletingCvAI && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-bg-card border border-white/10 rounded-xl p-6 max-w-sm w-full">
-            <div className="flex items-center text-red-400 mb-4">
-              <AlertTriangle size={24} className="mr-3" />
-              <h3 className="font-space font-semibold text-lg">Confirmer la suppression</h3>
-            </div>
-            <p className="text-text-muted mb-6">Cette action est irréversible. Voulez-vous vraiment supprimer ce CV AI Engineer ?</p>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setDeletingCvAI(false)} className="px-4 py-2 text-text-primary hover:bg-white/5 rounded transition-colors">Annuler</button>
-              <button onClick={handleDeleteCvAI} className="px-4 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded font-medium transition-colors">Supprimer</button>
-            </div>
-          </div>
-        </div>
+      {confirmDelete && (
+        <ConfirmModal
+          isOpen={true}
+          title="Supprimer le CV"
+          message={`Supprimer le CV ${confirmDelete === 'fullstack' ? 'Full Stack' : 'AI Engineer'} ? Cette action est irréversible.`}
+          onConfirm={() => deleteCV(confirmDelete)}
+          onCancel={() => setConfirmDelete(null)}
+        />
       )}
     </div>
   );

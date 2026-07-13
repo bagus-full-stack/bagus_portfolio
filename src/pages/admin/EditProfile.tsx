@@ -5,8 +5,10 @@ import { Profile } from '../../types';
 import { SupabaseService, supabase } from '../../services/supabase.service';
 import { useDropzone } from 'react-dropzone';
 import BilingualField from '../../components/admin/BilingualField';
+import useProfileId from '../../hooks/useProfileId';
 
 export function EditProfile() {
+  const profileId = useProfileId();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingState, setSavingState] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
@@ -63,11 +65,17 @@ export function EditProfile() {
       toast.error('Veuillez remplir les champs obligatoires.');
       return;
     }
+    if (!profileId) {
+      toast.error('ID de profil non trouvé. Veuillez réessayer.');
+      return;
+    }
     setSavingState('saving');
     try {
+      const { id, created_at, updated_at, ...updateData } = formData as any;
       const { error } = await supabase
         .from('profiles')
-        .upsert({ id: profile?.id, ...formData });
+        .update(updateData)
+        .eq('id', profileId);
       if (error) throw error;
       setSavingState('success');
       toast.success('Modifications enregistrées');

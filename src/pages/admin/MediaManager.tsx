@@ -63,7 +63,7 @@ export function MediaManager() {
   }, [isUploadingCv]);
 
   const uploadAvatar = async (file: File) => {
-    if (!file || !profile) return;
+    if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
       toast.error("L'image dépasse la taille maximale de 2MB");
@@ -72,33 +72,61 @@ export function MediaManager() {
 
     setIsUploadingPhoto(true);
     setPhotoProgress(0);
-    try {
-      const ext = file.name.split('.').pop();
-      const path = `profile/avatar.${ext}`;
 
-      const { error } = await supabase.storage
+    try {
+      // Générer un nom de fichier propre
+      const ext = file.name.split('.').pop() || 'jpg';
+      const filePath = `profile/avatar.${ext}`;
+
+      // 1. Upload dans Supabase Storage
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(path, file, {
+        .upload(filePath, file, {
           upsert: true,
           contentType: file.type
         });
 
-      if (error) throw error;
+      if (uploadError) throw uploadError;
 
+      // 2. Récupérer l'URL publique
       const { data: urlData } = supabase.storage
         .from('avatars')
-        .getPublicUrl(path);
+        .getPublicUrl(filePath);
 
-      await supabase
+      const publicUrl = urlData.publicUrl;
+
+      // 3. Récupérer l'UUID du profil d'abord
+      const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
-        .update({ photo_url: urlData.publicUrl })
-        .eq('id', profile.id);
+        .select('id')
+        .single();
+
+      if (fetchError || !existingProfile) {
+        // Profil inexistant → INSERT
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            name: 'Assami Baga',
+            title: 'Full Stack & AI Engineer',
+            photo_url: publicUrl
+          });
+        if (insertError) throw insertError;
+      } else {
+        // Profil existant → UPDATE avec vrai UUID
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ photo_url: publicUrl })
+          .eq('id', existingProfile.id);
+
+        if (updateError) throw updateError;
+      }
 
       setPhotoProgress(100);
-      setProfile(prev => prev ? { ...prev, photo_url: urlData.publicUrl } : prev);
+      setProfile(prev => prev ? { ...prev, photo_url: publicUrl } : prev);
       toast.success('Photo mise à jour');
     } catch (err) {
-      toast.error("Erreur lors de l'upload de l'image");
+      console.error('Upload error:', err);
+      toast.error("Échec de l'upload");
     } finally {
       setTimeout(() => {
         setIsUploadingPhoto(false);
@@ -128,12 +156,18 @@ export function MediaManager() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone(dropzoneConfig);
 
   const handleDeletePhoto = async () => {
-    if (!profile) return;
     try {
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .single();
+        
+      if (!existingProfile) return;
+
       await supabase
         .from('profiles')
         .update({ photo_url: null })
-        .eq('id', profile.id);
+        .eq('id', existingProfile.id);
         
       setProfile(prev => prev ? { ...prev, photo_url: undefined } : prev);
       toast.success('Photo supprimée');
@@ -146,7 +180,7 @@ export function MediaManager() {
 
   const handleCvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !profile) return;
+    if (!file) return;
 
     if (file.type !== 'application/pdf') {
       toast.error('Veuillez sélectionner un fichier PDF');
@@ -165,10 +199,17 @@ export function MediaManager() {
 
       if (error) throw error;
 
-      await supabase
+      const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
-        .update({ cv_url: 'cv.pdf' })
-        .eq('id', profile.id);
+        .select('id')
+        .single();
+        
+      if (!fetchError && existingProfile) {
+        await supabase
+          .from('profiles')
+          .update({ cv_url: 'cv.pdf' })
+          .eq('id', existingProfile.id);
+      }
 
       setCvProgress(100);
       setProfile(prev => prev ? { ...prev, cv_url: 'cv.pdf' } : prev);
@@ -184,12 +225,18 @@ export function MediaManager() {
   };
 
   const handleDeleteCv = async () => {
-    if (!profile) return;
     try {
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .single();
+        
+      if (!existingProfile) return;
+
       await supabase
         .from('profiles')
         .update({ cv_url: null })
-        .eq('id', profile.id);
+        .eq('id', existingProfile.id);
 
       setProfile(prev => prev ? { ...prev, cv_url: undefined } : prev);
       toast.success('CV supprimé');

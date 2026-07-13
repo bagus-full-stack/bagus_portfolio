@@ -28,21 +28,38 @@ export const importJSON = async (
   // PROFIL
   if (sections.includes('profile') && data.profile) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Utilisateur non connecté');
-      
-      const profileData = { ...data.profile, id: user.id };
-      
-      const { error } = await supabase
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .upsert(profileData);
-        
-      results.push({
-        section: 'Profil',
-        total: 1,
-        success: error ? 0 : 1,
-        errors: error ? [error.message] : []
-      });
+        .select('id')
+        .single();
+      
+      const profileData = { ...data.profile };
+      delete profileData.id;
+      
+      if (existingProfile) {
+        const { error } = await supabase
+          .from('profiles')
+          .update(profileData)
+          .eq('id', existingProfile.id);
+
+        results.push({
+          section: 'Profil',
+          total: 1,
+          success: error ? 0 : 1,
+          errors: error ? [error.message] : []
+        });
+      } else {
+        const { error } = await supabase
+          .from('profiles')
+          .insert(profileData);
+          
+        results.push({
+          section: 'Profil',
+          total: 1,
+          success: error ? 0 : 1,
+          errors: error ? [error.message] : []
+        });
+      }
     } catch (e: any) {
       results.push({
         section: 'Profil',

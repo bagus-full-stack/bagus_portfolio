@@ -5,8 +5,10 @@ import { Profile } from '../../types';
 import { SupabaseService, supabase } from '../../services/supabase.service';
 import { useDropzone } from 'react-dropzone';
 import BilingualField from '../../components/admin/BilingualField';
+import { useProfileId } from '../../hooks/useProfileId';
 
 export function EditProfile() {
+  const existingProfileId = useProfileId();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingState, setSavingState] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
@@ -69,13 +71,23 @@ export function EditProfile() {
     }
     setSavingState('saving');
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Utilisateur non connecté');
+      const payload = { ...formData };
+      delete payload.id;
 
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({ ...formData, id: user.id });
-      if (error) throw error;
+      if (!existingProfileId) {
+        // Fallback to inserting if no profile exists
+        const { error } = await supabase
+          .from('profiles')
+          .insert(payload);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('profiles')
+          .update(payload)
+          .eq('id', existingProfileId);
+        if (error) throw error;
+      }
+      
       setSavingState('success');
       toast.success('Modifications enregistrées');
       setTimeout(() => setSavingState('idle'), 2000);

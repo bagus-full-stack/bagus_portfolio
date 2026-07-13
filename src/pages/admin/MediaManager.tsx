@@ -4,10 +4,8 @@ import { toast } from 'sonner';
 import { useDropzone } from 'react-dropzone';
 import { SupabaseService, supabase } from '../../services/supabase.service';
 import { Profile } from '../../types';
-import { useProfileId } from '../../hooks/useProfileId';
 
 export function MediaManager() {
-  const existingProfileId = useProfileId();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -65,69 +63,42 @@ export function MediaManager() {
   }, [isUploadingCv]);
 
   const uploadAvatar = async (file: File) => {
-    if (!file) return;
+    if (!file || !profile) return;
 
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("L'image dépasse la taille maximale de 2MB");
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    setPhotoProgress(0);
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
-      if (authError || !user) throw new Error('Utilisateur non connecté')
-      
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error('Format non supporté. Utilisez JPG, PNG, WEBP ou GIF.')
-      }
-      
-      const maxSize = 5 * 1024 * 1024 // 5MB
-      if (file.size > maxSize) {
-        throw new Error('Fichier trop volumineux. Maximum 5MB.')
-      }
+      const ext = file.name.split('.').pop();
+      const path = `profile/avatar.${ext}`;
 
-      setIsUploadingPhoto(true);
-      setPhotoProgress(0);
-      
-      const fileExt = file.name.split('.').pop()?.toLowerCase()
-      const filePath = `avatars/${user.id}.${fileExt}`
-      
-      const { error: uploadError } = await supabase.storage
+      const { error } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, {
+        .upload(path, file, {
           upsert: true,
           contentType: file.type
-        })
-      
-      if (uploadError) throw new Error(`Échec upload : ${uploadError.message}`)
-      
+        });
+
+      if (error) throw error;
+
       const { data: urlData } = supabase.storage
         .from('avatars')
-        .getPublicUrl(filePath)
-      
-      const publicUrl = urlData.publicUrl
-      
-      if (existingProfileId) {
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({
-            photo_url: publicUrl,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingProfileId)
-        
-        if (updateError) throw new Error(`Échec mise à jour profil : ${updateError.message}`)
-      } else {
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            name: 'Nouveau Profil',
-            title: 'À compléter',
-            photo_url: publicUrl
-          })
-        if (insertError) throw new Error(`Échec création profil : ${insertError.message}`)
-      }
+        .getPublicUrl(path);
+
+      await supabase
+        .from('profiles')
+        .update({ photo_url: urlData.publicUrl })
+        .eq('id', profile.id);
 
       setPhotoProgress(100);
-      setProfile(prev => prev ? { ...prev, photo_url: publicUrl } : prev);
+      setProfile(prev => prev ? { ...prev, photo_url: urlData.publicUrl } : prev);
       toast.success('Photo mise à jour');
-    } catch (err: any) {
-      toast.error(err.message || "Erreur lors de l'upload de l'image");
+    } catch (err) {
+      toast.error("Erreur lors de l'upload de l'image");
     } finally {
       setTimeout(() => {
         setIsUploadingPhoto(false);
@@ -157,12 +128,12 @@ export function MediaManager() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone(dropzoneConfig);
 
   const handleDeletePhoto = async () => {
-    if (!profile || !existingProfileId) return;
+    if (!profile) return;
     try {
       await supabase
         .from('profiles')
         .update({ photo_url: null })
-        .eq('id', existingProfileId);
+        .eq('id', profile.id);
         
       setProfile(prev => prev ? { ...prev, photo_url: undefined } : prev);
       toast.success('Photo supprimée');
@@ -175,7 +146,7 @@ export function MediaManager() {
 
   const handleCvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !profile || !existingProfileId) return;
+    if (!file || !profile) return;
 
     if (file.type !== 'application/pdf') {
       toast.error('Veuillez sélectionner un fichier PDF');
@@ -197,7 +168,7 @@ export function MediaManager() {
       await supabase
         .from('profiles')
         .update({ cv_url: 'cv.pdf' })
-        .eq('id', existingProfileId);
+        .eq('id', profile.id);
 
       setCvProgress(100);
       setProfile(prev => prev ? { ...prev, cv_url: 'cv.pdf' } : prev);
@@ -213,12 +184,12 @@ export function MediaManager() {
   };
 
   const handleDeleteCv = async () => {
-    if (!profile || !existingProfileId) return;
+    if (!profile) return;
     try {
       await supabase
         .from('profiles')
         .update({ cv_url: null })
-        .eq('id', existingProfileId);
+        .eq('id', profile.id);
 
       setProfile(prev => prev ? { ...prev, cv_url: undefined } : prev);
       toast.success('CV supprimé');

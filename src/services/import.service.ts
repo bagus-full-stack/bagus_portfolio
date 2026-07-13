@@ -28,38 +28,20 @@ export const importJSON = async (
   // PROFIL
   if (sections.includes('profile') && data.profile) {
     try {
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .single();
-      
       const profileData = { ...data.profile };
-      delete profileData.id;
+      // Handle the bio_short / bio_full mapping to bio if needed, but assuming data structure is what the DB expects or mapping is required.
+      // Based on prompt "profile" format and DB schema: it's better to just upsert.
       
-      if (existingProfile) {
-        const { error } = await supabase
-          .from('profiles')
-          .update(profileData)
-          .eq('id', existingProfile.id);
-
-        results.push({
-          section: 'Profil',
-          total: 1,
-          success: error ? 0 : 1,
-          errors: error ? [error.message] : []
-        });
-      } else {
-        const { error } = await supabase
-          .from('profiles')
-          .insert(profileData);
-          
-        results.push({
-          section: 'Profil',
-          total: 1,
-          success: error ? 0 : 1,
-          errors: error ? [error.message] : []
-        });
-      }
+      const { error } = await supabase
+        .from('profiles')
+        .upsert(profileData);
+        
+      results.push({
+        section: 'Profil',
+        total: 1,
+        success: error ? 0 : 1,
+        errors: error ? [error.message] : []
+      });
     } catch (e: any) {
       results.push({
         section: 'Profil',

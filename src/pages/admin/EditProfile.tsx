@@ -5,10 +5,8 @@ import { Profile } from '../../types';
 import { SupabaseService, supabase } from '../../services/supabase.service';
 import { useDropzone } from 'react-dropzone';
 import BilingualField from '../../components/admin/BilingualField';
-import { useProfileId } from '../../hooks/useProfileId';
 
 export function EditProfile() {
-  const existingProfileId = useProfileId();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingState, setSavingState] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
@@ -36,19 +34,15 @@ export function EditProfile() {
       const file = files[0];
       if (!file) return;
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Non connecté');
-
-        const ext = file.name.split('.').pop()?.toLowerCase();
-        const filePath = `avatars/${user.id}.${ext}`;
-        const { error } = await supabase.storage
+        const ext = file.name.split('.').pop();
+        const { data, error } = await supabase.storage
           .from('avatars')
-          .upload(filePath, file, { upsert: true, contentType: file.type });
+          .upload(`profile.${ext}`, file, { upsert: true });
           
         if (error) throw error;
         
         // Obtenir l'URL public
-        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(`profile.${ext}`);
         setFormData(prev => ({ ...prev, photo_url: publicUrl }));
         toast.success('Image téléchargée avec succès');
       } catch (err) {
@@ -71,23 +65,10 @@ export function EditProfile() {
     }
     setSavingState('saving');
     try {
-      const payload = { ...formData };
-      delete payload.id;
-
-      if (!existingProfileId) {
-        // Fallback to inserting if no profile exists
-        const { error } = await supabase
-          .from('profiles')
-          .insert(payload);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('profiles')
-          .update(payload)
-          .eq('id', existingProfileId);
-        if (error) throw error;
-      }
-      
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({ id: profile?.id, ...formData });
+      if (error) throw error;
       setSavingState('success');
       toast.success('Modifications enregistrées');
       setTimeout(() => setSavingState('idle'), 2000);
@@ -239,17 +220,14 @@ export function EditProfile() {
                   const file = e.target.files?.[0];
                   if (!file) return;
                   try {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (!user) throw new Error('Non connecté');
-                    
                     toast.loading('Téléchargement du CV...', { id: 'cv-upload' });
                     const { error } = await supabase.storage
                       .from('cv')
-                      .upload('cv.pdf', file, { upsert: true, contentType: 'application/pdf' });
+                      .upload(`cv.pdf`, file, { upsert: true });
                       
                     if (error) throw error;
                     
-                    const { data: { publicUrl } } = supabase.storage.from('cv').getPublicUrl('cv.pdf');
+                    const { data: { publicUrl } } = supabase.storage.from('cv').getPublicUrl(`cv.pdf`);
                     setFormData(prev => ({ ...prev, cv_url: publicUrl }));
                     toast.success('CV téléchargé avec succès', { id: 'cv-upload' });
                   } catch (err) {

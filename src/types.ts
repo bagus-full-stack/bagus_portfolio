@@ -19,6 +19,14 @@ export interface Profile {
   cv_fullstack_updated_at?: string;
   cv_ai_url?: string;
   cv_ai_updated_at?: string;
+  cv_fullstack_fr?: string;
+  cv_fullstack_en?: string;
+  cv_ai_fr?: string;
+  cv_ai_en?: string;
+  cv_fullstack_fr_updated_at?: string;
+  cv_fullstack_en_updated_at?: string;
+  cv_ai_fr_updated_at?: string;
+  cv_ai_en_updated_at?: string;
   email?: string;
   linkedin_url?: string;
   github_url?: string;

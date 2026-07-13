@@ -5,120 +5,11 @@ import { toast } from 'sonner';
 import { Loader2, Download, ChevronDown, Code, Brain } from 'lucide-react';
 import useTheme from '../hooks/useTheme';
 
+import CVDropdown from './CVDropdown';
 import Skeleton from './ui/Skeleton';
-
-const CVDropdown = () => {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState<string | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Fermer si clic en dehors
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
-
-  const downloadCV = async (type: 'fullstack' | 'ai') => {
-    setLoading(type);
-    try {
-      const filename = type === 'fullstack'
-        ? 'cv-fullstack.pdf'
-        : 'cv-ai-engineer.pdf';
-
-      const { data, error } = await supabase
-        .storage
-        .from('cv')
-        .createSignedUrl(filename, 3600);
-
-      if (error) throw error;
-
-      const a = document.createElement('a');
-      a.href = data.signedUrl;
-      a.download = type === 'fullstack'
-        ? 'CV-Assami-Baga-FullStack.pdf'
-        : 'CV-Assami-Baga-AI-Engineer.pdf';
-      a.click();
-
-    } catch {
-      toast.error('Téléchargement impossible');
-    } finally {
-      setLoading(null);
-      setOpen(false);
-    }
-  };
-
-  return (
-    <div ref={ref} className="relative w-full sm:w-auto [.presentation-mode_&]:hidden">
-      {/* Bouton principal */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full sm:w-auto px-8 py-3.5 rounded-sm border border-[var(--border-subtle)] text-[var(--text-primary)] font-space font-medium transition-colors hover:bg-[var(--text-primary)]/5 flex items-center justify-center bg-[var(--bg-primary)] gap-2"
-      >
-        <Download size={16} />
-        Télécharger le CV
-        <ChevronDown
-          size={14}
-          className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute top-full right-0 sm:left-0 mt-2 w-64 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-elevated)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-          {/* Option Full Stack */}
-          <button
-            onClick={() => downloadCV('fullstack')}
-            disabled={loading === 'fullstack'}
-            className="w-full flex items-center gap-3 px-4 py-3 text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors text-left disabled:opacity-50"
-          >
-            <div className="w-8 h-8 rounded-lg bg-[#E08A3E]/20 flex items-center justify-center shrink-0">
-              {loading === 'fullstack' ? (
-                <Loader2 size={14} className="text-[#E08A3E] animate-spin" />
-              ) : (
-                <Code size={14} className="text-[#E08A3E]" />
-              )}
-            </div>
-            <div>
-              <p className="font-[Inter] text-sm font-medium">CV Full Stack</p>
-              <p className="font-[JetBrains_Mono] text-xs text-[var(--text-muted)]">Angular · React · NestJS</p>
-            </div>
-          </button>
-
-          {/* Séparateur */}
-          <div className="h-px bg-[var(--border-subtle)]" />
-
-          {/* Option AI Engineer */}
-          <button
-            onClick={() => downloadCV('ai')}
-            disabled={loading === 'ai'}
-            className="w-full flex items-center gap-3 px-4 py-3 text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors text-left disabled:opacity-50"
-          >
-            <div className="w-8 h-8 rounded-lg bg-[#2DD4BF]/20 flex items-center justify-center shrink-0">
-              {loading === 'ai' ? (
-                <Loader2 size={14} className="text-[#2DD4BF] animate-spin" />
-              ) : (
-                <Brain size={14} className="text-[#2DD4BF]" />
-              )}
-            </div>
-            <div>
-              <p className="font-[Inter] text-sm font-medium">CV AI Engineer</p>
-              <p className="font-[JetBrains_Mono] text-xs text-[var(--text-muted)]">PyTorch · YOLO · HuggingFace</p>
-            </div>
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
 
 export function HeroSection() {
   const [views, setViews] = useState<number | null>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
   const { t } = useTranslation();
   const { isDark } = useTheme();
 
@@ -176,28 +67,6 @@ export function HeroSection() {
 
     trackAndCount()
   }, []);
-
-  const getCvUrl = async () => {
-    if (!supabase) {
-      toast.error('Supabase non configuré.');
-      return;
-    }
-    setIsDownloading(true);
-    try {
-      const { data, error } = await supabase
-        .storage
-        .from('cv') // nom du bucket
-        .createSignedUrl('cv.pdf', 3600); // valide 1h
-        
-      if (error) throw error;
-      if (data) window.open(data.signedUrl, '_blank');
-    } catch (err) {
-      toast.error('Erreur lors du téléchargement du CV.');
-      // console.error(err);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
 
   // Programmatic SVG generation for the background node graph
   const graph = useMemo(() => {

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase.service'
 import { WifiOff, Link2Off } from 'lucide-react'
 
+import { CV_CONFIG, CVType } from '../config/cv.config'
+
 type State = 'loading' | 'offline' | 'not_found' | 'error'
 
 const ShortUrlRedirect = () => {
@@ -22,8 +24,20 @@ const ShortUrlRedirect = () => {
 
       try {
         // Logique spéciale pour les CV
-        if (slug === 'cv-fullstack' || slug === 'cv-ai') {
-          const filename = slug === 'cv-fullstack' ? 'cv-fullstack.pdf' : 'cv-ai-engineer.pdf';
+        const cvSlugMap: Record<string, CVType> = {
+          'cv-fullstack-fr': 'fullstack_fr',
+          'cv-fullstack-en': 'fullstack_en',
+          'cv-ai-fr': 'ai_fr',
+          'cv-ai-en': 'ai_en',
+          // Rétrocompatibilité avec les anciens liens
+          'cv-fullstack': 'fullstack_fr',
+          'cv-ai': 'ai_fr'
+        };
+
+        if (slug in cvSlugMap) {
+          const cvType = cvSlugMap[slug];
+          const filename = CV_CONFIG[cvType].filename;
+          
           const { data: signedData, error: signedError } = await supabase
             .storage
             .from('cv')
@@ -31,7 +45,7 @@ const ShortUrlRedirect = () => {
 
           if (!signedError && signedData) {
             // Incrémenter clics si le lien existe en base
-            supabase.rpc('increment_short_url_clicks', { p_slug: slug }).catch(() => {});
+            supabase.rpc('increment_short_url_clicks', { p_slug: slug }).then(() => {});
             window.location.href = signedData.signedUrl;
             return;
           }

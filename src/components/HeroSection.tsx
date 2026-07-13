@@ -16,56 +16,30 @@ export function HeroSection() {
   useEffect(() => {
     const trackAndCount = async () => {
       try {
-        // Tentative 1 : Edge Function complète
-        const { data, error } =
-          await supabase.functions.invoke(
-            'track-visitor',
-            {
-              body: {
-                page: window.location.pathname
-              }
-            }
-          )
+        let fingerprint = localStorage.getItem('visitor_fingerprint');
+        if (!fingerprint) {
+          fingerprint = crypto.randomUUID().slice(0, 32);
+          localStorage.setItem('visitor_fingerprint', fingerprint);
+        }
+
+        // Appel direct à increment_visitors qui gère l'unicité
+        const { data, error } = await supabase.rpc('increment_visitors', {
+          p_fingerprint: fingerprint,
+          p_page: window.location.pathname,
+          p_country: '',
+          p_city: ''
+        });
 
         if (!error && data?.total) {
-          setViews(data.total)
-          return
+          setViews(data.total);
+        } else {
+          setViews(0);
         }
-
-        throw new Error('Function failed')
-
-      } catch {
-        // Tentative 2 : Fallback direct Supabase
-        // sans Edge Function
-        try {
-          const alreadyCounted =
-            sessionStorage.getItem('visitor_counted')
-
-          if (!alreadyCounted) {
-            await supabase.rpc('increment_visitors', {
-              p_fingerprint: crypto.randomUUID()
-                .slice(0, 32),
-              p_page: window.location.pathname,
-              p_country: '',
-              p_city: ''
-            })
-            sessionStorage.setItem(
-              'visitor_counted', 'true'
-            )
-          }
-
-          const { data: countData } =
-            await supabase.rpc('get_visitor_count')
-          setViews(countData || 0)
-
-        } catch {
-          // Fallback silencieux — afficher 0
-          setViews(0)
-        }
+      } catch (err) {
+        setViews(0);
       }
-    }
-
-    trackAndCount()
+    };
+    trackAndCount();
   }, []);
 
   // Programmatic SVG generation for the background node graph

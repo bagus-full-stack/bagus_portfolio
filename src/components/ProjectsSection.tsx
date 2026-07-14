@@ -5,9 +5,11 @@ import { Project } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
 import { useTranslation } from '../hooks/useTranslation';
+import { useSectionTracker } from '../hooks/useSectionTracker';
 import { useLocalizedField } from '../hooks/useLocalizedField';
 
 export function ProjectsSection() {
+  const sectionRef = useSectionTracker('Projects');
   const { t: translate } = useTranslation();
   const { t } = useLocalizedField();
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ export function ProjectsSection() {
 
   if (error) {
     return (
-      <section id="projects" className="py-24 bg-bg-card/20 border-t border-white/5">
+      <section id="projects" ref={sectionRef as any} className="py-24 bg-bg-card/20 border-t border-white/5">
          <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-sm text-sm font-inter">
             {translate('projects.error')}

@@ -5,9 +5,11 @@ import { SupabaseService, supabase } from '../services/supabase.service';
 import { toast } from 'sonner';
 import { X, Folder } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
+import { useSectionTracker } from '../hooks/useSectionTracker';
 
 export function SkillsSection() {
   const { t } = useTranslation();
+  const sectionRef = useSectionTracker('Skills');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [skills, setSkills] = useState<Skill[]>([]);

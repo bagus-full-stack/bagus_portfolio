@@ -22,7 +22,8 @@ import {
   Legend,
   Filler
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
+import { BarElement } from 'chart.js';
 import { SupabaseService } from '../../services/supabase.service';
 import { VisitorLog, ChartDataPoint, AnalyticsMetrics } from '../../types';
 
@@ -31,6 +32,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -46,6 +48,7 @@ export function Analytics() {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
   const [logs, setLogs] = useState<VisitorLog[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -63,14 +66,16 @@ export function Analytics() {
     setLoading(true);
     setError(false);
     try {
-      const [chart, metricsData, logsData] = await Promise.all([
+      const [chart, metricsData, logsData, eventsData] = await Promise.all([
         SupabaseService.getAnalyticsChart(period),
         SupabaseService.getAnalyticsMetrics(),
-        SupabaseService.getVisitorLogs()
+        SupabaseService.getVisitorLogs(),
+        SupabaseService.getAnalyticsEvents(period)
       ]);
       setChartData(chart);
       setMetrics(metricsData);
       setLogs(logsData);
+      setEvents(eventsData);
     } catch (e) {
       setError(true);
     } finally {
@@ -99,6 +104,47 @@ export function Analytics() {
     }
     return sortOrder === 'asc' ? comparison : -comparison;
   });
+
+
+
+  // Advanced Stats computation
+  const sectionViews = events.filter(e => e.event_type === 'section_view');
+  const sectionTimes = sectionViews.reduce((acc, curr) => {
+    acc[curr.event_name] = (acc[curr.event_name] || 0) + curr.duration;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const skillClicks = events.filter(e => e.event_type === 'skill_click');
+  const skillCounts = skillClicks.reduce((acc, curr) => {
+    acc[curr.event_name] = (acc[curr.event_name] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Sort and prep for charts
+  const topSkills = Object.entries(skillCounts).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 5);
+  const topSections = Object.entries(sectionTimes).sort((a, b) => (b[1] as number) - (a[1] as number));
+
+  const skillChartData = {
+    labels: topSkills.map(s => s[0]),
+    datasets: [{
+      label: 'Clics',
+      data: topSkills.map(s => s[1]),
+      backgroundColor: 'rgba(217, 119, 87, 0.5)',
+      borderColor: '#D97757',
+      borderWidth: 1
+    }]
+  };
+
+  const sectionChartData = {
+    labels: topSections.map(s => s[0]),
+    datasets: [{
+      label: 'Temps (secondes)',
+      data: topSections.map(s => s[1]),
+      backgroundColor: 'rgba(64, 191, 172, 0.5)',
+      borderColor: '#40BFAC',
+      borderWidth: 1
+    }]
+  };
 
   const totalPages = Math.ceil(sortedLogs.length / itemsPerPage);
   const paginatedLogs = sortedLogs.slice(
@@ -320,6 +366,54 @@ export function Analytics() {
                       <ArrowUp size={14} className="mr-1" /> Élevé
                     </span>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+
+
+          {/* Advanced Analytics */}
+          {events.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-bg-card border border-white/5 p-6 rounded-xl">
+                <h3 className="font-space text-lg font-bold mb-6 flex items-center">
+                  <Activity size={20} className="mr-2 text-accent-ocre" />
+                  Compétences les plus consultées
+                </h3>
+                <div className="h-64">
+                  <Bar 
+                    data={skillChartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: { legend: { display: false } },
+                      scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } },
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-bg-card border border-white/5 p-6 rounded-xl">
+                <h3 className="font-space text-lg font-bold mb-6 flex items-center">
+                  <Clock size={20} className="mr-2 text-accent-cyan" />
+                  Temps passé par section (sec)
+                </h3>
+                <div className="h-64">
+                  <Bar 
+                    data={sectionChartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: { legend: { display: false } },
+                      scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } },
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } }
+                      }
+                    }}
+                  />
                 </div>
               </div>
             </div>

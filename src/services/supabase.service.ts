@@ -81,6 +81,47 @@ export const supabase = (supabaseUrl && supabaseKey)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const SupabaseService = {
+
+  async trackEvent(eventType: string, eventName: string, duration: number = 0) {
+    if (!supabaseUrl || !supabaseKey) return;
+    try {
+      let visitorId = localStorage.getItem('visitor_fingerprint');
+      if (!visitorId) {
+        visitorId = crypto.randomUUID().slice(0, 32);
+        localStorage.setItem('visitor_fingerprint', visitorId);
+      }
+      const { error } = await supabase
+        .from('analytics_events')
+        .insert([{ visitor_id: visitorId, event_type: eventType, event_name: eventName, duration }]);
+      if (error) {
+        console.warn('Could not track event', error.message);
+      }
+    } catch (e) {
+      console.warn('Analytics disabled');
+    }
+  },
+
+  async getAnalyticsEvents(period: string = '7') {
+    if (!supabaseUrl || !supabaseKey) return [];
+    try {
+      const now = new Date();
+      const startDate = new Date();
+      startDate.setDate(now.getDate() - parseInt(period));
+      
+      const { data, error } = await supabase
+        .from('analytics_events')
+        .select('*')
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      return data || [];
+    } catch (e) {
+      console.warn('Failed to load events');
+      return [];
+    }
+  },
+
   async getProfile(): Promise<Profile> {
     if (supabase) {
       const { data, error } = await supabase.from('profiles').select('*').maybeSingle();

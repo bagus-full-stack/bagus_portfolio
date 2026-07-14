@@ -3,6 +3,7 @@ import { Experience } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
 import { useTranslation } from '../hooks/useTranslation';
+import { useSectionTracker } from '../hooks/useSectionTracker';
 import { useLocalizedField } from '../hooks/useLocalizedField';
 
 const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, isEven }) => {
@@ -72,6 +73,7 @@ const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, i
 
 export function ExperiencesSection() {
   const { t } = useTranslation();
+  const sectionRef = useSectionTracker('ExperiencesSection');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -101,7 +103,7 @@ export function ExperiencesSection() {
 
   if (error) {
     return (
-      <section id="experiences" className="py-24 bg-bg-primary">
+      <section id="experiences" ref={sectionRef as any} className="py-24 bg-bg-primary">
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24">
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-sm text-sm font-inter">
             {t('experiences.error')}

@@ -761,3 +761,23 @@ DELETE FROM activity_logs
   WHERE description LIKE '%test@validation.com%';
 DELETE FROM notifications
   WHERE message LIKE '%Test Recruteur%';
+
+-- TABLE : analytics_events (suivi avancé)
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  visitor_id text,
+  event_type text NOT NULL,
+  event_name text NOT NULL,
+  duration integer DEFAULT 0,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "public_insert_analytics_events" 
+  ON analytics_events FOR INSERT 
+  WITH CHECK (true);
+
+CREATE POLICY "admin_read_analytics_events" 
+  ON analytics_events FOR SELECT 
+  USING ( auth.uid() IN (SELECT id FROM admin_users) );

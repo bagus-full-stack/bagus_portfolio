@@ -14,7 +14,8 @@ export function NewsPage() {
     <div className="pt-24 min-h-screen">
       <SEOHead meta={{
         title: `${t('tech_news.title')} | Assami Baga`,
-        description: "Retrouvez les dernières actualités Tech selectionnées."
+        description: "Retrouvez les dernières actualités Tech selectionnées.",
+        url: "https://assamibaga.com/news"
       }} />
       <TechNewsSection />
     </div>

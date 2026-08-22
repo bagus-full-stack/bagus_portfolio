@@ -136,8 +136,46 @@ export function ChatbotWidget() {
         
         console.log("Local API not available, falling back to Supabase Edge Function...");
         if (!supabase) throw new Error("Supabase not configured");
+        
+        // Fetch CV data for the old Edge Function payload
+        const [
+          { data: profile },
+          { data: experiences },
+          { data: projects },
+          { data: skills }
+        ] = await Promise.all([
+          supabase.from('profiles').select('*').maybeSingle(),
+          supabase.from('experiences').select('*').order('start_date', { ascending: false }),
+          supabase.from('projects').select('*'),
+          supabase.from('skills').select('*')
+        ]);
+        
+        const cvData = {
+          name: profile?.full_name || "Assami Baga",
+          role: profile?.title || "Ingénieur Full Stack & IA",
+          bio: profile?.bio || "",
+          experiences: (experiences || []).map((exp: any) => ({
+            role: exp.role,
+            company: exp.company,
+            period: `${exp.start_date} - ${exp.end_date || 'Présent'}`,
+            description: exp.description
+          })),
+          projects: (projects || []).map((p: any) => ({
+            title: p.title,
+            description: p.description,
+            technologies: p.technologies
+          })),
+          skills: (skills || []).map((s: any) => s.name),
+        };
+
         const { data: supabaseData, error: invokeError } = await supabase.functions.invoke('chat-resume', {
-          body: { message: trimmedText, history: messages.slice(-10) },
+          body: { 
+            message: trimmedText, 
+            history: messages.slice(-10),
+            // Legacy edge function compatibility:
+            question: trimmedText,
+            context: JSON.stringify({ cv: cvData, history: messages.slice(-10) })
+          },
           signal: abortControllerRef.current.signal
         } as any);
         
@@ -147,7 +185,7 @@ export function ChatbotWidget() {
       
       const assistantMsg: ChatMessage = {
         role: 'assistant',
-        content: data.response,
+        content: data.response || data.reply,
         timestamp: new Date().toISOString()
       };
       

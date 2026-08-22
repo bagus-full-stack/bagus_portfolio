@@ -16,23 +16,23 @@ export function HeroSection() {
   useEffect(() => {
     const trackAndCount = async () => {
       try {
-        let fingerprint = localStorage.getItem('visitor_fingerprint');
-        if (!fingerprint) {
-          fingerprint = crypto.randomUUID().slice(0, 32);
-          localStorage.setItem('visitor_fingerprint', fingerprint);
+        const hasVisited = localStorage.getItem('has_visited_portfolio');
+        
+        // If not visited yet, increment the counter
+        if (!hasVisited) {
+          const { error: incError } = await supabase.rpc('increment_visitors');
+          if (!incError) {
+            localStorage.setItem('has_visited_portfolio', 'true');
+          }
         }
 
-        // Appel direct à increment_visitors qui gère l'unicité
-        const { data, error } = await supabase.rpc('increment_visitors', {
-          p_fingerprint: fingerprint,
-          p_page: window.location.pathname,
-          p_country: '',
-          p_city: ''
-        });
-
-        if (!error && data?.total) {
-          setViews(data.total);
+        // Always get the current count
+        const { data, error } = await supabase.rpc('get_visitor_count');
+        
+        if (!error && data !== null) {
+          setViews(Number(data));
         } else {
+          // Fallback if error
           setViews(0);
         }
       } catch (err) {

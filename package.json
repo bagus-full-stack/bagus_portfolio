@@ -29,6 +29,7 @@
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "openai": "^6.45.0",
+    "puppeteer": "^25.8.0",
     "react": "^19.0.1",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.0.1",

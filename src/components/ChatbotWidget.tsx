@@ -13,7 +13,7 @@ export function ChatbotWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | false>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -117,15 +117,33 @@ export function ChatbotWidget() {
     abortControllerRef.current = new AbortController();
 
     try {
-      const res = await fetch('/api/chat-resume', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmedText, history: messages.slice(-10) }),
-        signal: abortControllerRef.current.signal
-      });
-      
-      if (!res.ok) throw new Error('API Error');
-      const data = await res.json();
+      let data;
+      try {
+        const res = await fetch('/api/chat-resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: trimmedText, history: messages.slice(-10) }),
+          signal: abortControllerRef.current.signal
+        });
+        
+        if (!res.ok) {
+          if (res.status === 404) throw new Error('FallbackToSupabase');
+          throw new Error(`API Error: ${res.status}`);
+        }
+        data = await res.json();
+      } catch (innerErr: any) {
+        if (innerErr.name === 'AbortError') throw innerErr;
+        
+        console.log("Local API not available, falling back to Supabase Edge Function...");
+        if (!supabase) throw new Error("Supabase not configured");
+        const { data: supabaseData, error: invokeError } = await supabase.functions.invoke('chat-resume', {
+          body: { message: trimmedText, history: messages.slice(-10) },
+          signal: abortControllerRef.current.signal
+        } as any);
+        
+        if (invokeError) throw invokeError;
+        data = supabaseData;
+      }
       
       const assistantMsg: ChatMessage = {
         role: 'assistant',
@@ -140,7 +158,7 @@ export function ChatbotWidget() {
         return;
       }
       // console.error(e);
-      setError(true);
+      setError(e.message || String(e));
       // We don't add an error message to the history as requested, just show inline error
     } finally {
       setLoading(false);
@@ -288,7 +306,7 @@ export function ChatbotWidget() {
             {/* Error Message */}
             {error && (
               <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-center mx-4">
-                {t('chatbot.error')}
+                {t('chatbot.error')} - {error}
               </div>
             )}
 

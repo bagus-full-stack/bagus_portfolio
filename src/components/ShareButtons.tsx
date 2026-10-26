@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
-import { Copy, Linkedin, Download, Check, Loader2 } from 'lucide-react';
-import useDownloadCV from '../hooks/useDownloadCV';
-import { useTranslation } from '../hooks/useTranslation';
+import { Copy, Linkedin, Check } from 'lucide-react';
+import CVDropdown from './CVDropdown';
 
 export function ShareButtons() {
   const [copied, setCopied] = useState(false);
-  const { lang } = useTranslation();
-  const { downloadCV, loading: cvLoading } = useDownloadCV();
-  const loading = cvLoading !== null;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -19,8 +15,6 @@ export function ShareButtons() {
     const encodedUrl = encodeURIComponent(window.location.href);
     window.open(`https://linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, '_blank', 'noopener,noreferrer');
   };
-
-  const handleDownloadCV = () => downloadCV(lang === 'en' ? 'fullstack_en' : 'fullstack_fr');
 
   return (
     <div className="flex flex-wrap items-center gap-4 mt-16 pt-10 border-t border-white/5">
@@ -49,20 +43,7 @@ export function ShareButtons() {
         Partager sur LinkedIn
       </button>
 
-      <button
-        onClick={handleDownloadCV}
-        disabled={loading}
-        className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)]/30 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] transition-colors disabled:opacity-50"
-      >
-        {loading ? (
-          <Loader2 size={16} className="animate-spin" />
-        ) : (
-          <Download size={16} />
-        )}
-        <span className="font-space text-sm">
-          CV PDF
-        </span>
-      </button>
+      <CVDropdown dropUp />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Download, ChevronDown, Code, Brain, Loader2 } from 'lucide-react'
 import useDownloadCV from '../hooks/useDownloadCV'
 import { CV_TYPES, CVType } from '../config/cv.config'
 
-const CVDropdown = () => {
+const CVDropdown = ({ dropUp = false }: { dropUp?: boolean }) => {
   const [open, setOpen] = useState(false)
   const { downloadCV, loading } = useDownloadCV()
   const ref = useRef<HTMLDivElement>(null)
@@ -49,7 +49,7 @@ const CVDropdown = () => {
 
       {/* Panel dropdown */}
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-64 z-50 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden shadow-[var(--shadow-elevated)] animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className={`absolute ${dropUp ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 w-64 z-50 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden shadow-[var(--shadow-elevated)] animate-in fade-in duration-150`}>
           
           {/* GROUPE Full Stack */}
           <div>

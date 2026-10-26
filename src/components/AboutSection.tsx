@@ -96,10 +96,12 @@ export function AboutSection() {
                     <MapPin size={16} className="mr-2" />
                     {profile.location}
                   </div>
-                  <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="flex items-center text-accent-cyan hover:text-accent-cyan/80 font-inter text-sm transition-colors">
-                    <Linkedin size={16} className="mr-2" />
-                    Profil LinkedIn
-                  </a>
+                  {profile.linkedin_url && (
+                    <a href={profile.linkedin_url} target="_blank" rel="noreferrer" className="flex items-center text-accent-cyan hover:text-accent-cyan/80 font-inter text-sm transition-colors">
+                      <Linkedin size={16} className="mr-2" />
+                      Profil LinkedIn
+                    </a>
+                  )}
                 </div>
               </>
             )}

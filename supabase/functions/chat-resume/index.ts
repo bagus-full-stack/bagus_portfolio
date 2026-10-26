@@ -29,6 +29,8 @@ const MODELS = [
 
 const rateLimit = new Map<string, number>();
 const RATE_LIMIT_WINDOW = 3000; // 3 seconds
+const MAX_HISTORY = 10;
+const MAX_HISTORY_CHARS = 500;
 
 serve(async (req) => {
   const origin = req.headers.get('origin')
@@ -69,6 +71,10 @@ serve(async (req) => {
       })
     }
     rateLimit.set(ip, now);
+    // La Map ne doit pas grossir sans fin : on purge les entrées déjà expirées
+    if (rateLimit.size > 1000) {
+      for (const [k, t] of rateLimit) if (now - t >= RATE_LIMIT_WINDOW) rateLimit.delete(k);
+    }
 
     const { message, history } = await req.json() as ChatRequest
 
@@ -138,9 +144,13 @@ CV : ${CV_JSON}`;
 
     // Formatage de l'historique pour l'API Gemini
     // L'API Google attend "user" ou "model" (au lieu de "assistant")
-    const geminiContents = (history || []).map((msg) => ({
+    // Historique venu du client : on borne le nombre et la taille des messages (coût Gemini)
+    const safeHistory = (Array.isArray(history) ? history : [])
+      .slice(-MAX_HISTORY)
+      .filter((msg) => typeof msg?.content === 'string' && msg.content.trim() !== '')
+    const geminiContents = safeHistory.map((msg) => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
+      parts: [{ text: msg.content.slice(0, MAX_HISTORY_CHARS) }]
     }))
     
     // Ajout du message actuel de l'utilisateur

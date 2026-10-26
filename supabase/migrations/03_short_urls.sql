@@ -15,6 +15,7 @@ CREATE INDEX IF NOT EXISTS idx_short_urls_active
   ON short_urls(active);
 
 -- Trigger updated_at
+DROP TRIGGER IF EXISTS trigger_short_urls_updated_at ON short_urls;
 CREATE TRIGGER trigger_short_urls_updated_at
   BEFORE UPDATE ON short_urls
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -24,12 +25,14 @@ ALTER TABLE short_urls
   ENABLE ROW LEVEL SECURITY;
 
 -- Lecture publique (pour la redirection)
+DROP POLICY IF EXISTS "public_read_short_urls" ON short_urls;
 CREATE POLICY "public_read_short_urls"
   ON short_urls FOR SELECT
   TO anon, authenticated
   USING (active = true);
 
 -- Écriture admin uniquement
+DROP POLICY IF EXISTS "admin_all_short_urls" ON short_urls;
 CREATE POLICY "admin_all_short_urls"
   ON short_urls FOR ALL
   TO authenticated

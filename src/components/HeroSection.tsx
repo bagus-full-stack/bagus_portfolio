@@ -20,7 +20,12 @@ export function HeroSection() {
         
         // If not visited yet, increment the counter
         if (!hasVisited) {
-          const { error: incError } = await supabase.rpc('increment_visitors');
+          let fingerprint = localStorage.getItem('visitor_fingerprint');
+          if (!fingerprint) {
+            fingerprint = crypto.randomUUID().replace(/-/g, '');
+            localStorage.setItem('visitor_fingerprint', fingerprint);
+          }
+          const { error: incError } = await supabase.rpc('increment_visitors', { p_fingerprint: fingerprint, p_page: '/' });
           if (!incError) {
             localStorage.setItem('has_visited_portfolio', 'true');
           }

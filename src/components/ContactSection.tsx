@@ -4,10 +4,12 @@ import { Mail, Calendar, Linkedin, Github, Loader2 } from 'lucide-react';
 import { ContactForm } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { useTranslation } from '../hooks/useTranslation';
+import { useProfile } from '../hooks/useProfile';
 import { BookingModal } from './BookingModal';
 
 export function ContactSection() {
   const { t } = useTranslation();
+  const { profile } = useProfile();
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [honeypot, setHoneypot] = useState('');
   const [formData, setFormData] = useState<ContactForm>({
@@ -58,14 +60,18 @@ export function ContactSection() {
             <div>
               <h3 className="font-space text-xl font-semibold text-text-primary mb-4">{t('contact.subtitle')}</h3>
               
-              <a 
-                href="mailto:contact@example.com" 
-                className="inline-flex items-center text-text-primary hover:text-accent-ocre transition-colors font-inter mb-6"
-              >
-                <Mail size={20} className="mr-3 text-accent-ocre" />
-                contact@example.com
-              </a>
-              <br />
+              {profile?.email && (
+                <>
+                  <a 
+                    href={`mailto:${profile.email}`} 
+                    className="inline-flex items-center text-text-primary hover:text-accent-ocre transition-colors font-inter mb-6"
+                  >
+                    <Mail size={20} className="mr-3 text-accent-ocre" />
+                    {profile.email}
+                  </a>
+                  <br />
+                </>
+              )}
                 <BookingModal 
                   isOpen={bookingModalOpen}
                   onClose={() => setBookingModalOpen(false)}
@@ -82,12 +88,16 @@ export function ContactSection() {
             <div className="pt-8 border-t border-white/5">
               <h4 className="font-inter text-sm text-text-muted mb-4 uppercase tracking-wider">Réseaux</h4>
               <div className="flex flex-col space-y-4">
-                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="flex items-center text-text-muted hover:text-text-primary transition-colors font-inter text-sm">
-                  <Linkedin size={18} className="mr-3" /> LinkedIn
-                </a>
-                <a href="https://github.com" target="_blank" rel="noreferrer" className="flex items-center text-text-muted hover:text-text-primary transition-colors font-inter text-sm">
-                  <Github size={18} className="mr-3" /> GitHub
-                </a>
+                {profile?.linkedin_url && (
+                  <a href={profile.linkedin_url} target="_blank" rel="noreferrer" className="flex items-center text-text-muted hover:text-text-primary transition-colors font-inter text-sm">
+                    <Linkedin size={18} className="mr-3" /> LinkedIn
+                  </a>
+                )}
+                {profile?.github_url && (
+                  <a href={profile.github_url} target="_blank" rel="noreferrer" className="flex items-center text-text-muted hover:text-text-primary transition-colors font-inter text-sm">
+                    <Github size={18} className="mr-3" /> GitHub
+                  </a>
+                )}
               </div>
             </div>
           </div>

@@ -1,8 +1,10 @@
 import { Github, Linkedin, Mail } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
+import { useProfile } from '../hooks/useProfile';
 
 export function Footer() {
   const { t } = useTranslation();
+  const { profile } = useProfile();
   return (
     <footer className="no-print bg-bg-primary border-t border-white/5 py-10">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-24 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -21,24 +23,28 @@ export function Footer() {
         </button>
 
         <div className="flex items-center space-x-6">
-          <a 
-            href="https://github.com" 
-            target="_blank" 
-            rel="noreferrer" 
-            className="text-text-muted hover:text-text-primary transition-colors"
-          >
-            <span className="sr-only">GitHub</span>
-            <Github size={20} />
-          </a>
-          <a 
-            href="https://linkedin.com" 
-            target="_blank" 
-            rel="noreferrer" 
-            className="text-text-muted hover:text-text-primary transition-colors"
-          >
-            <span className="sr-only">LinkedIn</span>
-            <Linkedin size={20} />
-          </a>
+          {profile?.github_url && (
+            <a 
+              href={profile.github_url} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="text-text-muted hover:text-text-primary transition-colors"
+            >
+              <span className="sr-only">GitHub</span>
+              <Github size={20} />
+            </a>
+          )}
+          {profile?.linkedin_url && (
+            <a 
+              href={profile.linkedin_url} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="text-text-muted hover:text-text-primary transition-colors"
+            >
+              <span className="sr-only">LinkedIn</span>
+              <Linkedin size={20} />
+            </a>
+          )}
           <a 
             href="mailto:bagaassami009@gmail.com" 
             className="text-text-muted hover:text-text-primary transition-colors"

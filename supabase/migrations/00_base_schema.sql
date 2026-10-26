@@ -222,53 +222,63 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
 -- Lecture publique (front-office)
+DROP POLICY IF EXISTS "public_read_profiles" ON profiles;
 CREATE POLICY "public_read_profiles"
   ON profiles FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "public_read_experiences" ON experiences;
 CREATE POLICY "public_read_experiences"
   ON experiences FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "public_read_projects" ON projects;
 CREATE POLICY "public_read_projects"
   ON projects FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "public_read_skills" ON skills;
 CREATE POLICY "public_read_skills"
   ON skills FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "public_read_skill_categories" ON skill_categories;
 CREATE POLICY "public_read_skill_categories"
   ON skill_categories FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "public_read_certifications" ON certifications;
 CREATE POLICY "public_read_certifications"
   ON certifications FOR SELECT
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "public_read_testimonials" ON testimonials;
 CREATE POLICY "public_read_testimonials"
   ON testimonials FOR SELECT
   TO anon, authenticated
   USING (true);
 
 -- Écriture publique limitée
+DROP POLICY IF EXISTS "public_insert_messages" ON messages;
 CREATE POLICY "public_insert_messages"
   ON messages FOR INSERT
   TO anon, authenticated
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "public_insert_analytics" ON analytics;
 CREATE POLICY "public_insert_analytics"
   ON analytics FOR INSERT
   TO anon, authenticated
   WITH CHECK (true);
 
 -- Admin uniquement — accès complet
+DROP POLICY IF EXISTS "admin_all_profiles" ON profiles;
 CREATE POLICY "admin_all_profiles"
   ON profiles FOR ALL
   TO authenticated
@@ -279,6 +289,7 @@ CREATE POLICY "admin_all_profiles"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_all_experiences" ON experiences;
 CREATE POLICY "admin_all_experiences"
   ON experiences FOR ALL
   TO authenticated
@@ -289,6 +300,7 @@ CREATE POLICY "admin_all_experiences"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_all_projects" ON projects;
 CREATE POLICY "admin_all_projects"
   ON projects FOR ALL
   TO authenticated
@@ -299,6 +311,7 @@ CREATE POLICY "admin_all_projects"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_all_skills" ON skills;
 CREATE POLICY "admin_all_skills"
   ON skills FOR ALL
   TO authenticated
@@ -309,6 +322,7 @@ CREATE POLICY "admin_all_skills"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_all_skill_categories" ON skill_categories;
 CREATE POLICY "admin_all_skill_categories"
   ON skill_categories FOR ALL
   TO authenticated
@@ -319,6 +333,7 @@ CREATE POLICY "admin_all_skill_categories"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_all_certifications" ON certifications;
 CREATE POLICY "admin_all_certifications"
   ON certifications FOR ALL
   TO authenticated
@@ -329,6 +344,7 @@ CREATE POLICY "admin_all_certifications"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_all_testimonials" ON testimonials;
 CREATE POLICY "admin_all_testimonials"
   ON testimonials FOR ALL
   TO authenticated
@@ -339,6 +355,7 @@ CREATE POLICY "admin_all_testimonials"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_all_messages" ON messages;
 CREATE POLICY "admin_all_messages"
   ON messages FOR ALL
   TO authenticated
@@ -349,6 +366,7 @@ CREATE POLICY "admin_all_messages"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_read_analytics" ON analytics;
 CREATE POLICY "admin_read_analytics"
   ON analytics FOR SELECT
   TO authenticated
@@ -356,6 +374,7 @@ CREATE POLICY "admin_read_analytics"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_all_activity_logs" ON activity_logs;
 CREATE POLICY "admin_all_activity_logs"
   ON activity_logs FOR ALL
   TO authenticated
@@ -366,6 +385,7 @@ CREATE POLICY "admin_all_activity_logs"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_all_notifications" ON notifications;
 CREATE POLICY "admin_all_notifications"
   ON notifications FOR ALL
   TO authenticated
@@ -376,6 +396,7 @@ CREATE POLICY "admin_all_notifications"
     EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "admin_read_admin_users" ON admin_users;
 CREATE POLICY "admin_read_admin_users"
   ON admin_users FOR SELECT
   TO authenticated
@@ -520,22 +541,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_profiles_updated_at ON profiles;
 CREATE TRIGGER trigger_profiles_updated_at
   BEFORE UPDATE ON profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_experiences_updated_at ON experiences;
 CREATE TRIGGER trigger_experiences_updated_at
   BEFORE UPDATE ON experiences
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_projects_updated_at ON projects;
 CREATE TRIGGER trigger_projects_updated_at
   BEFORE UPDATE ON projects
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_certifications_updated_at ON certifications;
 CREATE TRIGGER trigger_certifications_updated_at
   BEFORE UPDATE ON certifications
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_testimonials_updated_at ON testimonials;
 CREATE TRIGGER trigger_testimonials_updated_at
   BEFORE UPDATE ON testimonials
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -569,6 +595,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS trigger_log_new_message ON messages;
 CREATE TRIGGER trigger_log_new_message
   AFTER INSERT ON messages
   FOR EACH ROW EXECUTE FUNCTION log_new_message();
@@ -591,6 +618,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS trigger_log_new_visitor ON analytics;
 CREATE TRIGGER trigger_log_new_visitor
   AFTER INSERT ON analytics
   FOR EACH ROW EXECUTE FUNCTION log_new_visitor();
@@ -609,7 +637,7 @@ INSERT INTO profiles (
   email,
   linkedin_url,
   github_url
-) VALUES (
+) SELECT
   'Assami Baga',
   'Full Stack & AI Engineer',
   'Ingénieur passionné par le développement full-stack et l''intelligence artificielle. Créateur d''AgroSahel AI, une solution de diagnostic agricole pour les cultures du Sahel.',
@@ -617,8 +645,7 @@ INSERT INTO profiles (
   'ton-email@gmail.com',
   'https://linkedin.com/in/ton-profil',
   'https://github.com/bagus-full-stack'
-)
-ON CONFLICT DO NOTHING;
+WHERE NOT EXISTS (SELECT 1 FROM profiles);
 
 -- Catégories de compétences par défaut
 INSERT INTO skill_categories (name) VALUES
@@ -646,34 +673,40 @@ ON CONFLICT (id) DO NOTHING;
 -- Lecture publique des 3 buckets
 -- (nécessaire pour 'cv' car createSignedUrl() est appelé
 --  côté visiteur anonyme dans HeroSection / ShareButtons)
+DROP POLICY IF EXISTS "public_read_avatars" ON storage.objects;
 CREATE POLICY "public_read_avatars"
   ON storage.objects FOR SELECT
   TO anon, authenticated
   USING (bucket_id = 'avatars');
 
+DROP POLICY IF EXISTS "public_read_covers" ON storage.objects;
 CREATE POLICY "public_read_covers"
   ON storage.objects FOR SELECT
   TO anon, authenticated
   USING (bucket_id = 'covers');
 
+DROP POLICY IF EXISTS "public_read_cv" ON storage.objects;
 CREATE POLICY "public_read_cv"
   ON storage.objects FOR SELECT
   TO anon, authenticated
   USING (bucket_id = 'cv');
 
 -- Écriture réservée à l'admin (upload / update / delete)
+DROP POLICY IF EXISTS "admin_manage_avatars" ON storage.objects;
 CREATE POLICY "admin_manage_avatars"
   ON storage.objects FOR ALL
   TO authenticated
   USING (bucket_id = 'avatars' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()))
   WITH CHECK (bucket_id = 'avatars' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()));
 
+DROP POLICY IF EXISTS "admin_manage_covers" ON storage.objects;
 CREATE POLICY "admin_manage_covers"
   ON storage.objects FOR ALL
   TO authenticated
   USING (bucket_id = 'covers' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()))
   WITH CHECK (bucket_id = 'covers' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()));
 
+DROP POLICY IF EXISTS "admin_manage_cv" ON storage.objects;
 CREATE POLICY "admin_manage_cv"
   ON storage.objects FOR ALL
   TO authenticated

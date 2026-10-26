@@ -29,6 +29,7 @@ const ShortUrlRedirect = () => {
           'cv-fullstack-en': 'fullstack_en',
           'cv-ai-fr': 'ai_fr',
           'cv-ai-en': 'ai_en',
+          'cv': 'fullstack_fr',
           // Rétrocompatibilité avec les anciens liens
           'cv-fullstack': 'fullstack_fr',
           'cv-ai': 'ai_fr'
@@ -58,14 +59,14 @@ const ShortUrlRedirect = () => {
           .eq('active', true)
           .single()
 
-        if (error || !data) {
+        if (error || !data || !data.target_url) {
           setState('not_found')
           return
         }
 
-        // Incrémenter clics (fire and forget)
+        // Incrémenter clics (fire and forget) ; le builder Supabase n'envoie la requête que sur .then()
         supabase.rpc('increment_short_url_clicks',
-          { p_slug: slug })
+          { p_slug: slug }).then(() => {})
 
         // Redirection
         if (data.target_url.startsWith('http')) {

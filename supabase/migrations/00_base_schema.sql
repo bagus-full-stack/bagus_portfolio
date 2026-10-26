@@ -24,8 +24,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   name text NOT NULL DEFAULT '',
   title text NOT NULL DEFAULT '',
-  bio_short text DEFAULT '',
-  bio_full text DEFAULT '',
+  bio text DEFAULT '',
   location text DEFAULT '',
   email text DEFAULT '',
   linkedin_url text DEFAULT '',
@@ -605,8 +604,7 @@ CREATE TRIGGER trigger_log_new_visitor
 INSERT INTO profiles (
   name,
   title,
-  bio_short,
-  bio_full,
+  bio,
   location,
   email,
   linkedin_url,
@@ -614,7 +612,6 @@ INSERT INTO profiles (
 ) VALUES (
   'Assami Baga',
   'Full Stack & AI Engineer',
-  'Ingénieur Full Stack & IA basé en Île-de-France, disponible pour un CDI.',
   'Ingénieur passionné par le développement full-stack et l''intelligence artificielle. Créateur d''AgroSahel AI, une solution de diagnostic agricole pour les cultures du Sahel.',
   'Île-de-France, France',
   'ton-email@gmail.com',
@@ -632,152 +629,66 @@ INSERT INTO skill_categories (name) VALUES
   ('Mobile')
 ON CONFLICT (name) DO NOTHING;
 
--- Compte admin
--- IMPORTANT : Créer d'abord le compte dans
--- Authentication → Users → Add user
--- puis exécuter cette requête en remplaçant
--- l'email par le tien
-INSERT INTO admin_users (id, email)
-SELECT id, email
-FROM auth.users
-WHERE email = 'ton-email@gmail.com'
-ON CONFLICT DO NOTHING;
+-- ============================================================
+-- BLOC 8 — Buckets Storage + policies
+-- ============================================================
+
+-- BUCKET 1 : avatars (public, 2MB, images)
+-- BUCKET 2 : cv (privé — accès via URL signée, 10MB, PDF)
+-- BUCKET 3 : covers (public, 5MB, images)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES
+  ('avatars', 'avatars', true, 2097152, ARRAY['image/jpeg','image/png','image/webp']),
+  ('covers', 'covers', true, 5242880, ARRAY['image/jpeg','image/png','image/webp','image/gif']),
+  ('cv', 'cv', false, 10485760, ARRAY['application/pdf'])
+ON CONFLICT (id) DO NOTHING;
+
+-- Lecture publique des 3 buckets
+-- (nécessaire pour 'cv' car createSignedUrl() est appelé
+--  côté visiteur anonyme dans HeroSection / ShareButtons)
+CREATE POLICY "public_read_avatars"
+  ON storage.objects FOR SELECT
+  TO anon, authenticated
+  USING (bucket_id = 'avatars');
+
+CREATE POLICY "public_read_covers"
+  ON storage.objects FOR SELECT
+  TO anon, authenticated
+  USING (bucket_id = 'covers');
+
+CREATE POLICY "public_read_cv"
+  ON storage.objects FOR SELECT
+  TO anon, authenticated
+  USING (bucket_id = 'cv');
+
+-- Écriture réservée à l'admin (upload / update / delete)
+CREATE POLICY "admin_manage_avatars"
+  ON storage.objects FOR ALL
+  TO authenticated
+  USING (bucket_id = 'avatars' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()))
+  WITH CHECK (bucket_id = 'avatars' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()));
+
+CREATE POLICY "admin_manage_covers"
+  ON storage.objects FOR ALL
+  TO authenticated
+  USING (bucket_id = 'covers' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()))
+  WITH CHECK (bucket_id = 'covers' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()));
+
+CREATE POLICY "admin_manage_cv"
+  ON storage.objects FOR ALL
+  TO authenticated
+  USING (bucket_id = 'cv' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()))
+  WITH CHECK (bucket_id = 'cv' AND EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()));
 
 
 -- ============================================================
--- BLOC 8 — Buckets Storage
+-- BLOC 9 — CRON job nettoyage automatique (ignoré si pg_cron indisponible)
 -- ============================================================
 
--- À créer manuellement dans Storage → New Bucket
--- (impossible via SQL Editor)
---
--- BUCKET 1 : avatars
---   Public : OUI
---   Taille max : 2MB
---   Types : image/jpeg, image/png, image/webp
---
--- BUCKET 2 : cv
---   Public : NON (bucket privé)
---   Taille max : 10MB
---   Types : application/pdf
---
--- BUCKET 3 : covers
---   Public : OUI
---   Taille max : 5MB
---   Types : image/jpeg, image/png,
---            image/webp, image/gif
-
-
--- ============================================================
--- BLOC 9 — CRON job nettoyage automatique
--- ============================================================
-
--- Prérequis : activer pg_cron dans
--- Dashboard → Database → Extensions → pg_cron
-
-SELECT cron.schedule(
-  'cleanup-old-logs',
-  '0 3 * * *',
-  'SELECT cleanup_old_logs();'
-);
-
-
--- ============================================================
--- BLOC 10 — Vérification finale
--- ============================================================
-
--- Vérifier toutes les tables créées
-SELECT
-  t.table_name,
-  string_agg(
-    c.column_name || ' (' || c.data_type || ')',
-    ', ' ORDER BY c.ordinal_position
-  ) AS columns
-FROM information_schema.tables t
-JOIN information_schema.columns c
-  ON t.table_name = c.table_name
-  AND t.table_schema = c.table_schema
-WHERE t.table_schema = 'public'
-  AND t.table_type = 'BASE TABLE'
-GROUP BY t.table_name
-ORDER BY t.table_name;
-
--- Vérifier les fonctions RPC créées
-SELECT routine_name, routine_type
-FROM information_schema.routines
-WHERE routine_schema = 'public'
-  AND routine_type = 'FUNCTION'
-ORDER BY routine_name;
-
--- Vérifier les triggers actifs
-SELECT
-  trigger_name,
-  event_object_table AS table_name,
-  event_manipulation AS event,
-  action_timing AS timing
-FROM information_schema.triggers
-WHERE trigger_schema = 'public'
-ORDER BY event_object_table;
-
--- Vérifier les politiques RLS
-SELECT
-  schemaname,
-  tablename,
-  policyname,
-  permissive,
-  roles,
-  cmd
-FROM pg_policies
-WHERE schemaname = 'public'
-ORDER BY tablename, policyname;
-
--- Vérifier le compte admin
-SELECT
-  au.id,
-  au.email,
-  au.created_at,
-  u.last_sign_in_at
-FROM admin_users au
-JOIN auth.users u ON au.id = u.id;
-
--- Test trigger messages
-INSERT INTO messages (name, email, message)
-VALUES (
-  'Test Recruteur',
-  'test@validation.com',
-  'Message de test pour valider les triggers.'
-);
-
-SELECT * FROM activity_logs
-ORDER BY created_at DESC LIMIT 1;
-
-SELECT * FROM notifications
-ORDER BY created_at DESC LIMIT 1;
-
--- Nettoyage du test
-DELETE FROM messages
-  WHERE email = 'test@validation.com';
-DELETE FROM activity_logs
-  WHERE description LIKE '%test@validation.com%';
-DELETE FROM notifications
-  WHERE message LIKE '%Test Recruteur%';
-
--- TABLE : analytics_events (suivi avancé)
-CREATE TABLE IF NOT EXISTS analytics_events (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  visitor_id text,
-  event_type text NOT NULL,
-  event_name text NOT NULL,
-  duration integer DEFAULT 0,
-  created_at timestamptz DEFAULT now()
-);
-
-ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "public_insert_analytics_events" 
-  ON analytics_events FOR INSERT 
-  WITH CHECK (true);
-
-CREATE POLICY "admin_read_analytics_events" 
-  ON analytics_events FOR SELECT 
-  USING ( auth.uid() IN (SELECT id FROM admin_users) );
+DO $$
+BEGIN
+  CREATE EXTENSION IF NOT EXISTS pg_cron;
+  PERFORM cron.schedule('cleanup-old-logs', '0 3 * * *', 'SELECT cleanup_old_logs();');
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'pg_cron ignoré : %', SQLERRM;
+END $$;

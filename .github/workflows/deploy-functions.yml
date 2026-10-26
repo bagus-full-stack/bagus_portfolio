@@ -1,4 +1,4 @@
-name: Deploy Edge Functions — Supabase
+name: Deploy Supabase — Migrations & Edge Functions
 
 on:
   push:
@@ -6,69 +6,42 @@ on:
       - main
     paths:
       - 'supabase/functions/**'
+      - 'supabase/migrations/**'
   workflow_dispatch:
 
+concurrency:
+  group: supabase-deploy
+  cancel-in-progress: false
+
+env:
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
 jobs:
-  deploy:
-    name: Deploy All Edge Functions
+  migrate:
+    name: Apply SQL migrations
     runs-on: ubuntu-latest
-
     env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
         with:
           version: latest
+      - name: Link project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+      - name: Push migrations
+        run: supabase db push
 
-      - name: Deploy chat function
-        run: |
-          supabase functions deploy chat \
-            --project-ref $SUPABASE_PROJECT_ID
-        continue-on-error: false
-
-      - name: Deploy meet function
-        run: |
-          supabase functions deploy meet \
-            --project-ref $SUPABASE_PROJECT_ID
-        continue-on-error: false
-
-      - name: Deploy calendar function
-        run: |
-          supabase functions deploy calendar \
-            --project-ref $SUPABASE_PROJECT_ID
-        continue-on-error: false
-
-      - name: Deploy chat-resume function
-        run: |
-          supabase functions deploy chat-resume \
-            --project-ref $SUPABASE_PROJECT_ID
-        continue-on-error: false
-
-      - name: Deploy track-visitor function
-        run: |
-          supabase functions deploy track-visitor \
-            --project-ref $SUPABASE_PROJECT_ID
-        continue-on-error: false
-
-      - name: Deploy translate function
-        run: |
-          supabase functions deploy translate \
-            --project-ref $SUPABASE_PROJECT_ID
-        continue-on-error: false
-
-      - name: Deployment summary
-        run: |
-          echo "✅ Edge Functions déployées"
-          echo "Projet : $SUPABASE_PROJECT_ID"
-
-# AJOUTER ICI les nouvelles fonctions si besoin :
-# - name: Deploy [nom] function
-#   run: |
-#     supabase functions deploy [nom] \
-#       --project-ref $SUPABASE_PROJECT_ID
+  functions:
+    name: Deploy all Edge Functions
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      # Sans nom, déploie chaque dossier de supabase/functions (_shared ignoré)
+      - name: Deploy functions
+        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_ID"

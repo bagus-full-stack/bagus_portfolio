@@ -59,7 +59,8 @@
     "status": {
       "production": "En production",
       "beta": "Bêta",
-      "archived": "Archivé"
+      "archived": "Archivé",
+      "conception": "En conception"
     }
   },
   "project_detail": {

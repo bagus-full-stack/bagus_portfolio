@@ -111,20 +111,20 @@ serve(async (req) => {
     ]);
 
     const CV_JSON = JSON.stringify({
-      name: profile?.full_name || "Assami Baga",
+      name: profile?.name || profile?.name_fr || "Assami Baga",
       role: profile?.title || "Ingénieur Full Stack & IA",
       bio: profile?.bio || "Développeur passionné avec 5 ans d'expérience.",
       contact: profile?.email ? { email: profile.email, github: profile.github_url, linkedin: profile.linkedin_url } : null,
       experiences: (experiences || []).map(exp => ({
-        role: exp.role,
-        company: exp.company,
+        role: exp.title || exp.title_fr,
+        company: exp.organization || exp.organization_fr,
         period: `${exp.start_date} - ${exp.end_date || 'Présent'}`,
-        description: exp.description
+        description: exp.description || exp.description_fr
       })),
       projects: (projects || []).map(p => ({
         title: p.title,
         description: p.description,
-        technologies: p.technologies
+        technologies: p.stack
       })),
       skills: (skills || []).map(s => s.name),
       availability: "Disponible pour de nouvelles opportunités"

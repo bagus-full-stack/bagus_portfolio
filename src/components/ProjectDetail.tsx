@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useLoaderData } from 'react-router-dom';
-import { ArrowLeft, Github, ExternalLink, Network } from 'lucide-react';
+import { Github, ExternalLink } from 'lucide-react';
 import { Project } from '../types';
 import { SEOHead } from './SEOHead';
 import { ShareButtons } from './ShareButtons';
@@ -63,7 +63,6 @@ export function ProjectDetail() {
           to="/#projects" 
           className="inline-flex items-center text-accent-cyan hover:text-accent-cyan/80 font-inter text-sm mb-16 transition-colors"
         >
-          <ArrowLeft size={16} className="mr-2" />
           {translate('project_detail.back')}
         </Link>
         

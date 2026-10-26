@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Copy, Linkedin, Download, Check, Loader2 } from 'lucide-react';
-import { supabase } from '../services/supabase.service';
-import { toast } from 'sonner';
+import useDownloadCV from '../hooks/useDownloadCV';
+import { useTranslation } from '../hooks/useTranslation';
 
 export function ShareButtons() {
   const [copied, setCopied] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { lang } = useTranslation();
+  const { downloadCV, loading: cvLoading } = useDownloadCV();
+  const loading = cvLoading !== null;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -18,40 +20,7 @@ export function ShareButtons() {
     window.open(`https://linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, '_blank', 'noopener,noreferrer');
   };
 
-  const handleDownloadCV = async () => {
-    setLoading(true);
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('cv_url')
-        .maybeSingle();
-
-      if (!profile?.cv_url) {
-        toast.error('CV non disponible pour le moment');
-        return;
-      }
-
-      const filePath = profile.cv_url.split('/').pop() || 'cv.pdf';
-
-      const { data: signed } = await supabase
-        .storage
-        .from('cv')
-        .createSignedUrl(filePath, 3600);
-
-      if (signed?.signedUrl) {
-        const a = document.createElement('a');
-        a.href = signed.signedUrl;
-        a.download = 'CV-Assami-Baga.pdf';
-        a.click();
-      } else {
-        toast.error('Erreur lors de la génération du lien');
-      }
-    } catch (err) {
-      toast.error('Erreur lors du téléchargement');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleDownloadCV = () => downloadCV(lang === 'en' ? 'fullstack_en' : 'fullstack_fr');
 
   return (
     <div className="flex flex-wrap items-center gap-4 mt-16 pt-10 border-t border-white/5">

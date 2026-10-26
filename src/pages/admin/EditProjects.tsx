@@ -158,23 +158,33 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
   const [stackInput, setStackInput] = useState('');
   const [coverPreview, setCoverPreview] = useState<string | null>(formData.cover_image || null);
   const { translateBatch, translating } = useTranslate();
+  // Lignes EN (`tc_0`, `ch_1`, `rs_2`) dont le FR a changé depuis la dernière traduction (session en cours)
+  const [staleEn, setStaleEn] = useState<Set<string>>(new Set());
 
   const handleTranslateAll = async () => {
     const choices = formData.technical_choices || [];
     const challenges = formData.challenges || [];
     const metrics = formData.results || [];
-    // Les listes sont aplaties en clés `tc_0_choice`, `ch_1`, `rs_2` puis reconstruites
+    const enChoices = formData.technical_choices_en || [];
+    const enChallenges = formData.challenges_en || [];
+    const enMetrics = formData.results_en || [];
+    // Listes : on ne retraduit que les lignes EN vides ou périmées, pour garder les corrections manuelles
+    const needTc = (i: number) => !enChoices[i]?.choice?.trim() || !enChoices[i]?.reason?.trim() || staleEn.has(`tc_${i}`);
+    const needCh = (i: number) => !enChallenges[i]?.trim() || staleEn.has(`ch_${i}`);
+    const needRs = (i: number) => !enMetrics[i]?.metric?.trim() || staleEn.has(`rs_${i}`);
+
+    // Un seul appel de traduction pour tous les champs (clés `tc_0_choice`, `ch_1`, `rs_2`)
     const translated: Record<string, string> = await translateBatch(
       [
         { key: 'title_en', text: formData.title_fr || '' },
         { key: 'description_en', text: formData.description_fr || '' },
         { key: 'context_en', text: formData.context_fr || '' },
-        ...choices.flatMap((tc, i) => [
+        ...choices.flatMap((tc, i) => needTc(i) ? [
           { key: `tc_${i}_choice`, text: tc.choice },
           { key: `tc_${i}_reason`, text: tc.reason }
-        ]),
-        ...challenges.map((c, i) => ({ key: `ch_${i}`, text: c })),
-        ...metrics.map((r, i) => ({ key: `rs_${i}`, text: r.metric }))
+        ] : []),
+        ...challenges.flatMap((c, i) => needCh(i) ? [{ key: `ch_${i}`, text: c }] : []),
+        ...metrics.flatMap((m, i) => needRs(i) ? [{ key: `rs_${i}`, text: m.metric }] : [])
       ],
       'fr',
       'en'
@@ -185,13 +195,14 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
       title_en: translated.title_en ?? prev.title_en,
       description_en: translated.description_en ?? prev.description_en,
       context_en: translated.context_en ?? prev.context_en,
-      technical_choices_en: choices.map((tc, i) => ({
+      technical_choices_en: choices.map((tc, i) => needTc(i) ? {
         choice: translated[`tc_${i}_choice`] || tc.choice,
         reason: translated[`tc_${i}_reason`] || tc.reason
-      })),
-      challenges_en: challenges.map((c, i) => translated[`ch_${i}`] || c),
-      results_en: metrics.map((r, i) => ({ metric: translated[`rs_${i}`] || r.metric, value: r.value }))
+      } : enChoices[i]),
+      challenges_en: challenges.map((c, i) => needCh(i) ? (translated[`ch_${i}`] || c) : enChallenges[i]),
+      results_en: metrics.map((m, i) => needRs(i) ? { metric: translated[`rs_${i}`] || m.metric, value: m.value } : enMetrics[i])
     }));
+    setStaleEn(new Set());
     toast.success('Tous les champs traduits !');
   };
 
@@ -279,12 +290,37 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
     triggerSave();
   };
 
-  // Dynamic lists handlers
+  // Listes dynamiques : FR dans les champs d'origine, EN dans `<champ>_en` (même index, complété à la volée)
+  const markStale = (key: string, hasEn: boolean) => {
+    if (hasEn) setStaleEn(prev => new Set(prev).add(key));
+  };
+  const clearStale = (key: string) => setStaleEn(prev => { const n = new Set(prev); n.delete(key); return n; });
+  const dropStale = (prefix: string, idx: number) => setStaleEn(prev => {
+    const next = new Set<string>();
+    prev.forEach(k => {
+      if (!k.startsWith(prefix)) { next.add(k); return; }
+      const n = Number(k.slice(prefix.length));
+      if (n < idx) next.add(k); else if (n > idx) next.add(`${prefix}${n - 1}`);
+    });
+    return next;
+  });
+  const dropAt = (arr: any[] | undefined, idx: number) => (arr || []).filter((_, i) => i !== idx);
+  const setAt = <T,>(arr: T[] | undefined, idx: number, val: T, blank: T): T[] => {
+    const list = [...(arr || [])];
+    while (list.length <= idx) list.push(blank);
+    list[idx] = val;
+    return list;
+  };
+
   const handleTechChoiceChange = (idx: number, field: 'choice' | 'reason', val: string) => {
-    const newChoices = [...(formData.technical_choices || [])];
-    if (!newChoices[idx]) newChoices[idx] = { choice: '', reason: '' };
-    newChoices[idx] = { ...newChoices[idx], [field]: val };
-    setFormData(prev => ({ ...prev, technical_choices: newChoices }));
+    setFormData(prev => ({ ...prev, technical_choices: setAt(prev.technical_choices, idx, { ...(prev.technical_choices?.[idx] || { choice: '', reason: '' }), [field]: val }, { choice: '', reason: '' }) }));
+    const en = formData.technical_choices_en?.[idx];
+    markStale(`tc_${idx}`, !!(en?.choice || en?.reason));
+    triggerSave();
+  };
+  const handleTechChoiceEn = (idx: number, field: 'choice' | 'reason', val: string) => {
+    setFormData(prev => ({ ...prev, technical_choices_en: setAt(prev.technical_choices_en, idx, { ...(prev.technical_choices_en?.[idx] || { choice: '', reason: '' }), [field]: val }, { choice: '', reason: '' }) }));
+    clearStale(`tc_${idx}`);
     triggerSave();
   };
   const addTechChoice = () => {
@@ -292,14 +328,19 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
     triggerSave();
   };
   const removeTechChoice = (idx: number) => {
-    setFormData(prev => ({ ...prev, technical_choices: (prev.technical_choices || []).filter((_, i) => i !== idx) }));
+    setFormData(prev => ({ ...prev, technical_choices: dropAt(prev.technical_choices, idx), technical_choices_en: dropAt(prev.technical_choices_en, idx) }));
+    dropStale('tc_', idx);
     triggerSave();
   };
 
   const handleChallengeChange = (idx: number, val: string) => {
-    const newChallenges = [...(formData.challenges || [])];
-    newChallenges[idx] = val;
-    setFormData(prev => ({ ...prev, challenges: newChallenges }));
+    setFormData(prev => ({ ...prev, challenges: setAt(prev.challenges, idx, val, '') }));
+    markStale(`ch_${idx}`, !!formData.challenges_en?.[idx]);
+    triggerSave();
+  };
+  const handleChallengeEn = (idx: number, val: string) => {
+    setFormData(prev => ({ ...prev, challenges_en: setAt(prev.challenges_en, idx, val, '') }));
+    clearStale(`ch_${idx}`);
     triggerSave();
   };
   const addChallenge = () => {
@@ -307,15 +348,19 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
     triggerSave();
   };
   const removeChallenge = (idx: number) => {
-    setFormData(prev => ({ ...prev, challenges: (prev.challenges || []).filter((_, i) => i !== idx) }));
+    setFormData(prev => ({ ...prev, challenges: dropAt(prev.challenges, idx), challenges_en: dropAt(prev.challenges_en, idx) }));
+    dropStale('ch_', idx);
     triggerSave();
   };
 
   const handleResultChange = (idx: number, field: 'metric' | 'value', val: string) => {
-    const newResults = [...(formData.results || [])];
-    if (!newResults[idx]) newResults[idx] = { metric: '', value: '' };
-    newResults[idx] = { ...newResults[idx], [field]: val };
-    setFormData(prev => ({ ...prev, results: newResults }));
+    setFormData(prev => ({ ...prev, results: setAt(prev.results, idx, { ...(prev.results?.[idx] || { metric: '', value: '' }), [field]: val }, { metric: '', value: '' }) }));
+    if (field === 'metric') markStale(`rs_${idx}`, !!formData.results_en?.[idx]?.metric);
+    triggerSave();
+  };
+  const handleResultEn = (idx: number, val: string) => {
+    setFormData(prev => ({ ...prev, results_en: setAt(prev.results_en, idx, { metric: val, value: prev.results?.[idx]?.value || '' }, { metric: '', value: '' }) }));
+    clearStale(`rs_${idx}`);
     triggerSave();
   };
   const addResult = () => {
@@ -323,9 +368,40 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
     triggerSave();
   };
   const removeResult = (idx: number) => {
-    setFormData(prev => ({ ...prev, results: (prev.results || []).filter((_, i) => i !== idx) }));
+    setFormData(prev => ({ ...prev, results: dropAt(prev.results, idx), results_en: dropAt(prev.results_en, idx) }));
+    dropStale('rs_', idx);
     triggerSave();
   };
+
+  // Retraduit une seule ligne FR vers EN (bouton de ligne)
+  const retranslateRow = async (kind: 'tc' | 'ch' | 'rs', idx: number) => {
+    if (kind === 'tc') {
+      const tc = formData.technical_choices?.[idx];
+      if (!tc) return;
+      const t = await translateBatch([{ key: 'choice', text: tc.choice }, { key: 'reason', text: tc.reason }], 'fr', 'en');
+      setFormData(prev => ({ ...prev, technical_choices_en: setAt(prev.technical_choices_en, idx, { choice: t.choice || tc.choice, reason: t.reason || tc.reason }, { choice: '', reason: '' }) }));
+    } else if (kind === 'ch') {
+      const c = formData.challenges?.[idx];
+      if (c === undefined) return;
+      const t = await translateBatch([{ key: 'v', text: c }], 'fr', 'en');
+      setFormData(prev => ({ ...prev, challenges_en: setAt(prev.challenges_en, idx, t.v || c, '') }));
+    } else {
+      const m = formData.results?.[idx];
+      if (!m) return;
+      const t = await translateBatch([{ key: 'v', text: m.metric }], 'fr', 'en');
+      setFormData(prev => ({ ...prev, results_en: setAt(prev.results_en, idx, { metric: t.v || m.metric, value: m.value }, { metric: '', value: '' }) }));
+    }
+    clearStale(`${kind}_${idx}`);
+    triggerSave();
+  };
+
+  const enInputCls = "px-3 py-2 bg-bg-primary border border-white/10 rounded text-sm text-text-primary focus:border-accent-cyan outline-none";
+  const rowTools = (kind: 'tc' | 'ch' | 'rs', idx: number) => (
+    <div className="flex items-center gap-2 pt-1">
+      {staleEn.has(`${kind}_${idx}`) && <span className="text-[10px] font-mono text-accent-ocre whitespace-nowrap">FR modifié</span>}
+      <button type="button" onClick={() => retranslateRow(kind, idx)} disabled={translating} title="Retraduire cette ligne en anglais" className="p-2 text-text-muted hover:text-accent-cyan disabled:opacity-50"><Languages size={16} /></button>
+    </div>
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -478,15 +554,22 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
           {/* Technical Choices */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-text-muted">Choix techniques</label>
+              <label className="block text-sm font-medium text-text-muted">Choix techniques <span className="text-xs">(FR / EN)</span></label>
               <button type="button" onClick={addTechChoice} className="text-xs text-accent-cyan hover:underline flex items-center"><Plus size={12} className="mr-1"/> Ajouter</button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {(formData.technical_choices || []).map((tc, i) => (
-                <div key={i} className="flex gap-3 items-start">
-                  <input type="text" placeholder="Choix (ex: React)" value={tc.choice} onChange={e => handleTechChoiceChange(i, 'choice', e.target.value)} onBlur={triggerSave} className="w-1/3 px-3 py-2 bg-bg-primary border border-white/10 rounded text-sm text-text-primary focus:border-accent-cyan outline-none" />
-                  <input type="text" placeholder="Raison" value={tc.reason} onChange={e => handleTechChoiceChange(i, 'reason', e.target.value)} onBlur={triggerSave} className="flex-1 px-3 py-2 bg-bg-primary border border-white/10 rounded text-sm text-text-primary focus:border-accent-cyan outline-none" />
-                  <button type="button" onClick={() => removeTechChoice(i)} className="p-2 text-text-muted hover:text-red-400"><Trash2 size={16} /></button>
+                <div key={i} className="space-y-2">
+                  <div className="flex gap-3 items-start">
+                    <input type="text" placeholder="Choix (ex: React)" value={tc.choice} onChange={e => handleTechChoiceChange(i, 'choice', e.target.value)} onBlur={triggerSave} className={`w-1/3 ${enInputCls}`} />
+                    <input type="text" placeholder="Raison" value={tc.reason} onChange={e => handleTechChoiceChange(i, 'reason', e.target.value)} onBlur={triggerSave} className={`flex-1 ${enInputCls}`} />
+                    <button type="button" onClick={() => removeTechChoice(i)} className="p-2 text-text-muted hover:text-red-400"><Trash2 size={16} /></button>
+                  </div>
+                  <div className="flex gap-3 items-start pl-4 border-l-2 border-accent-cyan/30">
+                    <input type="text" placeholder="Choice (EN)" value={formData.technical_choices_en?.[i]?.choice || ''} onChange={e => handleTechChoiceEn(i, 'choice', e.target.value)} onBlur={triggerSave} className={`w-1/3 ${enInputCls}`} />
+                    <input type="text" placeholder="Reason (EN)" value={formData.technical_choices_en?.[i]?.reason || ''} onChange={e => handleTechChoiceEn(i, 'reason', e.target.value)} onBlur={triggerSave} className={`flex-1 ${enInputCls}`} />
+                    {rowTools('tc', i)}
+                  </div>
                 </div>
               ))}
             </div>
@@ -495,14 +578,20 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
           {/* Challenges */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-text-muted">Difficultés rencontrées</label>
+              <label className="block text-sm font-medium text-text-muted">Difficultés rencontrées <span className="text-xs">(FR / EN)</span></label>
               <button type="button" onClick={addChallenge} className="text-xs text-accent-cyan hover:underline flex items-center"><Plus size={12} className="mr-1"/> Ajouter</button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {(formData.challenges || []).map((c, i) => (
-                <div key={i} className="flex gap-3 items-start">
-                  <textarea rows={2} value={c} onChange={e => handleChallengeChange(i, e.target.value)} onBlur={triggerSave} className="flex-1 px-3 py-2 bg-bg-primary border border-white/10 rounded text-sm text-text-primary focus:border-accent-cyan outline-none resize-none" />
-                  <button type="button" onClick={() => removeChallenge(i)} className="p-2 text-text-muted hover:text-red-400"><Trash2 size={16} /></button>
+                <div key={i} className="space-y-2">
+                  <div className="flex gap-3 items-start">
+                    <textarea rows={2} value={c} onChange={e => handleChallengeChange(i, e.target.value)} onBlur={triggerSave} className={`flex-1 resize-none ${enInputCls}`} />
+                    <button type="button" onClick={() => removeChallenge(i)} className="p-2 text-text-muted hover:text-red-400"><Trash2 size={16} /></button>
+                  </div>
+                  <div className="flex gap-3 items-start pl-4 border-l-2 border-accent-cyan/30">
+                    <textarea rows={2} placeholder="Challenge (EN)" value={formData.challenges_en?.[i] || ''} onChange={e => handleChallengeEn(i, e.target.value)} onBlur={triggerSave} className={`flex-1 resize-none ${enInputCls}`} />
+                    {rowTools('ch', i)}
+                  </div>
                 </div>
               ))}
             </div>
@@ -511,15 +600,21 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
           {/* Results */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-text-muted">Résultats</label>
+              <label className="block text-sm font-medium text-text-muted">Résultats <span className="text-xs">(FR / EN, la valeur n'est pas traduite)</span></label>
               <button type="button" onClick={addResult} className="text-xs text-accent-cyan hover:underline flex items-center"><Plus size={12} className="mr-1"/> Ajouter</button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {(formData.results || []).map((r, i) => (
-                <div key={i} className="flex gap-3 items-start">
-                  <input type="text" placeholder="Métrique (ex: Performance)" value={r.metric} onChange={e => handleResultChange(i, 'metric', e.target.value)} onBlur={triggerSave} className="w-1/3 px-3 py-2 bg-bg-primary border border-white/10 rounded text-sm text-text-primary focus:border-accent-cyan outline-none" />
-                  <input type="text" placeholder="Valeur (ex: +40%)" value={r.value} onChange={e => handleResultChange(i, 'value', e.target.value)} onBlur={triggerSave} className="w-1/3 px-3 py-2 bg-bg-primary border border-white/10 rounded text-sm text-text-primary focus:border-accent-cyan outline-none" />
-                  <button type="button" onClick={() => removeResult(i)} className="p-2 text-text-muted hover:text-red-400"><Trash2 size={16} /></button>
+                <div key={i} className="space-y-2">
+                  <div className="flex gap-3 items-start">
+                    <input type="text" placeholder="Métrique (ex: Performance)" value={r.metric} onChange={e => handleResultChange(i, 'metric', e.target.value)} onBlur={triggerSave} className={`w-1/3 ${enInputCls}`} />
+                    <input type="text" placeholder="Valeur (ex: +40%)" value={r.value} onChange={e => handleResultChange(i, 'value', e.target.value)} onBlur={triggerSave} className={`w-1/3 ${enInputCls}`} />
+                    <button type="button" onClick={() => removeResult(i)} className="p-2 text-text-muted hover:text-red-400"><Trash2 size={16} /></button>
+                  </div>
+                  <div className="flex gap-3 items-start pl-4 border-l-2 border-accent-cyan/30">
+                    <input type="text" placeholder="Metric (EN)" value={formData.results_en?.[i]?.metric || ''} onChange={e => handleResultEn(i, e.target.value)} onBlur={triggerSave} className={`w-1/3 ${enInputCls}`} />
+                    {rowTools('rs', i)}
+                  </div>
                 </div>
               ))}
             </div>

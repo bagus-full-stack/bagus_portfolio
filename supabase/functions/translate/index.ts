@@ -54,7 +54,64 @@ serve(async (req) => {
   }
 
   try {
-    const { text, from, to } = await req.json()
+    const { text, texts, from, to } = await req.json()
+
+    // Mode lot : une seule requête Gemini pour N textes (tableau JSON en entrée et en sortie)
+    if (Array.isArray(texts)) {
+      const reply = (body: unknown, status = 200) =>
+        new Response(JSON.stringify(body), {
+          status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      const total = texts.reduce((n: number, t: unknown) => n + (typeof t === 'string' ? t.length : 1e9), 0)
+      if (texts.length < 1 || texts.length > 60 || total > 12000 ||
+          !['fr', 'en'].includes(from) || !['fr', 'en'].includes(to)) {
+        return reply({ error: 'Paramètres invalides : texts (1-60 chaînes, 12000 caractères max), from, to' }, 400)
+      }
+      if (from === to) return reply({ translations: texts })
+
+      const key = Deno.env.get('GEMINI_API_KEY')
+      if (!key) throw new Error('GEMINI_API_KEY is not set')
+      const names: Record<string, string> = { fr: 'French', en: 'English' }
+      const batchPrompt = `You are a professional translator specializing in technical and professional content.
+Translate every string of the JSON array below from ${names[from]} to ${names[to]}.
+STRICT RULES :
+- Return ONLY a JSON array of strings, same length and same order as the input
+- Preserve ALL technical terms exactly as-is (React, TypeScript, FastAPI, Docker, etc.)
+- Preserve proper nouns and brand names (Assami Baga, AgroSahel AI, Supabase, etc.)
+- Preserve punctuation, capitalization and the same professional tone
+
+${JSON.stringify(texts)}`
+
+      for (const modelName of MODELS) {
+        try {
+          const r = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: batchPrompt }] }],
+                generationConfig: {
+                  temperature: 0.1,
+                  maxOutputTokens: 8000,
+                  responseMimeType: 'application/json'
+                }
+              })
+            }
+          )
+          const d = await r.json()
+          if (!r.ok || d.error) continue
+          const out = JSON.parse(d.candidates[0].content.parts[0].text)
+          if (Array.isArray(out) && out.length === texts.length && out.every((x: unknown) => typeof x === 'string')) {
+            return reply({ translations: out.map((x: string) => x.trim()) })
+          }
+        } catch (_) {
+          continue
+        }
+      }
+      throw new Error('Tous les modèles ont échoué (mode lot)')
+    }
 
     if (!text || !from || !to) {
       return new Response(
@@ -146,7 +203,7 @@ ${text}`
     for (const modelName of MODELS) {
       try {
         const response = await fetch(
-          \`https://generativelanguage.googleapis.com/v1beta/models/\${modelName}:generateContent?key=\${geminiKey}\`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`,
           {
             method: 'POST',
             headers: {
@@ -165,7 +222,7 @@ ${text}`
         const data = await response.json()
         
         if (!response.ok || data.error) {
-          lastError = data.error?.message || \`Erreur HTTP \${response.status}\`;
+          lastError = data.error?.message || `Erreur HTTP ${response.status}`;
           continue;
         }
 
@@ -179,7 +236,7 @@ ${text}`
     }
 
     if (!translated) {
-      throw new Error(\`Tous les modèles ont échoué. Dernière erreur : \${lastError}\`);
+      throw new Error(`Tous les modèles ont échoué. Dernière erreur : ${lastError}`);
     }
 
     return new Response(

@@ -44,17 +44,13 @@ serve(async (req) => {
   const corsHeaders = getCorsHeaders(origin)
 
   try {
-    // GET ?date=2024-06-23 → créneaux disponibles
-    // Note: Supabase Edge Functions with GET don't usually send body, so we read from query string
-    if (method === 'POST' && url.searchParams.get('action') === 'slots' || method === 'GET') {
-      let date = url.searchParams.get('date');
-      
-      // Fallback to read from body if POST
-      if (!date && method === 'POST') {
-        const reqBody = await req.json().catch(() => ({}));
-        date = reqBody.date;
-      }
-      
+    // Le corps ne se lit qu'une fois : on le parse ici pour les deux branches
+    const body = method === 'POST' ? await req.json().catch(() => ({})) : {}
+
+    // GET ?date=… ou POST { action: 'slots', date } (ou ?action=slots) → créneaux disponibles
+    if (method === 'GET' || body.action === 'slots' || url.searchParams.get('action') === 'slots') {
+      const date = url.searchParams.get('date') || body.date;
+
       if (!date) {
         return new Response(JSON.stringify({ error: 'Date is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
@@ -111,7 +107,7 @@ serve(async (req) => {
         start, end,
         attendeeName, attendeeEmail,
         subject, notes
-      } = await req.json()
+      } = body
 
       const { data: event } = await calendar.events.insert({
         calendarId: CALENDAR_ID,

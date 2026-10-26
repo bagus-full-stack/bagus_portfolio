@@ -35,25 +35,25 @@ export const useLocalizedField = () => {
     return ''
   }
 
-  // Pour les tableaux (challenges, stack)
-  const tArray = (
+  // Pour les tableaux (challenges, technical_choices, results)
+  const tArray = <T = string>(
     obj: LocalizedObject,
     field: string
-  ): string[] => {
+  ): T[] => {
     const localizedValue =
       obj[`${field}_${currentLang}`]
 
     if (Array.isArray(localizedValue) &&
         localizedValue.length > 0) {
-      return localizedValue as string[]
+      return localizedValue as T[]
     }
 
     const frValue = obj[`${field}_fr`]
-    if (Array.isArray(frValue) && frValue.length > 0) return frValue
+    if (Array.isArray(frValue) && frValue.length > 0) return frValue as T[]
 
     const originalValue = obj[field]
     if (Array.isArray(originalValue)) {
-      return originalValue as string[]
+      return originalValue as T[]
     }
 
     return []

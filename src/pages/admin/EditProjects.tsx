@@ -160,20 +160,38 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
   const { translateBatch, translating } = useTranslate();
 
   const handleTranslateAll = async () => {
-    const results = await translateBatch(
+    const choices = formData.technical_choices || [];
+    const challenges = formData.challenges || [];
+    const metrics = formData.results || [];
+    // Les listes sont aplaties en clés `tc_0_choice`, `ch_1`, `rs_2` puis reconstruites
+    const translated: Record<string, string> = await translateBatch(
       [
         { key: 'title_en', text: formData.title_fr || '' },
         { key: 'description_en', text: formData.description_fr || '' },
-        { key: 'context_en', text: formData.context_fr || '' }
+        { key: 'context_en', text: formData.context_fr || '' },
+        ...choices.flatMap((tc, i) => [
+          { key: `tc_${i}_choice`, text: tc.choice },
+          { key: `tc_${i}_reason`, text: tc.reason }
+        ]),
+        ...challenges.map((c, i) => ({ key: `ch_${i}`, text: c })),
+        ...metrics.map((r, i) => ({ key: `rs_${i}`, text: r.metric }))
       ],
       'fr',
       'en'
     );
 
-    setFormData(prev => {
-      const newData = { ...prev, ...results };
-      return newData;
-    });
+    setFormData(prev => ({
+      ...prev,
+      title_en: translated.title_en ?? prev.title_en,
+      description_en: translated.description_en ?? prev.description_en,
+      context_en: translated.context_en ?? prev.context_en,
+      technical_choices_en: choices.map((tc, i) => ({
+        choice: translated[`tc_${i}_choice`] || tc.choice,
+        reason: translated[`tc_${i}_reason`] || tc.reason
+      })),
+      challenges_en: challenges.map((c, i) => translated[`ch_${i}`] || c),
+      results_en: metrics.map((r, i) => ({ metric: translated[`rs_${i}`] || r.metric, value: r.value }))
+    }));
     toast.success('Tous les champs traduits !');
   };
 

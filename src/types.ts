@@ -68,10 +68,14 @@ export interface Project {
   context_fr?: string;
   context_en?: string;
   technical_choices: { choice: string; reason: string }[];
+  technical_choices_fr?: { choice: string; reason: string }[];
+  technical_choices_en?: { choice: string; reason: string }[];
   challenges: string[];
   challenges_fr?: string[];
   challenges_en?: string[];
   results: { metric: string; value: string }[];
+  results_fr?: { metric: string; value: string }[];
+  results_en?: { metric: string; value: string }[];
   github_url?: string;
   live_url?: string;
   status: 'production' | 'beta' | 'archived' | 'conception';

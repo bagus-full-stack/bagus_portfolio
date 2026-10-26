@@ -29,7 +29,9 @@ export function ProjectDetail() {
   const description = t(project, 'description');
   const context = t(project, 'context');
   const stack = project.stack ?? [];
-  const technicalChoices = project.technical_choices ?? [];
+  const technicalChoices = tArray<{ choice: string; reason: string }>(project, 'technical_choices');
+  const challenges = tArray(project, 'challenges');
+  const results = tArray<{ metric: string; value: string }>(project, 'results');
 
   return (
     <div className="min-h-screen bg-bg-primary pt-24 pb-32 selection:bg-accent-cyan/30">
@@ -143,11 +145,11 @@ export function ProjectDetail() {
           )}
 
           {/* Difficultés */}
-          {project.challenges && project.challenges.length > 0 && (
+          {challenges.length > 0 && (
             <section>
               <h2 className="font-space text-2xl font-semibold text-text-primary mb-6">{translate('project_detail.sections.challenges')}</h2>
               <ul className="space-y-4">
-                {tArray(project, 'challenges').map((challenge, idx) => (
+                {challenges.map((challenge, idx) => (
                   <li key={idx} className="flex gap-4">
                     <span className="text-accent-cyan mt-1">•</span>
                     <span className="font-inter text-text-muted leading-relaxed">{challenge}</span>
@@ -158,11 +160,11 @@ export function ProjectDetail() {
           )}
           
           {/* Résultats */}
-          {project.results && project.results.length > 0 && (
+          {results.length > 0 && (
             <section>
               <h2 className="font-space text-2xl font-semibold text-text-primary mb-6">{translate('project_detail.sections.results')}</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {project.results.map((result, idx) => (
+                {results.map((result, idx) => (
                   <div key={idx} className="bg-bg-card p-6 rounded-xl border border-white/5 flex flex-col items-center justify-center text-center">
                     <span className="font-space text-3xl font-bold text-text-primary mb-2">
                       {result.value}

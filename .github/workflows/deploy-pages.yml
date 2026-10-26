@@ -39,9 +39,6 @@ jobs:
 
       - name: Type check
         run: npx tsc --noEmit
-        continue-on-error: true
-        # Ne bloque pas le déploiement sur
-        # les erreurs de type mineures
 
       - name: Build for production
         run: npm run build

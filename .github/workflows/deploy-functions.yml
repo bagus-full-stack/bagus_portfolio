@@ -44,6 +44,24 @@ jobs:
             --project-ref $SUPABASE_PROJECT_ID
         continue-on-error: false
 
+      - name: Deploy chat-resume function
+        run: |
+          supabase functions deploy chat-resume \
+            --project-ref $SUPABASE_PROJECT_ID
+        continue-on-error: false
+
+      - name: Deploy track-visitor function
+        run: |
+          supabase functions deploy track-visitor \
+            --project-ref $SUPABASE_PROJECT_ID
+        continue-on-error: false
+
+      - name: Deploy translate function
+        run: |
+          supabase functions deploy translate \
+            --project-ref $SUPABASE_PROJECT_ID
+        continue-on-error: false
+
       - name: Deployment summary
         run: |
           echo "✅ Edge Functions déployées"

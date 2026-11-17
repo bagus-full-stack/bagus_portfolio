@@ -8,7 +8,7 @@ export const subscribeToNotifications = (
     .channel('portfolio-notifications')
     .on(
       'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'messages' },
+      { event: 'INSERT', schema: 'portfolio', table: 'messages' },
       (payload) => {
         onNew({
           id: payload.new.id,
@@ -22,7 +22,7 @@ export const subscribeToNotifications = (
     )
     .on(
       'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'analytics' },
+      { event: 'INSERT', schema: 'portfolio', table: 'analytics' },
       (payload) => {
         onNew({
           id: crypto.randomUUID(),

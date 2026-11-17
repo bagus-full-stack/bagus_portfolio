@@ -18,6 +18,10 @@ export interface ImportResult {
   errors: string[];
 }
 
+// Only the listed keys, and only when present, so absent translations don't overwrite existing ones with null.
+const pickDefined = (obj: any, keys: string[]) =>
+  Object.fromEntries(keys.filter((k) => obj[k] !== undefined).map((k) => [k, obj[k]]));
+
 export const importJSON = async (
   data: ImportData,
   sections: string[],
@@ -76,7 +80,8 @@ export const importJSON = async (
           start_date: exp.start_date,
           end_date: exp.end_date,
           description: exp.description,
-          stack: exp.stack || []
+          stack: exp.stack || [],
+          ...pickDefined(exp, ['title_fr', 'title_en', 'organization_fr', 'organization_en', 'description_fr', 'description_en'])
         });
         
       if (error) {
@@ -117,7 +122,11 @@ export const importJSON = async (
           live_url: project.live_url,
           status: project.status || 'production',
           architecture_nodes: project.architecture_nodes || [],
-          architecture_edges: project.architecture_edges || []
+          architecture_edges: project.architecture_edges || [],
+          ...pickDefined(project, [
+            'cover_image', 'title_fr', 'title_en', 'description_fr', 'description_en',
+            'context_fr', 'context_en', 'technical_choices_en', 'results_en', 'challenges_en'
+          ])
         }, { onConflict: 'slug' });
         
       if (error) {

@@ -365,18 +365,48 @@ L'application sera accessible sur `http://localhost:3000` (ou le port spécifié
 
 1.  **Base de données** : Exécutez vos scripts SQL initiaux pour créer les tables nécessaires (`profiles`, `projects`, `experiences`, `skills`, `certifications`).
 2.  **Storage** : Créez les buckets `avatars` (public) et `cv` (privé).
-3.  **Edge Functions** : Le projet inclut plusieurs fonctions Serverless (`meet`, `chat-resume`, `translate`, `track-visitor`).
-    *   **Déploiement CI/CD** : Le déploiement de ces fonctions est automatisé via **GitHub Actions** lors des pushs sur la branche principale. Assurez-vous d'avoir configuré les secrets GitHub nécessaires (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`).
-    *   **Déploiement manuel** : Vous pouvez également les déployer manuellement via le CLI Supabase :
-        ```bash
-        supabase functions deploy --all
-        ```
-4.  **Secrets Edge Functions** : Configurez les clés d'API (Google, Gemini) dans les secrets Supabase.
-    ```bash
-    supabase secrets set GOOGLE_CREDENTIALS='{"type": "service_account", ...}'
-    supabase secrets set GOOGLE_CALENDAR_ID='votre_id_calendrier@group.calendar.google.com'
-    supabase secrets set OWNER_EMAIL='votre_email@gmail.com'
-    ```
+3.  **Edge Functions** : `meet`, `calendar`, `chat-resume`, `translate`. Elles sont déployées sur un Supabase **self-hosted** (Coolify) par l'app `supabase-deployer`, sans SSH (voir ci-dessous).
+
+---
+
+## 🚀 Déploiement (Coolify + Supabase self-hosted)
+
+Un `git push` sur `main` déclenche deux apps Coolify via leur webhook GitHub :
+
+| App Coolify | Build pack | Rôle |
+|---|---|---|
+| Frontend | Dockerfile (`/Dockerfile`, port 80) | Build Vite + nginx |
+| `supabase-deployer` | Docker Compose (`/deploy/supabase/docker-compose.yml`) | Applique les migrations SQL et synchronise les functions via `scripts/vps/apply-supabase.sh` |
+
+Le résultat du deployer se lit dans ses *Runtime Logs* (`DEPLOY OK`). Les migrations déjà appliquées sont suivies dans `<APP_SCHEMA>._migrations` (checksum) : ne modifiez jamais une migration appliquée, ajoutez-en une nouvelle. Les functions sont copiées sans `--delete` (dossier partagé entre apps) : supprimez à la main une function retirée du repo.
+
+### Variables Coolify
+
+**Frontend** (*Build Variables*, pas Runtime : Vite les compile dans le bundle)
+
+| Variable | Valeur |
+|---|---|
+| `VITE_SUPABASE_URL` | URL publique de Kong |
+| `VITE_SUPABASE_ANON_KEY` | `SERVICE_SUPABASEANON_KEY` du service Supabase |
+
+**`supabase-deployer`**
+
+| Variable | Valeur |
+|---|---|
+| `POSTGRES_PASSWORD` | `SERVICE_PASSWORD_POSTGRES` du service Supabase (obligatoire) |
+
+`APP_SCHEMA` (défaut `portfolio`) : schéma Postgres de l'app. À changer pour chaque autre app qui partage cette instance Supabase.
+
+**Service Supabase** : les functions lisent ces variables, qui doivent être définies **et** listées dans le bloc `environment` du conteneur `supabase-edge-functions` du compose (Coolify ne transmet pas une variable que le compose ne référence pas).
+
+| Variable | Utilisée par |
+|---|---|
+| `GEMINI_API_KEY` | `chat-resume`, `translate` |
+| `GOOGLE_CREDENTIALS`, `GOOGLE_CALENDAR_ID`, `OWNER_EMAIL` | `meet`, `calendar` |
+| `ENVIRONMENT` | `_shared/cors.ts`. Mettre `production` (ou ne pas la définir) ; `development` désactive la liste blanche CORS. |
+| `DISABLE_SIGNUP` | GoTrue. Valeur booléenne exacte (`true` / `false`, sans ponctuation) sinon `supabase-auth` boucle en crash. |
+
+L'ID du service (`cpahgclbkgadccrsd81ioi7o`) est codé en dur dans `deploy/supabase/docker-compose.yml` (réseau et volume `functions`) : à mettre à jour si le service Supabase est recréé.
 
 ---
 

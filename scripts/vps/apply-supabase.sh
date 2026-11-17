@@ -9,8 +9,15 @@ SRC="${1:?usage: apply-supabase.sh <dir>}"
 DB_NAME="${DB_NAME:-postgres}"
 SCHEMA="${APP_SCHEMA:-portfolio}"
 
+# APP_SCHEMA is interpolated into SQL: accept plain identifiers only
+[[ "$SCHEMA" =~ ^[a-z_][a-z0-9_]*$ ]] || { echo "ERROR: invalid APP_SCHEMA '$SCHEMA'" >&2; exit 1; }
+[ -d "$SRC/migrations" ] || { echo "ERROR: $SRC/migrations not found" >&2; exit 1; }
+
 SUDO="${SUDO-sudo -n}"
-if [ -z "${PGHOST:-}" ]; then
+if [ -n "${PGHOST:-}" ]; then
+  : "${PGPASSWORD:?PGPASSWORD missing: set POSTGRES_PASSWORD in Coolify}"
+  psql -h "$PGHOST" -U supabase_admin -d "$DB_NAME" -qtAc 'SELECT 1' >/dev/null     || { echo "ERROR: cannot connect to $PGHOST (wrong password or network)" >&2; exit 1; }
+else
   DB_CONTAINER="${DB_CONTAINER:-$(docker ps --filter name=supabase-db- --format '{{.Names}}' | head -1)}"
   [ -n "$DB_CONTAINER" ] || { echo "supabase-db container not found" >&2; exit 1; }
 fi
@@ -48,6 +55,11 @@ done
 psql_run -c "NOTIFY pgrst, 'reload schema'" >/dev/null
 
 echo "== functions"
+# This script cannot see the edge-functions container env: list what the functions read so it can be checked in Coolify
+if [ -d "$SRC/functions" ]; then
+  echo "functions read env (must be in the edge-functions compose 'environment'):"
+  grep -rhoE "Deno\.env\.get\(['\"][A-Z0-9_]+" "$SRC/functions" | sed -E "s/.*['\"]//" | grep -v '^SUPABASE_' | sort -u | sed 's/^/  - /'
+fi
 if [ -d "$SRC/functions" ]; then
   [ -n "${PGHOST:-}" ] || FUNCTIONS_DIR="${FUNCTIONS_DIR:-$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/home/deno/functions"}}{{.Source}}{{end}}{{end}}' \
     "$(docker ps --filter name=supabase-edge-functions- --format '{{.Names}}' | head -1)")}"

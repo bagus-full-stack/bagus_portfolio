@@ -22,6 +22,13 @@ export interface ImportResult {
 const pickDefined = (obj: any, keys: string[]) =>
   Object.fromEntries(keys.filter((k) => obj[k] !== undefined).map((k) => [k, obj[k]]));
 
+const PROFILE_KEYS = [
+  'id', 'name', 'title', 'title_fr', 'title_en', 'bio', 'bio_short', 'bio_short_fr', 'bio_short_en',
+  'bio_full', 'bio_full_fr', 'bio_full_en', 'location', 'email', 'linkedin_url', 'github_url',
+  'calendly_url', 'photo_url', 'cv_url', 'cv_fullstack_url', 'cv_ai_url',
+  'cv_fullstack_fr', 'cv_fullstack_en', 'cv_ai_fr', 'cv_ai_en'
+];
+
 export const importJSON = async (
   data: ImportData,
   sections: string[],
@@ -32,10 +39,13 @@ export const importJSON = async (
   // PROFIL
   if (sections.includes('profile') && data.profile) {
     try {
-      const profileData = { ...data.profile };
-      // Handle the bio_short / bio_full mapping to bio if needed, but assuming data structure is what the DB expects or mapping is required.
-      // Based on prompt "profile" format and DB schema: it's better to just upsert.
-      
+      const profileData: Record<string, any> = pickDefined(data.profile, PROFILE_KEYS);
+      // Single-profile site: without an id, update the existing row instead of creating a second one.
+      if (!profileData.id) {
+        const { data: existing } = await supabase.from('profiles').select('id').limit(1).maybeSingle();
+        if (existing) profileData.id = existing.id;
+      }
+
       const { error } = await supabase
         .from('profiles')
         .upsert(profileData);
@@ -125,7 +135,8 @@ export const importJSON = async (
           architecture_edges: project.architecture_edges || [],
           ...pickDefined(project, [
             'cover_image', 'title_fr', 'title_en', 'description_fr', 'description_en',
-            'context_fr', 'context_en', 'technical_choices_en', 'results_en', 'challenges_en'
+            'context_fr', 'context_en', 'technical_choices_fr', 'technical_choices_en',
+            'results_fr', 'results_en', 'challenges_fr', 'challenges_en'
           ])
         }, { onConflict: 'slug' });
         
@@ -151,14 +162,13 @@ export const importJSON = async (
       await supabase.from('skills').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     }
 
-    const { error } = await supabase
-      .from('skills')
-      .insert(data.skills);
-
-    if (error) {
-      result.errors.push(error.message);
-    } else {
-      result.success = data.skills.length;
+    for (const skill of data.skills) {
+      const { error } = await supabase.from('skills').insert(pickDefined(skill, ['name', 'category']));
+      if (error) {
+        result.errors.push(`${skill.name} : ${error.message}`);
+      } else {
+        result.success++;
+      }
     }
     results.push(result);
   }
@@ -179,7 +189,7 @@ export const importJSON = async (
     for (const cert of data.certifications) {
       const { error } = await supabase
         .from('certifications')
-        .insert(cert);
+        .insert(pickDefined(cert, ['name', 'issuer', 'date', 'verify_url']));
         
       if (error) {
         result.errors.push(`${cert.name} : ${error.message}`);
@@ -206,7 +216,13 @@ export const importJSON = async (
     for (const [index, testimonial] of data.testimonials.entries()) {
       const { error } = await supabase
         .from('testimonials')
-        .insert({ ...testimonial, order: index });
+        .insert({
+          ...pickDefined(testimonial, [
+            'quote', 'quote_fr', 'quote_en', 'author_name', 'author_role', 'author_role_fr',
+            'author_role_en', 'author_company', 'linkedin_url'
+          ]),
+          order: index
+        });
         
       if (error) {
         result.errors.push(`${testimonial.author_name} : ${error.message}`);

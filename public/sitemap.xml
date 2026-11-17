@@ -5,21 +5,21 @@
 
   <!-- Page principale -->
   <url>
-    <loc>https://assami.dev</loc>
+    <loc>https://assamibaga.com</loc>
     <lastmod>2026-06-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate"
-      hreflang="fr" href="https://assami.dev" />
+      hreflang="fr" href="https://assamibaga.com" />
     <xhtml:link rel="alternate"
       hreflang="en"
-      href="https://assami.dev?lang=en" />
+      href="https://assamibaga.com?lang=en" />
   </url>
 
   <!-- Page AgroSahel AI -->
   <url>
     <loc>
-      https://assami.dev/projects/agrosahel-ai
+      https://assamibaga.com/projects/agrosahel-ai
     </loc>
     <lastmod>2026-06-28</lastmod>
     <changefreq>monthly</changefreq>
@@ -29,7 +29,7 @@
   <!-- Pages projets — ajouter un slug par projet -->
   <url>
     <loc>
-      https://assami.dev/projects/[slug-projet-2]
+      https://assamibaga.com/projects/[slug-projet-2]
     </loc>
     <lastmod>2026-06-28</lastmod>
     <changefreq>monthly</changefreq>

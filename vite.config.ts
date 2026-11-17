@@ -113,7 +113,7 @@ export default defineConfig(() => {
               handler: 'NetworkOnly'
             },
             {
-              urlPattern: /^https:\/\/bagus-full-stack\.me\//,
+              urlPattern: /^https:\/\/assami\.dev\//,
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'pages-cache',
@@ -126,18 +126,8 @@ export default defineConfig(() => {
             },
             {
               urlPattern: /^https:\/\/.*\.supabase\.co\//,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'supabase-cache',
-                networkTimeoutSeconds: 5,
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 60 * 60
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
+              // Jamais en cache : messages admin, URL signées du CV, sessions
+              handler: 'NetworkOnly'
             },
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\//,

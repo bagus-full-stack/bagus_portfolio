@@ -54,12 +54,12 @@ export function EditSkills() {
     if (!val) return;
     
     try {
+      // Même id en local et en base : sinon l'autosave (upsert) recrée la compétence en double
       const newSkill: Skill = { id: crypto.randomUUID(), name: val, category };
-      const updatedSkills = [...skills, newSkill];
-      setSkills(updatedSkills);
+      const { error } = await supabase.from('skills').insert([newSkill]);
+      if (error) throw error;
+      setSkills([...skills, newSkill]);
       setInputs(prev => ({ ...prev, [category]: '' }));
-      
-      await supabase.from('skills').insert([{ name: val, category }]);
     } catch (e) {
       toast.error('Erreur ajout compétence');
     }
@@ -73,7 +73,8 @@ export function EditSkills() {
     if (!deletingSkill) return;
     const { id } = deletingSkill;
     try {
-      await supabase.from('skills').delete().eq('id', id);
+      const { error } = await supabase.from('skills').delete().eq('id', id);
+      if (error) throw error;
       setSkills(skills.filter(s => s.id !== id));
       toast.success('Compétence supprimée');
     } catch (e) {
@@ -88,9 +89,13 @@ export function EditSkills() {
     const newCategory = newCategoryName.trim();
   
     // Ajouter la catégorie en base si elle n'existe pas
-    await supabase
+    const { error } = await supabase
       .from('skill_categories')
       .upsert({ name: newCategory });
+    if (error) {
+      toast.error('Erreur ajout catégorie');
+      return;
+    }
   
     setCategories(prev => [...prev, newCategory]);
     setNewCategoryName('');

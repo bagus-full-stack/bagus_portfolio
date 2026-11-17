@@ -9,7 +9,7 @@ interface SEOMeta {
   structuredData?: object
 }
 
-const DEFAULT_IMAGE = 'https://assami.dev/og-image.png'
+const DEFAULT_IMAGE = 'https://assamibaga.com/og-image.png'
 const SITE_NAME = 'Assami Baga — Portfolio'
 
 export const SEOHead = ({ meta }: { meta: SEOMeta }) => {

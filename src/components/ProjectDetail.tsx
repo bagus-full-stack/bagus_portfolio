@@ -38,7 +38,7 @@ export function ProjectDetail() {
       <SEOHead meta={{
         title: `${title} — Assami Baga`,
         description: description.slice(0, 155),
-        url: `https://assami.dev/projects/${project.slug}`,
+        url: `https://assamibaga.com/projects/${project.slug}`,
         image: project.cover_image || undefined,
         type: 'article',
         structuredData: {
@@ -46,11 +46,11 @@ export function ProjectDetail() {
           "@type": "SoftwareSourceCode",
           "name": title,
           "description": description,
-          "url": `https://assami.dev/projects/${project.slug}`,
+          "url": `https://assamibaga.com/projects/${project.slug}`,
           "author": {
             "@type": "Person",
             "name": "Assami Baga",
-            "url": "https://assami.dev"
+            "url": "https://assamibaga.com"
           },
           "programmingLanguage": stack,
           "codeRepository": project.github_url

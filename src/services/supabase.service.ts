@@ -71,6 +71,7 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit): Promis
 // Only create a real client if keys are present
 export const supabase = (supabaseUrl && supabaseKey) 
   ? createClient(supabaseUrl, supabaseKey, {
+      db: { schema: 'portfolio' },
       global: {
         fetch: customFetch
       }

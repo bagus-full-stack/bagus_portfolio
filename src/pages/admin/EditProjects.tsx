@@ -410,7 +410,11 @@ function ProjectForm({ initialData, onCancel, onSave }: { initialData: Project |
        return;
     }
     const finalProj = { ...formData, id: formData.id || crypto.randomUUID() } as Project;
-    await supabase.from('projects').upsert(finalProj);
+    const { error } = await supabase.from('projects').upsert(finalProj);
+    if (error) {
+      toast.error(`Échec de l'enregistrement : ${error.message}`);
+      return;
+    }
     onSave(finalProj);
     toast.success('Modifications enregistrées');
   };

@@ -1,12 +1,12 @@
 const ALLOWED_ORIGINS = [
-  'https://assami.dev',       // production
-  'https://www.assami.dev',   // variante www
+  'https://assamibaga.com',       // production
+  'https://www.assamibaga.com',   // variante www
   'http://localhost:5173',             // dev Vite
   'http://localhost:4173',             // preview Vite
   'http://localhost:3000',             // dev alternatif
 ]
 
-const isProd = Deno.env.get('ENVIRONMENT') === 'production'
+const isProd = Deno.env.get('ENVIRONMENT') !== 'development'
 
 export const getCorsHeaders = (
   requestOrigin: string | null
@@ -31,7 +31,7 @@ export const getCorsHeaders = (
   return {
     'Access-Control-Allow-Origin': isAllowed
       ? requestOrigin!
-      : 'https://assami.dev', // fallback domaine prod
+      : 'https://assamibaga.com', // fallback domaine prod
     'Access-Control-Allow-Headers':
       'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods':

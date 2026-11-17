@@ -7,7 +7,7 @@ export function NotFoundPage() {
       <SEOHead meta={{
         title: "Page introuvable | Assami Baga",
         description: "Cette page n'existe pas.",
-        url: "https://assami.dev/404"
+        url: "https://assamibaga.com/404"
       }} />
       <meta name="robots" content="noindex, nofollow" />
       

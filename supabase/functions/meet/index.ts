@@ -204,7 +204,7 @@ serve(async (req) => {
           description: [
             notes ? `Notes : ${notes}` : '',
             '',
-            'Réunion créée depuis bagus-full-stack.me'
+            'Réunion créée depuis assamibaga.com'
           ].filter(Boolean).join('\n'),
 
           start: {
@@ -255,7 +255,7 @@ serve(async (req) => {
         'VERSION:2.0',
         'PRODID:-//Assami Baga Portfolio//FR',
         'BEGIN:VEVENT',
-        `UID:${event.id}@bagus-full-stack.me`,
+        `UID:${event.id}@assamibaga.com`,
         `DTSTART:${start.replace(/[-:]/g, '').replace('.000Z', 'Z')}`,
         `DTEND:${end.replace(/[-:]/g, '').replace('.000Z', 'Z')}`,
         `SUMMARY:Appel avec Assami Baga`,

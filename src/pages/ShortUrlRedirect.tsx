@@ -150,7 +150,7 @@ const ShortUrlRedirect = () => {
         </div>
         <p className="font-[JetBrains_Mono]
           text-[#2DD4BF] text-xs opacity-70">
-          assami.dev/s/{slug}
+          assamibaga.com/s/{slug}
         </p>
       </div>
     )
@@ -180,7 +180,7 @@ const ShortUrlRedirect = () => {
         </p>
         <p className="text-[#8B94A3]/60
           font-[JetBrains_Mono] text-xs">
-          assami.dev/s/{slug}
+          assamibaga.com/s/{slug}
         </p>
       </div>
       <a href="/"

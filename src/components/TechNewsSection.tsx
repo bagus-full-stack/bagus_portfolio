@@ -24,11 +24,14 @@ export function TechNewsSection() {
     
     async function fetchNews() {
       try {
-        const response = await fetch(`/api/news?lang=${lang}`);
+        // API publique dev.to (CORS ouvert) : le site est statique, pas de serveur /api/news
+        const response = await fetch('https://dev.to/api/articles?tag=tech&per_page=100');
         if (!response.ok) {
           throw new Error('Failed to fetch news');
         }
-        const data = await response.json();
+        let data = (await response.json()).filter((a: any) => a.language === 'en' || a.language === 'fr');
+        const sameLang = data.filter((a: any) => a.language === lang);
+        if (sameLang.length >= 3) data = sameLang;
         if (mounted) {
           // Dev.to API can return articles without cover_image, filter to show nice ones
           const withImages = data.filter((a: Article) => a.cover_image).slice(0, 3);

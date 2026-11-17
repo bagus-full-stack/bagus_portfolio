@@ -168,7 +168,7 @@ export default function ShortUrlsManager() {
   };
 
   const copyToClipboard = (slug: string) => {
-    navigator.clipboard.writeText(`https://assami.dev/s/${slug}`);
+    navigator.clipboard.writeText(`https://assamibaga.com/s/${slug}`);
     toast.success('Lien copié !');
   };
 
@@ -222,7 +222,7 @@ export default function ShortUrlsManager() {
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-accent-cyan text-sm">
-                          assami.dev/s/{url.slug}
+                          assamibaga.com/s/{url.slug}
                         </span>
                         <button
                           onClick={() => copyToClipboard(url.slug)}
@@ -304,7 +304,7 @@ export default function ShortUrlsManager() {
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-text-muted text-sm pointer-events-none">
-                    assami.dev/s/
+                    assamibaga.com/s/
                   </span>
                   <input
                     type="text"

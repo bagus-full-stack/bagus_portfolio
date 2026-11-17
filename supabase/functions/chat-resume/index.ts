@@ -102,7 +102,7 @@ serve(async (req) => {
     // Récupération dynamique du CV via Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, { db: { schema: 'portfolio' } });
 
     const [
       { data: profile },

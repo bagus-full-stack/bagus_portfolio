@@ -12,7 +12,7 @@ BEGIN
   END IF;
   UPDATE messages SET read = true WHERE read = false;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = portfolio, public;
 
 -- Les vues et les logs restent ; seuls les logs d'activité et notifications sont purgés
 -- (analytics n'est plus purgée : le compteur public ne doit pas baisser)
@@ -26,11 +26,11 @@ BEGIN
   WHERE read = true
     AND created_at < (NOW() - INTERVAL '7 days');
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = portfolio, public;
 
-ALTER FUNCTION get_dashboard_metrics() SET search_path = public;
-ALTER FUNCTION get_analytics_by_period(integer) SET search_path = public;
-ALTER FUNCTION increment_short_url_clicks(text) SET search_path = public;
+ALTER FUNCTION get_dashboard_metrics() SET search_path = portfolio, public;
+ALTER FUNCTION get_analytics_by_period(integer) SET search_path = portfolio, public;
+ALTER FUNCTION increment_short_url_clicks(text) SET search_path = portfolio, public;
 
 REVOKE EXECUTE ON FUNCTION
   mark_all_messages_read(),
@@ -58,7 +58,7 @@ RETURNS integer AS $$
     + COUNT(DISTINCT fingerprint) FILTER (WHERE fingerprint <> '')
   )::integer
   FROM analytics;
-$$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public;
+$$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = portfolio, public;
 
 CREATE OR REPLACE FUNCTION increment_visitors(
   p_fingerprint text DEFAULT '',
@@ -94,7 +94,7 @@ BEGIN
 
   RETURN json_build_object('total', get_visitor_count(), 'is_new', NOT already_counted);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = portfolio, public;
 
 -- Les insertions passent par increment_visitors() (SECURITY DEFINER) :
 -- plus d'insertion directe ouverte sur la table

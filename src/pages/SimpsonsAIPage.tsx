@@ -8,13 +8,13 @@ export function SimpsonsAIPage() {
       <SEOHead meta={{
         title: "Simpsons AI Generator — Assami Baga",
         description: "Application Full Stack de génération d'images Simpsons par IA. FastAPI, PyTorch, Stable Diffusion, LoRA, ControlNet, Next.js 14.",
-        url: "https://assami.dev/projects/simpsons-ai",
+        url: "https://assamibaga.com/projects/simpsons-ai",
         structuredData: {
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
           "name": "Simpsons AI Generator",
           "description": "Génération d'images dans le style des Simpsons par intelligence artificielle générative.",
-          "url": "https://assami.dev/projects/simpsons-ai",
+          "url": "https://assamibaga.com/projects/simpsons-ai",
           "author": {
             "@type": "Person",
             "name": "Assami Baga"

@@ -40,7 +40,7 @@ export function Home() {
       <SEOHead meta={{
         title: "Assami Baga — Ingénieur Full Stack & IA | Île-de-France",
         description: "Portfolio d'Assami Baga, ingénieur Full Stack & IA basé en Île-de-France. Expert React, FastAPI, PyTorch. Créateur d'AgroSahel AI. Disponible pour CDI.",
-        url: "https://assami.dev"
+        url: "https://assamibaga.com"
       }} />
       <div id="hero" className={sectionClasses}><HeroSection /></div>
       <div id="about" className={sectionClasses}><AboutSection /></div>

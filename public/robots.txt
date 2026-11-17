@@ -9,7 +9,7 @@ Allow: /
 Disallow: /admin/
 
 # Sitemap
-Sitemap: https://assami.dev/sitemap.xml
+Sitemap: https://assamibaga.com/sitemap.xml
 
 # Crawl delay (optionnel)
 Crawl-delay: 1

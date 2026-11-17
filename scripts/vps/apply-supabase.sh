@@ -67,6 +67,8 @@ if [ -d "$SRC/functions" ]; then
   # shortcut: no --delete (functions dir is shared by all apps); remove stale functions by hand, upgrade by prefixing function names per app
   # main/ and hello/ belong to Supabase self-host: never touched
   $SUDO rsync -a --exclude=/main --exclude=/hello --exclude=deno.json "$SRC/functions/" "$FUNCTIONS_DIR/"
+  # Functions deleted from the repo: rsync cannot remove them, so list them here (only these names are removed)
+  for f in calendar; do $SUDO rm -rf "${FUNCTIONS_DIR:?}/$f"; done
   echo "synced -> $FUNCTIONS_DIR"
 fi
 echo "done"

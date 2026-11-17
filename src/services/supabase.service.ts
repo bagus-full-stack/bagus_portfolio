@@ -237,19 +237,11 @@ export const SupabaseService = {
 
   async submitContactForm(form: ContactForm): Promise<void> {
     if (supabase) {
-      const { error } = await supabase.from('messages').insert([
-        { 
-          name: form.name, 
-          email: form.email, 
-          subject: form.subject, 
-          message: form.message 
-          // read defaults to false, created_at is handled by DB
-        }
-      ]);
-      if (error) {
-        // console.error('Supabase submitContactForm error:', error);
-        throw error;
-      }
+      // Écriture via l'edge function : limite par IP, la table n'accepte plus l'insertion anonyme
+      const { error } = await supabase.functions.invoke('contact', {
+        body: { name: form.name, email: form.email, subject: form.subject, message: form.message }
+      });
+      if (error) throw error;
       return;
     }
     await delay(1000);

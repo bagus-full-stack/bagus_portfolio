@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { google } from "npm:googleapis"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3"
 import {
   getCorsHeaders,
   isOriginAllowed,
@@ -38,15 +39,22 @@ const tooManyBookings = (ip: string) => {
   return false
 }
 
-// Créneaux en cours de réservation : deux requêtes simultanées passent le test freebusy avant l'insertion
-// shortcut: mémoire de l'instance (une seule instance suffit à ce trafic), 30 s de verrou
-const claimed = new Map<number, number>()
-const claimSlot = (t: number) => {
-  const now = Date.now()
-  if ((claimed.get(t) || 0) > now) return false
-  claimed.set(t, now + 30000)
-  if (claimed.size > 1000) for (const [k, v] of claimed) if (v <= now) claimed.delete(k)
-  return true
+// Verrou de créneau partagé entre instances (table meet_claims) : deux requêtes simultanées
+// passent le test freebusy avant l'insertion, la clé primaire n'en laisse passer qu'une.
+const claimSlot = async (start: Date) => {
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL') || '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
+    { db: { schema: 'portfolio' } }
+  )
+  await admin.from('meet_claims').delete().lt('expires_at', new Date().toISOString())
+  const { error } = await admin.from('meet_claims').insert({
+    slot_start: start.toISOString(),
+    expires_at: new Date(Date.now() + 10 * 60000).toISOString()
+  })
+  if (!error) return true
+  if (error.code === '23505') return false // déjà réservé
+  throw error
 }
 
 const json = (body: unknown, status: number, corsHeaders: Record<string, string>) =>
@@ -179,7 +187,7 @@ serve(async (req) => {
         return json({ error: 'Too many bookings, try again later' }, 429, corsHeaders)
       }
 
-      if (!claimSlot(startD.getTime())) {
+      if (!(await claimSlot(startD))) {
         return json({ error: 'Slot no longer available' }, 409, corsHeaders)
       }
 

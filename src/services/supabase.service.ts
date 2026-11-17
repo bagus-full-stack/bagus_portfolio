@@ -19,13 +19,7 @@ import {
   mockProjects,
   mockSkills,
   mockCertifications,
-  mockMessages,
-  mockSessions,
-  mockVisitorLogs,
-  mockChartData7Days,
-  mockChartData30Days,
-  mockChartData90Days,
-  mockAnalyticsMetrics
+  mockMessages
 } from '../data';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -269,75 +263,57 @@ export const SupabaseService = {
     return 1337;
   },
 
-  async getViewCount(): Promise<number> {
-    await delay(100);
-    return 1337;
-  },
-
+  // Un seul appareil visible : GoTrue n'expose pas la liste des sessions au client.
   async getSessions(): Promise<Session[]> {
-    await delay(500);
-    return mockSessions;
-  },
-
-  async revokeSession(id: string): Promise<void> {
-    await delay(500);
-    const index = mockSessions.findIndex(s => s.id === id);
-    if (index !== -1) mockSessions.splice(index, 1);
+    const { data } = await supabase.auth.getSession();
+    const user = data.session?.user;
+    if (!user) return [];
+    return [{
+      id: 'current',
+      device: 'desktop',
+      location: 'Cet appareil',
+      createdAt: user.last_sign_in_at || new Date().toISOString(),
+      lastActive: new Date().toISOString(),
+      isCurrent: true
+    }];
   },
 
   async revokeAllOtherSessions(): Promise<void> {
-    await delay(800);
-    const current = mockSessions.find(s => s.isCurrent);
-    mockSessions.length = 0;
-    if (current) mockSessions.push(current);
+    const { error } = await supabase.auth.signOut({ scope: 'others' });
+    if (error) throw error;
   },
 
   async getVisitorLogs(): Promise<VisitorLog[]> {
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('analytics')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
-      
-      if (error) return mockVisitorLogs;
-      
-      return data.map(log => ({
-        id: log.id,
-        date: log.created_at,
-        country: log.country || 'Inconnu',
-        countryCode: log.country_code || '',
-        city: log.city || '—',
-        page: log.page,
-        duration: 0 // Cannot reliably calculate duration currently
-      }));
-    }
-    await delay(600);
-    return mockVisitorLogs;
+    const { data, error } = await supabase
+      .from('analytics')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    return data.map(log => ({
+      id: log.id,
+      date: log.created_at,
+      country: log.country || 'Inconnu',
+      countryCode: log.country_code || '',
+      city: log.city || '—',
+      page: log.page,
+      duration: 0 // Cannot reliably calculate duration currently
+    }));
   },
 
-  async getAnalyticsChart(period: '7' | '30' | '90'): Promise<ChartDataPoint[]> {
-    await delay(600);
-    if (period === '7') return mockChartData7Days;
-    if (period === '30') return mockChartData30Days;
-    return mockChartData90Days;
-  },
-
-  async getAnalyticsMetrics(): Promise<AnalyticsMetrics> {
-    await delay(500);
-    return mockAnalyticsMetrics;
-  },
-
-  async sendChatMessage(message: string, history: any[]): Promise<string> {
-    const res = await fetch('/api/chat-resume', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, history })
-    });
-    if (!res.ok) {
-      throw new Error('Failed to fetch chat response');
-    }
-    const data = await res.json();
-    return data.response;
+  async getAnalyticsSummary(period: '7' | '30' | '90'): Promise<{ chart: ChartDataPoint[]; metrics: AnalyticsMetrics }> {
+    const { data, error } = await supabase.rpc('get_analytics_summary', { days_back: Number(period) });
+    if (error) throw error;
+    return {
+      chart: data.daily.map((d: { date: string; views: number }) => ({
+        date: new Date(d.date + 'T00:00:00Z').toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', timeZone: 'UTC' }),
+        views: d.views
+      })),
+      metrics: {
+        topPage: data.top_page || '—',
+        topCountry: data.top_country || '—',
+        avgDuration: data.avg_duration || 0
+      }
+    };
   }
 };

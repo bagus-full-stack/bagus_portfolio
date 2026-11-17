@@ -5,8 +5,6 @@ import {
   Clock, 
   Activity,
   AlertTriangle,
-  ArrowUp,
-  ArrowDown,
   ChevronLeft,
   ChevronRight,
   ArrowUpDown
@@ -66,9 +64,8 @@ export function Analytics() {
     setLoading(true);
     setError(false);
     try {
-      const [chart, metricsData, logsData, eventsData] = await Promise.all([
-        SupabaseService.getAnalyticsChart(period),
-        SupabaseService.getAnalyticsMetrics(),
+      const [{ chart, metrics: metricsData }, logsData, eventsData] = await Promise.all([
+        SupabaseService.getAnalyticsSummary(period),
         SupabaseService.getVisitorLogs(),
         SupabaseService.getAnalyticsEvents(period)
       ]);
@@ -258,7 +255,7 @@ export function Analytics() {
       {loading ? (
         <div className="space-y-6">
           <div className="h-80 bg-bg-card border border-white/5 rounded-xl animate-pulse" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-bg-card border border-white/5 rounded-xl animate-pulse" />)}
           </div>
           <div className="bg-bg-card border border-white/5 rounded-xl p-6">
@@ -348,24 +345,6 @@ export function Analytics() {
                 </div>
                 <div>
                   <div className="font-space text-2xl font-bold text-text-primary">{formatDuration(metrics.avgDuration)}</div>
-                </div>
-              </div>
-              <div className="bg-bg-card border border-white/5 rounded-xl p-6 flex flex-col justify-between">
-                <div className="flex items-center gap-3 text-text-muted mb-4">
-                  <BarChart2 size={18} />
-                  <span className="font-medium">Taux de rebond</span>
-                </div>
-                <div className="flex items-end gap-3">
-                  <div className="font-space text-2xl font-bold text-text-primary">{metrics.bounceRate}%</div>
-                  {metrics.bounceRate < 50 ? (
-                    <span className="flex items-center text-sm font-medium text-accent-cyan mb-1">
-                      <ArrowDown size={14} className="mr-1" /> Bon
-                    </span>
-                  ) : (
-                    <span className="flex items-center text-sm font-medium text-red-400 mb-1">
-                      <ArrowUp size={14} className="mr-1" /> Élevé
-                    </span>
-                  )}
                 </div>
               </div>
             </div>

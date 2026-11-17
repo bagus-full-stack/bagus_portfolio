@@ -195,7 +195,6 @@ export interface AnalyticsMetrics {
   topPage: string;
   topCountry: string;
   avgDuration: number;
-  bounceRate: number;
 }
 
 export interface ChatMessage {

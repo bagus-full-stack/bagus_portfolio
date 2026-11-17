@@ -380,6 +380,13 @@ Un `git push` sur `main` déclenche deux apps Coolify via leur webhook GitHub :
 
 Le résultat du deployer se lit dans ses *Runtime Logs* (`DEPLOY OK`). Les migrations déjà appliquées sont suivies dans `<APP_SCHEMA>._migrations` (checksum) : ne modifiez jamais une migration appliquée, ajoutez-en une nouvelle. Les functions sont copiées sans `--delete` (dossier partagé entre apps) : supprimez à la main une function retirée du repo.
 
+### Pièges base de données
+
+- Une nouvelle table du schéma `portfolio` n'est visible par l'API qu'avec **RLS activée + `GRANT`** (pas de `ALTER DEFAULT PRIVILEGES`, voir migration 11) : sinon erreur `42501 permission denied`. Ajoutez les deux dans la migration qui crée la table.
+- Migrations 10 à 14 : publication Realtime, GRANTs, colonnes i18n, retrait des droits sur `_migrations`, résumé analytics admin + limite d'envoi du formulaire de contact.
+- Tests : `npm test` (calcul de l'heure de Paris utilisé par la function `meet`).
+- La function `calendar` a été supprimée du repo : si elle existe encore sur le serveur, supprimez le dossier `calendar` du répertoire des functions.
+
 ### Variables Coolify
 
 **Frontend** (*Build Variables*, pas Runtime : Vite les compile dans le bundle)

@@ -5,6 +5,7 @@ import {
   isOriginAllowed,
   handlePreflight
 } from "../_shared/cors.ts"
+import { parisOffsetMin, parisTime } from "../_shared/paris-time.ts"
 
 const auth = new google.auth.GoogleAuth({
   credentials: JSON.parse(Deno.env.get('GOOGLE_CREDENTIALS') || '{}'),
@@ -21,24 +22,6 @@ const DAY_END_HOUR = 18
 const MAX_DAYS_AHEAD = 60
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/
 
-// Décalage (minutes) de Paris par rapport à UTC à un instant donné : gère heure d'été et d'hiver
-const parisOffsetMin = (d: Date) => {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: TZ, hour12: false,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
-  }).formatToParts(d)
-  const get = (t: string) => Number(parts.find(p => p.type === t)!.value)
-  const asUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour') % 24, get('minute'), get('second'))
-  return Math.round((asUtc - d.getTime()) / 60000)
-}
-
-// Instant UTC de « date à hh:00 » heure de Paris
-const parisTime = (date: string, hour: number) => {
-  const guess = new Date(`${date}T${String(hour).padStart(2, '0')}:00:00Z`)
-  return new Date(guess.getTime() - parisOffsetMin(guess) * 60000)
-}
-
 // Limite de réservations par IP (mémoire de l'instance : suffit à freiner un script simple)
 const BOOKING_WINDOW_MS = 60 * 60 * 1000
 const BOOKING_MAX = 3
@@ -53,6 +36,17 @@ const tooManyBookings = (ip: string) => {
     for (const [k, v] of bookingsByIp) if (v.every(t => now - t >= BOOKING_WINDOW_MS)) bookingsByIp.delete(k)
   }
   return false
+}
+
+// Créneaux en cours de réservation : deux requêtes simultanées passent le test freebusy avant l'insertion
+// shortcut: mémoire de l'instance (une seule instance suffit à ce trafic), 30 s de verrou
+const claimed = new Map<number, number>()
+const claimSlot = (t: number) => {
+  const now = Date.now()
+  if ((claimed.get(t) || 0) > now) return false
+  claimed.set(t, now + 30000)
+  if (claimed.size > 1000) for (const [k, v] of claimed) if (v <= now) claimed.delete(k)
+  return true
 }
 
 const json = (body: unknown, status: number, corsHeaders: Record<string, string>) =>
@@ -166,6 +160,7 @@ serve(async (req) => {
         (subject == null || (typeof subject === 'string' && subject.length <= 200)) &&
         (notes == null || (typeof notes === 'string' && notes.length <= 1000))
       const validSlot =
+        typeof start === 'string' && typeof end === 'string' &&
         !isNaN(startD.getTime()) && !isNaN(endD.getTime()) &&
         endD.getTime() - startD.getTime() === SLOT_MINUTES * 60000 &&
         startD.getTime() > nowMs && startD.getTime() < nowMs + MAX_DAYS_AHEAD * 86400000 &&
@@ -175,9 +170,17 @@ serve(async (req) => {
         return json({ error: 'Invalid booking request' }, 400, corsHeaders)
       }
 
+      // Une seule ligne : ces champs finissent dans le titre de l'événement et le nom du participant
+      const name = attendeeName.trim().replace(/\s+/g, ' ')
+      const topic = typeof subject === 'string' ? subject.replace(/\s+/g, ' ').trim() : ''
+
       const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
       if (tooManyBookings(ip)) {
         return json({ error: 'Too many bookings, try again later' }, 429, corsHeaders)
+      }
+
+      if (!claimSlot(startD.getTime())) {
+        return json({ error: 'Slot no longer available' }, 409, corsHeaders)
       }
 
       // Le créneau a pu être pris depuis l'affichage de la liste
@@ -198,9 +201,7 @@ serve(async (req) => {
         sendUpdates: 'all', // emails automatiques aux participants
         conferenceDataVersion: 1, // active la création Meet
         requestBody: {
-          summary: `Appel avec ${attendeeName}${
-            subject ? ` — ${subject}` : ''
-          }`,
+          summary: `Appel avec ${name}${topic ? ` — ${topic}` : ''}`,
           description: [
             notes ? `Notes : ${notes}` : '',
             '',
@@ -219,7 +220,7 @@ serve(async (req) => {
           attendees: [
             {
               email: attendeeEmail,
-              displayName: attendeeName
+              displayName: name
             },
             {
               email: Deno.env.get('OWNER_EMAIL') || '',

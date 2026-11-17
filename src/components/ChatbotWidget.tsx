@@ -117,71 +117,12 @@ export function ChatbotWidget() {
     abortControllerRef.current = new AbortController();
 
     try {
-      let data;
-      try {
-        const res = await fetch('/api/chat-resume', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: trimmedText, history: messages.slice(-10) }),
-          signal: abortControllerRef.current.signal
-        });
-        
-        if (!res.ok) {
-          if (res.status === 404) throw new Error('FallbackToSupabase');
-          throw new Error(`API Error: ${res.status}`);
-        }
-        data = await res.json();
-      } catch (innerErr: any) {
-        if (innerErr.name === 'AbortError') throw innerErr;
-        
-        console.log("Local API not available, falling back to Supabase Edge Function...");
-        if (!supabase) throw new Error("Supabase not configured");
-        
-        // Fetch CV data for the old Edge Function payload
-        const [
-          { data: profile },
-          { data: experiences },
-          { data: projects },
-          { data: skills }
-        ] = await Promise.all([
-          supabase.from('profiles').select('*').maybeSingle(),
-          supabase.from('experiences').select('*').order('start_date', { ascending: false }),
-          supabase.from('projects').select('*'),
-          supabase.from('skills').select('*')
-        ]);
-        
-        const cvData = {
-          name: profile?.full_name || "Assami Baga",
-          role: profile?.title || "Ingénieur Full Stack & IA",
-          bio: profile?.bio || "",
-          experiences: (experiences || []).map((exp: any) => ({
-            role: exp.role,
-            company: exp.company,
-            period: `${exp.start_date} - ${exp.end_date || 'Présent'}`,
-            description: exp.description
-          })),
-          projects: (projects || []).map((p: any) => ({
-            title: p.title,
-            description: p.description,
-            technologies: p.technologies
-          })),
-          skills: (skills || []).map((s: any) => s.name),
-        };
-
-        const { data: supabaseData, error: invokeError } = await supabase.functions.invoke('chat-resume', {
-          body: { 
-            message: trimmedText, 
-            history: messages.slice(-10),
-            // Legacy edge function compatibility:
-            question: trimmedText,
-            context: JSON.stringify({ cv: cvData, history: messages.slice(-10) })
-          },
-          signal: abortControllerRef.current.signal
-        } as any);
-        
-        if (invokeError) throw invokeError;
-        data = supabaseData;
-      }
+      if (!supabase) throw new Error("Supabase not configured");
+      const { data, error: invokeError } = await supabase.functions.invoke('chat-resume', {
+        body: { message: trimmedText, history: messages.slice(-10) },
+        signal: abortControllerRef.current.signal
+      } as any);
+      if (invokeError) throw invokeError;
       
       const assistantMsg: ChatMessage = {
         role: 'assistant',

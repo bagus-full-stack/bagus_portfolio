@@ -22,7 +22,6 @@ export function SecuritySettings() {
   const [savingPassword, setSavingPassword] = useState(false);
 
   // Modals state
-  const [revokeModalId, setRevokeModalId] = useState<string | null>(null);
   const [revokeAllModal, setRevokeAllModal] = useState(false);
   const [revoking, setRevoking] = useState(false);
 
@@ -125,21 +124,6 @@ export function SecuritySettings() {
     }
   };
 
-  const handleRevokeSession = async () => {
-    if (!revokeModalId) return;
-    setRevoking(true);
-    try {
-      await SupabaseService.revokeSession(revokeModalId);
-      setSessions(sessions.filter(s => s.id !== revokeModalId));
-      toast.success('Session révoquée');
-    } catch (e) {
-      toast.error('Erreur lors de la révocation');
-    } finally {
-      setRevoking(false);
-      setRevokeModalId(null);
-    }
-  };
-
   const handleRevokeAll = async () => {
     setRevoking(true);
     try {
@@ -155,7 +139,6 @@ export function SecuritySettings() {
   };
 
   const currentSession = sessions.find(s => s.isCurrent);
-  const otherSessions = sessions.filter(s => !s.isCurrent);
 
   return (
     <div className="space-y-8 pb-12 max-w-4xl mx-auto">
@@ -277,7 +260,6 @@ export function SecuritySettings() {
             <h3 className="font-space text-lg font-bold text-text-primary">Sessions actives</h3>
           </div>
           
-          {otherSessions.length > 0 && (
             <button
               onClick={() => setRevokeAllModal(true)}
               className="px-4 py-2 border border-red-500/50 text-red-400 hover:bg-red-500/10 text-sm font-medium rounded-lg transition-colors flex items-center whitespace-nowrap"
@@ -285,7 +267,6 @@ export function SecuritySettings() {
               <LogOut size={16} className="mr-2" />
               Déconnecter les autres sessions
             </button>
-          )}
         </div>
 
         {loadingSessions ? (
@@ -325,55 +306,12 @@ export function SecuritySettings() {
                   </div>
                 </div>
 
-                {!session.isCurrent && (
-                  <button
-                    onClick={() => setRevokeModalId(session.id)}
-                    aria-label="Révoquer cette session"
-                    className="w-full sm:w-auto px-4 py-2 bg-white/5 hover:bg-white/10 text-text-primary text-sm font-medium rounded transition-colors"
-                  >
-                    Révoquer
-                  </button>
-                )}
               </div>
             ))}
             
-            {otherSessions.length === 0 && (
-              <div className="flex items-center justify-center p-6 bg-[var(--bg-card)] border border-white/5 rounded-lg text-text-muted">
-                <CheckCircle2 size={20} className="text-accent-cyan mr-3" />
-                <span>Aucune autre session active.</span>
-              </div>
-            )}
           </div>
         )}
       </div>
-
-      {/* Revoke Single Session Modal */}
-      {revokeModalId && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-bg-card border border-white/10 rounded-xl p-6 max-w-sm w-full">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex items-center text-red-400">
-                <AlertTriangle size={24} className="mr-3" />
-                <h3 className="font-space font-semibold text-lg">Révoquer la session</h3>
-              </div>
-              <button onClick={() => setRevokeModalId(null)} className="text-text-muted hover:text-text-primary">
-                <X size={20} />
-              </button>
-            </div>
-            <p className="text-text-muted mb-6">Cette session sera immédiatement déconnectée. Voulez-vous continuer ?</p>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setRevokeModalId(null)} className="px-4 py-2 text-text-primary hover:bg-white/5 rounded transition-colors">Annuler</button>
-              <button 
-                onClick={handleRevokeSession} 
-                disabled={revoking}
-                className="px-4 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded font-medium transition-colors disabled:opacity-50"
-              >
-                {revoking ? 'Révocation...' : 'Révoquer'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Revoke All Sessions Modal */}
       {revokeAllModal && (

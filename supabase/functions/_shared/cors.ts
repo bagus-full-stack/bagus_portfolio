@@ -1,6 +1,7 @@
 const ALLOWED_ORIGINS = [
   'https://assamibaga.com',       // production
   'https://www.assamibaga.com',   // variante www
+  'https://portfolio.assamibaga.com', // sous-domaine
   'http://localhost:5173',             // dev Vite
   'http://localhost:4173',             // preview Vite
   'http://localhost:3000',             // dev alternatif

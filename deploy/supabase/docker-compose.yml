@@ -1,5 +1,5 @@
 # Coolify app "supabase-deployer": Docker Compose build pack
-#   Base Directory: /    Compose Location: /deploy/supabase/docker-compose.yml
+#   Base Directory: /deploy/supabase    Compose Location: /docker-compose.yml
 # Env (Coolify): POSTGRES_PASSWORD = the Supabase service's SERVICE_PASSWORD_POSTGRES
 services:
   deployer:

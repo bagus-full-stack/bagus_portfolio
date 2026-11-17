@@ -376,7 +376,7 @@ Un `git push` sur `main` déclenche deux apps Coolify via leur webhook GitHub :
 | App Coolify | Build pack | Rôle |
 |---|---|---|
 | Frontend | Dockerfile (`/Dockerfile`, port 80) | Build Vite + nginx |
-| `supabase-deployer` | Docker Compose (`/deploy/supabase/docker-compose.yml`) | Applique les migrations SQL et synchronise les functions via `scripts/vps/apply-supabase.sh` |
+| `supabase-deployer` | Docker Compose (Base Directory `/deploy/supabase`, Compose Location `/docker-compose.yml`) | Applique les migrations SQL et synchronise les functions via `scripts/vps/apply-supabase.sh` |
 
 Le résultat du deployer se lit dans ses *Runtime Logs* (`DEPLOY OK`). Les migrations déjà appliquées sont suivies dans `<APP_SCHEMA>._migrations` (checksum) : ne modifiez jamais une migration appliquée, ajoutez-en une nouvelle. Les functions sont copiées sans `--delete` (dossier partagé entre apps) : supprimez à la main une function retirée du repo.
 

@@ -24,7 +24,6 @@
     <!-- Langue -->
     <meta http-equiv="content-language" content="fr" />
     <link rel="alternate" hreflang="fr" href="https://assamibaga.com" />
-    <link rel="alternate" hreflang="en" href="https://assamibaga.com?lang=en" />
 
     <!-- Canonical (évite le duplicate content) -->
     <link rel="canonical" href="https://assamibaga.com" />
@@ -119,7 +118,35 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+    <!-- shortcut: static copy for crawlers that do not run JS; React replaces it on load. Update by hand when the profile changes. -->
+    <main style="max-width:720px;margin:0 auto;padding:96px 24px;font-family:system-ui,sans-serif;color:#e6e8eb;line-height:1.6">
+      <h1>Assami Baga — Ingénieur Full Stack &amp; IA</h1>
+      <p>Ingénieur Full Stack &amp; IA basé en Île-de-France, spécialisé en React, Angular, FastAPI, PyTorch et MLOps. Disponible pour un CDI.</p>
+      <h2>Projets</h2>
+      <ul>
+      <li><a href="/projects/pymqcopy" style="color:#E08A3E">PYMQCOPY – Routage de messages MQ vers le cloud</a></li>
+      <li><a href="/projects/referentiel-services-flux" style="color:#E08A3E">Référentiel des Services Flux</a></li>
+      <li><a href="/projects/delegation-reboot" style="color:#E08A3E">Delegation Reboot – Vérification automatisée des droits de reboot</a></li>
+      <li><a href="/projects/pnp-plus" style="color:#E08A3E">PNP+ – Automatisation de la conception des offres commerciales</a></li>
+      <li><a href="/projects/myspace-bourse-fondation" style="color:#E08A3E">MySpace &amp; BourseFondation – Refonte de portails</a></li>
+      <li><a href="/projects/audit-spring-boot-starter" style="color:#E08A3E">Audit Spring Boot Starter</a></li>
+      <li><a href="/projects/job-application-tracker" style="color:#E08A3E">Job Application Tracker – Suivi automatisé de candidatures</a></li>
+      <li><a href="/projects/faso-connect" style="color:#E08A3E">Faso Connect – Traduction automatique et synthèse vocale</a></li>
+      <li><a href="/projects/sympsonimg" style="color:#E08A3E">SympsonIMG – Génération d'images par IA générative</a></li>
+      <li><a href="/projects/real-time-detection" style="color:#E08A3E">Real Time Detection – Surveillance vidéo en temps réel</a></li>
+      <li><a href="/projects/ai-health-chef" style="color:#E08A3E">AI Health Chef – Analyse nutritionnelle par vision IA</a></li>
+      <li><a href="/projects/bagus-checkers" style="color:#E08A3E">Bagus Checkers – Dames et Ludo multijoueur en ligne</a></li>
+      <li><a href="/projects/spare" style="color:#E08A3E">Spare – Suivi budgétaire FinTech</a></li>
+      <li><a href="/projects/found-again" style="color:#E08A3E">Found Again – Géolocalisation d'objets perdus</a></li>
+      <li><a href="/projects/math-viz" style="color:#E08A3E">Math Viz – Visualisation mathématique 2D/3D</a></li>
+      <li><a href="/projects/blue-attendance" style="color:#E08A3E">Blue Attendance – Prise de présence par Bluetooth</a></li>
+      <li><a href="/projects/projet-iot" style="color:#E08A3E">Projet IoT – Dashboard de capteurs connectés</a></li>
+      <li><a href="/projects/bagus-portfolio" style="color:#E08A3E">Bagus Portfolio – Site personnel dynamique</a></li>
+      </ul>
+      <p><a href="/news" style="color:#E08A3E">Actualités</a> · <a href="https://github.com/bagus-full-stack" style="color:#E08A3E">GitHub</a> · <a href="https://linkedin.com/in/assami-baga" style="color:#E08A3E">LinkedIn</a></p>
+    </main>
+  </div>
     <script type="module" src="/src/main.tsx"></script>
     <script type="application/ld+json">
     {
@@ -141,7 +168,8 @@
             "addressCountry": "FR"
           },
           "sameAs": [
-            "https://github.com/bagus-full-stack"
+            "https://github.com/bagus-full-stack",
+"https://linkedin.com/in/assami-baga"
           ],
           "knowsAbout": [
             "React", "Angular", "TypeScript",

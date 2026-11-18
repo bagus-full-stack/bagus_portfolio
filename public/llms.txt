@@ -1,0 +1,32 @@
+# Assami Baga
+
+> Ingénieur Full Stack & IA basé en Île-de-France, disponible pour un CDI. Stack : React, Angular, NestJS, Spring Boot, FastAPI, Python, PyTorch, MLOps. Portfolio : https://assamibaga.com
+
+## Liens
+- [Portfolio](https://assamibaga.com/): présentation, projets, expériences, compétences, contact
+- [Actualités](https://assamibaga.com/news): veille technologique
+- [GitHub](https://github.com/bagus-full-stack)
+- [LinkedIn](https://linkedin.com/in/assami-baga)
+
+## Projets
+- [PYMQCOPY – Routage de messages MQ vers le cloud](https://assamibaga.com/projects/pymqcopy)
+- [Référentiel des Services Flux](https://assamibaga.com/projects/referentiel-services-flux)
+- [Delegation Reboot – Vérification automatisée des droits de reboot](https://assamibaga.com/projects/delegation-reboot)
+- [PNP+ – Automatisation de la conception des offres commerciales](https://assamibaga.com/projects/pnp-plus)
+- [MySpace & BourseFondation – Refonte de portails](https://assamibaga.com/projects/myspace-bourse-fondation)
+- [Audit Spring Boot Starter](https://assamibaga.com/projects/audit-spring-boot-starter)
+- [Job Application Tracker – Suivi automatisé de candidatures](https://assamibaga.com/projects/job-application-tracker)
+- [Faso Connect – Traduction automatique et synthèse vocale](https://assamibaga.com/projects/faso-connect)
+- [SympsonIMG – Génération d'images par IA générative](https://assamibaga.com/projects/sympsonimg)
+- [Real Time Detection – Surveillance vidéo en temps réel](https://assamibaga.com/projects/real-time-detection)
+- [AI Health Chef – Analyse nutritionnelle par vision IA](https://assamibaga.com/projects/ai-health-chef)
+- [Bagus Checkers – Dames et Ludo multijoueur en ligne](https://assamibaga.com/projects/bagus-checkers)
+- [Spare – Suivi budgétaire FinTech](https://assamibaga.com/projects/spare)
+- [Found Again – Géolocalisation d'objets perdus](https://assamibaga.com/projects/found-again)
+- [Math Viz – Visualisation mathématique 2D/3D](https://assamibaga.com/projects/math-viz)
+- [Blue Attendance – Prise de présence par Bluetooth](https://assamibaga.com/projects/blue-attendance)
+- [Projet IoT – Dashboard de capteurs connectés](https://assamibaga.com/projects/projet-iot)
+- [Bagus Portfolio – Site personnel dynamique](https://assamibaga.com/projects/bagus-portfolio)
+
+## Contact
+Formulaire de contact et prise de rendez-vous : https://assamibaga.com/#contact

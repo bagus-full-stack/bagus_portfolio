@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Linkedin } from 'lucide-react';
-import { Profile } from '../types';
+import { Profile, Experience, Project } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
 import { useLocalizedField } from '../hooks/useLocalizedField';
@@ -10,15 +10,23 @@ export function AboutSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     let mounted = true;
     
     async function loadProfile() {
       try {
-        const data = await SupabaseService.getProfile();
+        const [data, exps, projs] = await Promise.all([
+          SupabaseService.getProfile(),
+          SupabaseService.getExperiences(),
+          SupabaseService.getProjects()
+        ]);
         if (mounted) {
           setProfile(data);
+          setExperiences(exps);
+          setProjects(projs);
           setLoading(false);
         }
       } catch (err) {
@@ -33,6 +41,12 @@ export function AboutSection() {
     loadProfile();
     return () => { mounted = false; };
   }, []);
+
+  // Manual value (admin profile) wins; otherwise computed from the data
+  const firstYear = Math.min(...experiences.filter(e => e.type === 'pro').map(e => Number(e.start_date?.match(/\d{4}/)?.[0])).filter(Boolean));
+  const computedYears = Number.isFinite(firstYear) ? new Date().getFullYear() - firstYear : null;
+  const years = profile?.years_experience_override ?? computedYears;
+  const deployed = profile?.projects_count_override ?? projects.filter(p => p.status === 'production').length;
 
   if (error) {
     return (
@@ -82,11 +96,11 @@ export function AboutSection() {
                 
                 <div className="flex flex-wrap items-center gap-x-8 gap-y-4 py-2">
                   <div className="flex flex-col">
-                    <span className="font-mono text-2xl font-bold text-accent-cyan">5+</span>
+                    <span className="font-mono text-2xl font-bold text-accent-cyan">{years}+</span>
                     <span className="font-mono text-xs text-text-muted uppercase tracking-wider">ans d'expérience</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-mono text-2xl font-bold text-accent-cyan">15+</span>
+                    <span className="font-mono text-2xl font-bold text-accent-cyan">{deployed}+</span>
                     <span className="font-mono text-xs text-text-muted uppercase tracking-wider">projets déployés</span>
                   </div>
                 </div>

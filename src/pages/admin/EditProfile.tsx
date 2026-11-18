@@ -59,6 +59,11 @@ export function EditProfile() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value === '' ? null : Number(value) }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.title) {
@@ -165,6 +170,25 @@ export function EditProfile() {
               multiline={true}
               maxLength={500}
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-text-muted mb-1.5">Années d'expérience (vide = calcul auto)</label>
+              <input 
+                type="number" min="0" name="years_experience_override" value={formData.years_experience_override ?? ''} onChange={handleNumber}
+                placeholder="Auto"
+                className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-muted mb-1.5">Projets déployés (vide = calcul auto)</label>
+              <input 
+                type="number" min="0" name="projects_count_override" value={formData.projects_count_override ?? ''} onChange={handleNumber}
+                placeholder="Auto"
+                className="w-full px-4 py-2 bg-bg-primary border border-white/10 rounded text-text-primary focus:border-accent-cyan outline-none transition-colors" 
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

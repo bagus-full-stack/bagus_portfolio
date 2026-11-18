@@ -26,7 +26,8 @@ const PROFILE_KEYS = [
   'id', 'name', 'title', 'title_fr', 'title_en', 'bio', 'bio_short', 'bio_short_fr', 'bio_short_en',
   'bio_full', 'bio_full_fr', 'bio_full_en', 'location', 'email', 'linkedin_url', 'github_url',
   'calendly_url', 'photo_url', 'cv_url', 'cv_fullstack_url', 'cv_ai_url',
-  'cv_fullstack_fr', 'cv_fullstack_en', 'cv_ai_fr', 'cv_ai_en'
+  'cv_fullstack_fr', 'cv_fullstack_en', 'cv_ai_fr', 'cv_ai_en',
+  'years_experience_override', 'projects_count_override'
 ];
 
 export const importJSON = async (

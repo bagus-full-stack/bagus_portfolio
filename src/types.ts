@@ -12,6 +12,8 @@ export interface Profile {
   bio_full_fr?: string;
   bio_full_en?: string;
   location: string;
+  years_experience_override?: number | null;
+  projects_count_override?: number | null;
   photo_url?: string;
   cv_url?: string;
   cv_updated_at?: string;

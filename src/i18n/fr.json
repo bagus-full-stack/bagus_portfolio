@@ -210,6 +210,10 @@
     "activate_light": "Activer le thème clair",
     "activate_dark": "Activer le thème sombre"
   },
+  "cv": {
+    "downloading": "Téléchargement...",
+    "footer": "PDF · Lien sécurisé · Valable 1h"
+  },
   "cookie": {
     "message": "Ce site compte les visites pour mesurer son audience. Aucun cookie tiers, aucun tracking publicitaire.",
     "accept": "Compris"

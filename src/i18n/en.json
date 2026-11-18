@@ -210,6 +210,10 @@
     "activate_light": "Switch to light theme",
     "activate_dark": "Switch to dark theme"
   },
+  "cv": {
+    "downloading": "Downloading...",
+    "footer": "PDF · Secure link · Valid for 1h"
+  },
   "cookie": {
     "message": "This site counts visits to measure its audience. No third-party cookies, no advertising tracking.",
     "accept": "Got it"

@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from 'react'
 import { Download, ChevronDown, Code, Brain, Loader2 } from 'lucide-react'
 import useDownloadCV from '../hooks/useDownloadCV'
 import { CV_TYPES, CVType } from '../config/cv.config'
+import { useTranslation } from '../hooks/useTranslation'
 
 const CVDropdown = ({ dropUp = false }: { dropUp?: boolean }) => {
   const [open, setOpen] = useState(false)
   const { downloadCV, loading } = useDownloadCV()
+  const { t, lang } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -23,9 +25,9 @@ const CVDropdown = ({ dropUp = false }: { dropUp?: boolean }) => {
     setOpen(false)
   }
 
-  // Grouper les CV par profil
-  const fullstackCVs = CV_TYPES.filter(cv => cv.profile === 'fullstack')
-  const aiCVs = CV_TYPES.filter(cv => cv.profile === 'ai')
+  // Grouper les CV par profil, dans la langue choisie
+  const fullstackCVs = CV_TYPES.filter(cv => cv.profile === 'fullstack' && cv.lang === lang)
+  const aiCVs = CV_TYPES.filter(cv => cv.profile === 'ai' && cv.lang === lang)
 
   return (
     <div ref={ref} className="relative">
@@ -40,7 +42,7 @@ const CVDropdown = ({ dropUp = false }: { dropUp?: boolean }) => {
         ) : (
           <Download size={16} />
         )}
-        {loading ? 'Téléchargement...' : 'Télécharger le CV'}
+        {loading ? t('cv.downloading') : t('hero.cta.download')}
         <ChevronDown
           size={14}
           className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
@@ -80,7 +82,7 @@ const CVDropdown = ({ dropUp = false }: { dropUp?: boolean }) => {
 
                 <div className="flex-1 min-w-0">
                   <p className="text-[var(--text-primary)] font-[Inter] text-sm font-medium">
-                    {cv.lang === 'fr' ? 'Version Française' : 'English Version'}
+                    {cv.sublabel}
                   </p>
                   <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
                     {cv.downloadName.replace('.pdf', '')}
@@ -123,7 +125,7 @@ const CVDropdown = ({ dropUp = false }: { dropUp?: boolean }) => {
 
                 <div className="flex-1 min-w-0">
                   <p className="text-[var(--text-primary)] font-[Inter] text-sm font-medium">
-                    {cv.lang === 'fr' ? 'Version Française' : 'English Version'}
+                    {cv.sublabel}
                   </p>
                   <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-xs">
                     {cv.downloadName.replace('.pdf', '')}
@@ -138,7 +140,7 @@ const CVDropdown = ({ dropUp = false }: { dropUp?: boolean }) => {
           {/* Footer */}
           <div className="px-4 py-2 border-t border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
             <p className="text-[var(--text-muted)] font-[JetBrains_Mono] text-[10px] text-center">
-              PDF · Lien sécurisé · Valable 1h
+              {t('cv.footer')}
             </p>
           </div>
         </div>

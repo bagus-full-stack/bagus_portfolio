@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Code2 } from 'lucide-react';
+import { ExternalLink, Code2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Project } from '../types';
 import { SupabaseService } from '../services/supabase.service';
 import { toast } from 'sonner';
 import { useTranslation } from '../hooks/useTranslation';
 import { useSectionTracker } from '../hooks/useSectionTracker';
 import { useLocalizedField } from '../hooks/useLocalizedField';
+
+const PAGE_SIZE = 6; // 3 columns x 2 rows on desktop
 
 export function ProjectsSection() {
   const sectionRef = useSectionTracker('Projects');
@@ -16,6 +18,7 @@ export function ProjectsSection() {
   const [error, setError] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [filter, setFilter] = useState<string>('all');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     let mounted = true;
@@ -47,6 +50,15 @@ export function ProjectsSection() {
     p => filter === 'all' || p.stack.includes(filter)
   );
 
+  const pageCount = Math.max(1, Math.ceil(filteredProjects.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pagedProjects = filteredProjects.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const goToPage = (n: number) => {
+    setPage(n);
+    document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   if (error) {
     return (
       <section id="projects" ref={sectionRef as any} className="py-24 bg-bg-card/20 border-t border-white/5">
@@ -70,7 +82,7 @@ export function ProjectsSection() {
               {filters.map(f => (
                 <button
                   key={f.id}
-                  onClick={() => setFilter(f.id)}
+                  onClick={() => { setFilter(f.id); setPage(1); }}
                   className={`px-4 py-1.5 rounded-full text-sm font-inter transition-colors duration-200 ${
                     filter === f.id
                       ? 'bg-accent-ocre text-bg-primary font-medium'
@@ -108,8 +120,9 @@ export function ProjectsSection() {
             {translate('projects.empty.filter')}
           </div>
         ) : (
+          <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.map(project => (
+            {pagedProjects.map(project => (
               <div
                 key={project.id}
                 className="group flex flex-col rounded-xl border border-white/5 bg-bg-card overflow-hidden hover:border-accent-ocre transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
@@ -182,6 +195,42 @@ export function ProjectsSection() {
               </div>
             ))}
           </div>
+          {pageCount > 1 && (
+            <nav className="flex items-center justify-center gap-2 mt-12" aria-label="Pagination des projets">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                aria-label="Page précédente"
+                className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-text-primary hover:text-accent-ocre hover:border-accent-ocre transition-colors disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:text-text-primary"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              {Array.from({ length: pageCount }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goToPage(i + 1)}
+                  aria-label={`Page ${i + 1}`}
+                  aria-current={currentPage === i + 1 ? 'page' : undefined}
+                  className={`w-10 h-10 rounded-full text-sm font-mono transition-colors ${
+                    currentPage === i + 1
+                      ? 'bg-accent-ocre text-bg-primary font-medium'
+                      : 'border border-white/10 text-text-muted hover:text-text-primary hover:border-text-muted'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === pageCount}
+                aria-label="Page suivante"
+                className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-text-primary hover:text-accent-ocre hover:border-accent-ocre transition-colors disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:text-text-primary"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </nav>
+          )}
+          </>
         )}
       </div>
     </section>

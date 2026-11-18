@@ -3,45 +3,7 @@ import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Testimonial } from '../types';
 import DOMPurify from 'dompurify';
 import { useLocalizedField } from '../hooks/useLocalizedField';
-
-const MOCK_TESTIMONIALS: Testimonial[] = [
-  {
-    id: '1',
-    quote: 'Assami a transformé notre vision en une application robuste et évolutive. Sa maîtrise des technologies web et son sens du détail ont fait la différence sur notre projet.',
-    authorName: 'Sophie Laurent',
-    authorRole: 'CTO',
-    authorCompany: 'TechVision',
-    linkedinUrl: 'https://linkedin.com/in/example1',
-    order: 0
-  },
-  {
-    id: '2',
-    quote: 'Une collaboration exceptionnelle. Non seulement le code est propre et performant, mais la capacité d\'Assami à proposer des solutions innovantes en IA nous a fait gagner un temps précieux.',
-    authorName: 'Marc Dubois',
-    authorRole: 'Product Manager',
-    authorCompany: 'AgroData',
-    linkedinUrl: 'https://linkedin.com/in/example2',
-    order: 1
-  },
-  {
-    id: '3',
-    quote: 'Un vrai professionnel qui comprend aussi bien les enjeux techniques que business. La plateforme qu\'il a développée pour nous est devenue le cœur de notre activité.',
-    authorName: 'Claire Martin',
-    authorRole: 'CEO',
-    authorCompany: 'InnovaWeb',
-    linkedinUrl: 'https://linkedin.com/in/example3',
-    order: 2
-  },
-  {
-    id: '4',
-    quote: 'Je recommande vivement Assami pour tout projet complexe nécessitant une architecture solide et une interface utilisateur impeccable.',
-    authorName: 'Thomas Leroy',
-    authorRole: 'Lead Developer',
-    authorCompany: 'WebSolutions',
-    linkedinUrl: 'https://linkedin.com/in/example4',
-    order: 3
-  }
-];
+import { supabase } from '../services/supabase.service';
 
 export function TestimonialsSection() {
   const { t } = useLocalizedField();
@@ -52,14 +14,24 @@ export function TestimonialsSection() {
   const [visibleCount, setVisibleCount] = useState(3);
 
   useEffect(() => {
-    // Simulate fetch
+    let mounted = true;
     const fetchTestimonials = async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setTestimonials(MOCK_TESTIMONIALS);
+      const { data, error } = supabase
+        ? await supabase.from('testimonials').select('*').order('order', { ascending: true })
+        : { data: null, error: true };
+      if (!mounted) return;
+      // Table columns are snake_case; the component reads camelCase. On error the section stays hidden.
+      setTestimonials(error || !data ? [] : data.map((r: any) => ({
+        ...r,
+        authorName: r.author_name,
+        authorRole: r.author_role,
+        authorCompany: r.author_company,
+        linkedinUrl: r.linkedin_url
+      })));
       setLoading(false);
     };
     fetchTestimonials();
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -163,7 +135,7 @@ export function TestimonialsSection() {
                         <div>
                           <h4 className="font-space font-bold text-[var(--text-primary)]">{DOMPurify.sanitize(testimonial.authorName || '', { ALLOWED_TAGS: [] })}</h4>
                           <p className="font-inter text-sm text-[var(--text-muted)]">
-                            {DOMPurify.sanitize(t(testimonial, 'authorRole') || '', { ALLOWED_TAGS: [] })}, {DOMPurify.sanitize(testimonial.authorCompany || '', { ALLOWED_TAGS: [] })}
+                            {DOMPurify.sanitize(t(testimonial, 'author_role') || '', { ALLOWED_TAGS: [] })}, {DOMPurify.sanitize(testimonial.authorCompany || '', { ALLOWED_TAGS: [] })}
                           </p>
                         </div>
                         {safeUrl !== '#' && (

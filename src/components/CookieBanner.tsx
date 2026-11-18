@@ -12,7 +12,7 @@ export function CookieBanner() {
   return (
     <div className="no-print cookie-banner fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg-card)] border-t border-[var(--border-subtle)]/20 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
       <p className="text-[var(--text-muted)] text-sm font-[Inter]">
-        {t('cookies.desc')}
+        {t('cookie.message')}
       </p>
       <button
         onClick={() => {
@@ -21,7 +21,7 @@ export function CookieBanner() {
         }}
         className="shrink-0 px-4 py-2 bg-[#E08A3E] text-white text-sm rounded-lg hover:bg-[#C97A35] transition-colors w-full sm:w-auto"
       >
-        {t('cookies.accept')}
+        {t('cookie.accept')}
       </button>
     </div>
   );

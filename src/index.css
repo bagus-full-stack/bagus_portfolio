@@ -53,6 +53,10 @@ body {
 
 .presentation-mode nav,
 .presentation-mode footer,
+/* Keep floating widgets clear of the cookie banner */
+body:has(.cookie-banner) .chatbot-widget { bottom: 6.5rem; }
+body:has(.cookie-banner) .pwa-banner { display: none; }
+
 .presentation-mode .chatbot-widget,
 .presentation-mode .cookie-banner {
   display: none !important;

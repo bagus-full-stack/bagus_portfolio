@@ -129,7 +129,7 @@ export function HeroSection() {
         </h2>
 
         {/* Bio (Max 2 lines) */}
-        <p className="font-inter text-base text-[var(--text-muted)] max-w-2xl mb-12 leading-relaxed line-clamp-2">
+        <p className="font-inter text-base text-[var(--text-muted)] max-w-2xl mb-12 leading-relaxed">
           Je conçois des architectures résilientes et des systèmes intelligents, fusionnant la précision algorithmique avec une UX irréprochable. Expert en écosystèmes Cloud et déploiements LLM.
         </p>
 

@@ -46,7 +46,7 @@ const PWAInstallBanner = () => {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-6 sm:w-80 z-40 bg-[var(--bg-card)] border border-[var(--border-subtle)]/20 rounded-xl p-4 shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+    <div className="pwa-banner fixed bottom-32 left-4 right-4 sm:left-auto sm:right-6 sm:w-80 z-40 bg-[var(--bg-card)] border border-[var(--border-subtle)]/20 rounded-xl p-4 shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
       <div className="flex items-start gap-3">
         {profile?.photo_url ? (
           <img src={profile.photo_url} alt="Logo" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-[var(--border-subtle)]" />

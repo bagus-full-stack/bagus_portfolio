@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Testimonial } from '../types';
 import DOMPurify from 'dompurify';
 import { useLocalizedField } from '../hooks/useLocalizedField';
 import { supabase } from '../services/supabase.service';
+
+// Quotes longer than this are cut to 6 lines with a "read more" (about 6 lines in a 3-column card)
+const LONG_QUOTE = 280;
 
 export function TestimonialsSection() {
   const { t } = useLocalizedField();
@@ -12,6 +15,7 @@ export function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [visibleCount, setVisibleCount] = useState(3);
+  const [openQuote, setOpenQuote] = useState<Testimonial | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -33,6 +37,13 @@ export function TestimonialsSection() {
     fetchTestimonials();
     return () => { mounted = false; };
   }, []);
+
+  useEffect(() => {
+    if (!openQuote) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenQuote(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [openQuote]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -125,9 +136,19 @@ export function TestimonialsSection() {
                     >
                       <span className="font-space text-6xl text-[#E08A3E] opacity-40 absolute top-4 left-6 leading-none">"</span>
                       
-                      <p className="font-inter text-[16px] text-[var(--text-primary)] leading-[1.7] relative z-10 mb-8 pt-4 flex-grow">
-                        {DOMPurify.sanitize(t(testimonial, 'quote') || '', { ALLOWED_TAGS: [] })}
-                      </p>
+                      <div className="relative z-10 mb-8 pt-4 flex-grow">
+                        <p className="font-inter text-[16px] text-[var(--text-primary)] leading-[1.7] line-clamp-6">
+                          {DOMPurify.sanitize(t(testimonial, 'quote') || '', { ALLOWED_TAGS: [] })}
+                        </p>
+                        {(t(testimonial, 'quote') || '').length > LONG_QUOTE && (
+                          <button
+                            onClick={() => setOpenQuote(testimonial)}
+                            className="mt-3 text-sm font-inter font-medium text-accent-ocre hover:underline"
+                          >
+                            Lire la suite
+                          </button>
+                        )}
+                      </div>
                       
                       <div className="h-[1px] w-full bg-[var(--border-subtle)] opacity-30 mb-6"></div>
                       
@@ -194,6 +215,36 @@ export function TestimonialsSection() {
           </div>
         )}
       </div>
+
+      {openQuote && (
+        <div
+          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setOpenQuote(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Témoignage complet"
+        >
+          <div
+            className="bg-bg-card border border-white/10 rounded-xl p-8 max-w-2xl w-full max-h-[85vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex justify-end mb-2">
+              <button onClick={() => setOpenQuote(null)} aria-label="Fermer" className="text-text-muted hover:text-text-primary">
+                <X size={20} />
+              </button>
+            </div>
+            <p className="font-inter text-[16px] text-[var(--text-primary)] leading-[1.7] whitespace-pre-line">
+              {DOMPurify.sanitize(t(openQuote, 'quote') || '', { ALLOWED_TAGS: [] })}
+            </p>
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <h4 className="font-space font-bold text-[var(--text-primary)]">{DOMPurify.sanitize(openQuote.authorName || '', { ALLOWED_TAGS: [] })}</h4>
+              <p className="font-inter text-sm text-[var(--text-muted)]">
+                {DOMPurify.sanitize(t(openQuote, 'author_role') || '', { ALLOWED_TAGS: [] })}, {DOMPurify.sanitize(openQuote.authorCompany || '', { ALLOWED_TAGS: [] })}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

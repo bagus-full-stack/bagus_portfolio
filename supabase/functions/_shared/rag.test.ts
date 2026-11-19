@@ -17,7 +17,7 @@ test('every chunk exists in both languages with a stable source', () => {
   const chunks = buildChunks(data)
   for (const lang of ['fr', 'en']) {
     const sources = chunks.filter((c) => c.lang === lang).map((c) => c.source)
-    for (const s of ['profile', 'experience:e1', 'project:p1:overview', 'project:p1:context', 'project:p1:results', 'skills:Frontend', 'certifications']) {
+    for (const s of ['profile', 'experience:e1', 'project:p1','skills:Frontend', 'certifications']) {
       assert.ok(sources.includes(s), `${lang} missing ${s}`)
     }
   }
@@ -29,7 +29,7 @@ test('project details that the old prompt dropped are now indexed', () => {
 })
 
 test('language fallback and empty data', () => {
-  const fr = buildChunks(data).find((c) => c.lang === 'fr' && c.source === 'project:p1:overview')!
+  const fr = buildChunks(data).find((c) => c.lang === 'fr' && c.source === 'project:p1')!
   assert.ok(fr.content.startsWith('Projet'))
   assert.ok(!fr.content.includes('Desc')) // fallback is lang -> fr -> base, never the other language
   assert.deepEqual(buildChunks({}), [])

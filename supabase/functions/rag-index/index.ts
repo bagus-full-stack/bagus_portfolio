@@ -37,6 +37,8 @@ serve(async (req) => {
       profile: profile.data, experiences: experiences.data, projects: projects.data,
       skills: skills.data, certifications: certifications.data,
     })
+    // shortcut: Gemini free tier = 100 embedding requests/min and the function dies after ~30 s; above that, batch across calls
+    if (chunks.length > 95) return reply({ error: `${chunks.length} passages: dépasse le quota Gemini gratuit (100/min)` }, 413)
     const vectors = await embed(chunks.map((c) => c.content), geminiKey, 'RETRIEVAL_DOCUMENT')
     const rows = chunks.map((c, i) => ({ ...c, embedding: JSON.stringify(vectors[i]) }))
 

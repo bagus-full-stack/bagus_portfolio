@@ -6,7 +6,7 @@ export interface Chunk { source: string; lang: Lang; content: string }
 
 const EMBED_MODEL = 'gemini-embedding-001'
 export const EMBED_DIMS = 768
-const MAX_CHUNK_CHARS = 1800
+const MAX_CHUNK_CHARS = 3500
 
 const LABELS = {
   fr: { present: 'Présent', stack: 'Technologies', context: 'Contexte', choices: 'Choix techniques', challenges: 'Défis', results: 'Résultats', skills: 'Compétences', certs: 'Certifications', contact: 'Contact', avail: 'Disponible pour de nouvelles opportunités (CDI).', status: 'Statut' },
@@ -56,23 +56,18 @@ export function buildChunks(
     for (const p of projects ?? []) {
       const key = p.slug || p.id
       const stack = Array.isArray(p.stack) ? p.stack.join(', ') : ''
-      add(`project:${key}:overview`, lang, join([
+      // One passage per project: the free Gemini tier allows 100 embedding requests/min, one per passage
+      const choices = pickArr(p, 'technical_choices', lang)
+      const challenges = pickArr(p, 'challenges', lang)
+      const results = pickArr(p, 'results', lang)
+      add(`project:${key}`, lang, join([
         pick(p, 'title', lang),
         pick(p, 'description', lang),
         stack && `${L.stack}: ${stack}`,
         p.status && `${L.status}: ${p.status}`,
         p.github_url, p.live_url,
-      ]))
-      const choices = pickArr(p, 'technical_choices', lang)
-      add(`project:${key}:context`, lang, join([
-        `${pick(p, 'title', lang)} — ${L.context}`,
-        pick(p, 'context', lang),
+        pick(p, 'context', lang) && `${L.context}: ${pick(p, 'context', lang)}`,
         choices.length && `${L.choices}:\n` + choices.map((c: Row) => `- ${c.choice}: ${c.reason}`).join('\n'),
-      ]))
-      const challenges = pickArr(p, 'challenges', lang)
-      const results = pickArr(p, 'results', lang)
-      add(`project:${key}:results`, lang, join([
-        `${pick(p, 'title', lang)} — ${L.challenges} / ${L.results}`,
         challenges.length && `${L.challenges}:\n` + challenges.map((c: string) => `- ${c}`).join('\n'),
         results.length && `${L.results}:\n` + results.map((r: Row) => `- ${r.metric}: ${r.value}`).join('\n'),
       ]))

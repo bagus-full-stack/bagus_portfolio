@@ -7,7 +7,7 @@ import {
 } from "../_shared/cors.ts"
 import { embed } from "../_shared/rag.ts"
 
-const RAG_TOP_K = 6
+const RAG_TOP_K = 5
 const RAG_MIN_SIMILARITY = 0.35 // below this a passage is noise: answer from the rest or redirect
 
 interface ChatMessage {

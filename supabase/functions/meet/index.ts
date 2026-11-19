@@ -209,13 +209,18 @@ serve(async (req) => {
         return json({ error: 'Slot no longer available' }, 409, corsHeaders)
       }
 
+      // shortcut: un compte de service sans Workspace (délégation de domaine) ne peut ni inviter de participants
+      // ni créer de lien Meet (403) : le visiteur est noté dans la description, le lien Meet est fixe (MEET_LINK).
+      // À remplacer par attendees + conferenceData si l'agenda passe sur Google Workspace avec délégation.
+      const meetLink = Deno.env.get('MEET_LINK') || ''
       const { data: event } = await calendar.events.insert({
         calendarId: CALENDAR_ID,
-        sendUpdates: 'all', // emails automatiques aux participants
-        conferenceDataVersion: 1, // active la création Meet
         requestBody: {
           summary: `Appel avec ${name}${topic ? ` — ${topic}` : ''}`,
+          location: meetLink || undefined,
           description: [
+            `Contact : ${name} <${attendeeEmail}>`,
+            meetLink ? `Lien Meet : ${meetLink}` : '',
             notes ? `Notes : ${notes}` : '',
             '',
             'Réunion créée depuis assamibaga.com'
@@ -230,31 +235,9 @@ serve(async (req) => {
             timeZone: 'Europe/Paris'
           },
 
-          attendees: [
-            {
-              email: attendeeEmail,
-              displayName: name
-            },
-            {
-              email: Deno.env.get('OWNER_EMAIL') || '',
-              displayName: 'Assami Baga',
-              organizer: true
-            }
-          ],
-
-          conferenceData: {
-            createRequest: {
-              requestId: crypto.randomUUID(),
-              conferenceSolutionKey: {
-                type: 'hangoutsMeet'
-              }
-            }
-          },
-
           reminders: {
             useDefault: false,
             overrides: [
-              { method: 'email', minutes: 1440 }, // J-1
               { method: 'email', minutes: 60 },   // H-1
               { method: 'popup', minutes: 15 }    // 15 min avant
             ]
@@ -263,7 +246,6 @@ serve(async (req) => {
       })
 
       // Générer le fichier .ics en complément
-      const meetLink = event.hangoutLink || ''
       const icsLines = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',

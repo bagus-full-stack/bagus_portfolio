@@ -319,7 +319,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
             <div>
               <h3 className="font-space text-2xl font-bold text-white mb-2">Votre appel est confirmé !</h3>
               <p className="font-inter text-[var(--text-muted)] text-sm">
-                Un email de confirmation avec le lien Meet a été envoyé à {formData.email}
+                Créneau réservé. Je reviens vers vous à {formData.email} pour confirmer.
               </p>
             </div>
 

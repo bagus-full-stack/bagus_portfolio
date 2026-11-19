@@ -24,6 +24,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Sans config Supabase (.env absent), le site public reste affichable
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
     // Initial fetch of session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);

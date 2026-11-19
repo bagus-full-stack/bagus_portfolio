@@ -212,14 +212,12 @@ export function Analytics() {
 
     const dataPoint = tooltip.dataPoints?.[0];
     if (dataPoint) {
-      tooltipEl.innerHTML = `
-        <div style="color:#8B94A3;margin-bottom:2px">
-          ${dataPoint.label}
-        </div>
-        <div style="color:#2DD4BF;font-weight:bold">
-          ${dataPoint.raw} vues
-        </div>
-      `;
+      const [labelEl, valueEl] = [document.createElement('div'), document.createElement('div')];
+      labelEl.style.cssText = 'color:#8B94A3;margin-bottom:2px';
+      valueEl.style.cssText = 'color:#2DD4BF;font-weight:bold';
+      labelEl.textContent = String(dataPoint.label);
+      valueEl.textContent = `${dataPoint.raw} vues`;
+      tooltipEl.replaceChildren(labelEl, valueEl);
     }
 
     tooltipEl.style.opacity = '1';

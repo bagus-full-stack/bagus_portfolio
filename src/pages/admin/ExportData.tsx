@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, Database, Mail } from 'lucide-react';
 import { supabase } from '../../services/supabase.service';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 import { Profile, Experience, Skill, Certification } from '../../types';
 
@@ -50,6 +48,8 @@ export function ExportData() {
         setPdfState('idle');
         return;
       }
+
+      const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([import('jspdf'), import('html2canvas')]);
 
       // Rendre le div visible temporairement pour la capture
       printContent.style.display = 'block';

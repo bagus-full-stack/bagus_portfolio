@@ -49,7 +49,7 @@ const ExperienceItem: React.FC<{ exp: Experience, isEven: boolean }> = ({ exp, i
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-accent-cyan font-inter text-[14px] bg-transparent mt-2 hover:underline"
             >
-              {isExpanded ? translate('experiences.see_less') : translate('experiences.see_more')}
+              {isExpanded ? translate('experiences.collapse') : translate('experiences.expand')}
             </button>
           </div>
         )}

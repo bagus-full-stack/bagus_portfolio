@@ -161,7 +161,7 @@
   },
   "chatbot": {
     "title": "Assistant d'Assami",
-    "powered": "Propulsé par GPT-4o-mini",
+    "powered": "Propulsé par Gemini",
     "welcome": "Bonjour ! Je suis l'assistant d'Assami Baga. Posez-moi vos questions sur son parcours, ses projets ou sa disponibilité.",
     "suggestions": [
       "Quel est ton stack principal ?",
@@ -235,7 +235,11 @@
     "title": "Actualités Tech",
     "error": "Impossible de charger les actualités.",
     "read_more": "Lire la suite",
-    "minutes_read": "min de lecture"
+    "minutes_read": "min de lecture",
+    "pagination": "Pagination des actualités",
+    "prev_page": "Page précédente",
+    "next_page": "Page suivante",
+    "page": "Page"
   },
   "seo": {
     "home_title": "Assami Baga — Ingénieur Full Stack & IA | Île-de-France",

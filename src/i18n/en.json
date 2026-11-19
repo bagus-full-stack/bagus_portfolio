@@ -161,7 +161,7 @@
   },
   "chatbot": {
     "title": "Assami's Assistant",
-    "powered": "Powered by GPT-4o-mini",
+    "powered": "Powered by Gemini",
     "welcome": "Hello! I am Assami Baga's assistant. Ask me anything about his background, projects or availability.",
     "suggestions": [
       "What is your main tech stack?",
@@ -235,7 +235,11 @@
     "title": "Tech News",
     "error": "Unable to load news.",
     "read_more": "Read more",
-    "minutes_read": "min read"
+    "minutes_read": "min read",
+    "pagination": "News pagination",
+    "prev_page": "Previous page",
+    "next_page": "Next page",
+    "page": "Page"
   },
   "seo": {
     "home_title": "Assami Baga — Full Stack & AI Engineer | Île-de-France",

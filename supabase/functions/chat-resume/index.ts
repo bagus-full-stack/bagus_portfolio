@@ -179,7 +179,8 @@ CV : ${CV_JSON}`;
               contents: geminiContents,
               generationConfig: {
                 temperature: 0.7,
-                maxOutputTokens: 500,
+                // Gemini 3.x counts its internal reasoning tokens in this limit: 500 cut answers mid-sentence
+                maxOutputTokens: 2048,
               }
             }),
           }
@@ -195,7 +196,15 @@ CV : ${CV_JSON}`;
         }
 
         // Si succès, on extrait le message et on casse la boucle
-        assistantMessage = data.candidates[0].content.parts[0].text;
+        const cand = data.candidates?.[0];
+        // Skip reasoning parts; a truncated or empty answer falls through to the next model
+        const text = (cand?.content?.parts || []).filter((x: any) => !x.thought).map((x: any) => x.text || '').join('').trim();
+        if (!text || cand?.finishReason === 'MAX_TOKENS') {
+          lastError = `Réponse vide ou tronquée (${cand?.finishReason || 'aucun candidat'})`;
+          console.warn(`Échec ${modelName} : ${lastError}`);
+          continue;
+        }
+        assistantMessage = text;
         usedModel = modelName;
         break;
 

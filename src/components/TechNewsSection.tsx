@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ExternalLink, Clock, Calendar } from 'lucide-react';
+import { ExternalLink, Clock, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface Article {
@@ -13,6 +13,9 @@ interface Article {
   tag_list: string[];
 }
 
+const PAGE_SIZE = 6; // 3 columns x 2 rows on desktop
+const PER_SOURCE = 12; // pool per source: 24 articles = 4 pages
+
 // The HN front page is generic: keep only AI and software-development stories
 const HN_TOPICS = /\b(ai|llms?|gpt|openai|anthropic|claude|gemini|agents?|machine learning|neural|inference|rust|python|golang|java|javascript|typescript|react|node|ruby|rails|wasm|webassembly|api|sdk|compiler|code|coding|programming|developers?|software|open[- ]source|github|git|database|sql|postgres|sqlite|linux|kernel|docker|kubernetes|devops|servers?|rce|css|html|framework)\b/i;
 
@@ -21,6 +24,7 @@ export function TechNewsSection() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     let mounted = true;
@@ -55,9 +59,11 @@ export function TechNewsSection() {
       let dev = [...ok(ai), ...ok(web)].filter(a => !seen.has(a.id) && seen.add(a.id));
       const sameLang = dev.filter((a: any) => a.language === lang);
       if (sameLang.length >= 3) dev = sameLang;
-      // Prefer articles with a cover image; 3 from dev.to + 3 from Hacker News
-      dev = [...dev.filter(a => a.cover_image), ...dev.filter(a => !a.cover_image)].slice(0, 3);
-      const all = [...dev, ...ok(hn).slice(0, 3)];
+      // Prefer articles with a cover image, then interleave the two sources so every page is mixed
+      dev = [...dev.filter(a => a.cover_image), ...dev.filter(a => !a.cover_image)].slice(0, PER_SOURCE);
+      const hnList = ok(hn).slice(0, PER_SOURCE);
+      const all = Array.from({ length: Math.max(dev.length, hnList.length) }).flatMap((_, i) => [dev[i], hnList[i]]).filter(Boolean);
+      setPage(1);
       setArticles(all);
       setError(all.length === 0);
       setLoading(false);
@@ -66,6 +72,15 @@ export function TechNewsSection() {
     fetchNews();
     return () => { mounted = false; };
   }, [lang]);
+
+  const pageCount = Math.max(1, Math.ceil(articles.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pagedArticles = articles.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const goToPage = (n: number) => {
+    setPage(n);
+    document.getElementById('news')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   if (error || (!loading && articles.length === 0)) {
     return null; // Hide the section quietly on error or no data
@@ -86,7 +101,7 @@ export function TechNewsSection() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map(article => (
+            {pagedArticles.map(article => (
               <a 
                 key={article.id}
                 href={article.url}
@@ -139,6 +154,41 @@ export function TechNewsSection() {
               </a>
             ))}
           </div>
+        )}
+        {pageCount > 1 && (
+          <nav className="flex items-center justify-center gap-2 mt-12" aria-label={t('tech_news.pagination')}>
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              aria-label={t('tech_news.prev_page')}
+              className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-text-primary hover:text-accent-ocre hover:border-accent-ocre transition-colors disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:text-text-primary"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            {Array.from({ length: pageCount }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goToPage(i + 1)}
+                aria-label={`${t('tech_news.page')} ${i + 1}`}
+                aria-current={currentPage === i + 1 ? 'page' : undefined}
+                className={`w-10 h-10 rounded-full text-sm font-mono transition-colors ${
+                  currentPage === i + 1
+                    ? 'bg-accent-ocre text-bg-primary font-medium'
+                    : 'border border-white/10 text-text-muted hover:text-text-primary hover:border-text-muted'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === pageCount}
+              aria-label={t('tech_news.next_page')}
+              className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-text-primary hover:text-accent-ocre hover:border-accent-ocre transition-colors disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:text-text-primary"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </nav>
         )}
       </div>
     </section>

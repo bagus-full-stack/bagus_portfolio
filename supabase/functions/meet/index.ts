@@ -41,12 +41,15 @@ const tooManyBookings = (ip: string) => {
 
 // Verrou de créneau partagé entre instances (table meet_claims) : deux requêtes simultanées
 // passent le test freebusy avant l'insertion, la clé primaire n'en laisse passer qu'une.
+const adminClient = () => createClient(
+  Deno.env.get('SUPABASE_URL') || '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
+  { db: { schema: 'portfolio' } }
+)
+// Libère le verrou quand la création échoue, sinon le créneau reste refusé 10 min
+const releaseSlot = (start: Date) => adminClient().from('meet_claims').delete().eq('slot_start', start.toISOString())
 const claimSlot = async (start: Date) => {
-  const admin = createClient(
-    Deno.env.get('SUPABASE_URL') || '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '',
-    { db: { schema: 'portfolio' } }
-  )
+  const admin = adminClient()
   await admin.from('meet_claims').delete().lt('expires_at', new Date().toISOString())
   const { error } = await admin.from('meet_claims').insert({
     slot_start: start.toISOString(),
@@ -89,6 +92,7 @@ serve(async (req) => {
   // Headers CORS à inclure dans TOUTES les réponses
   const corsHeaders = getCorsHeaders(origin)
 
+  let claimed: Date | null = null
   try {
     // Le corps ne se lit qu'une fois : on le parse ici pour les deux branches
     const body = method === 'POST' ? await req.json().catch(() => ({})) : {}
@@ -190,6 +194,7 @@ serve(async (req) => {
       if (!(await claimSlot(startD))) {
         return json({ error: 'Slot no longer available' }, 409, corsHeaders)
       }
+      claimed = startD
 
       // Le créneau a pu être pris depuis l'affichage de la liste
       const { data: fb } = await calendar.freebusy.query({
@@ -287,7 +292,10 @@ serve(async (req) => {
 
     return new Response('Method not allowed', { status: 405, headers: corsHeaders })
   } catch (error: any) {
-    // Erreur générique — pas de détails techniques
+    // Le détail reste dans les logs serveur (googleapis met le code HTTP dans error.code)
+    console.error('meet:', error?.code, error?.message, JSON.stringify(error?.errors ?? ''))
+    if (claimed) await releaseSlot(claimed).catch(() => {})
+    // Erreur générique côté client — pas de détails techniques
     return new Response(JSON.stringify({ error: 'Une erreur est survenue' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 })

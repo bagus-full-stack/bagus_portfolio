@@ -13,6 +13,9 @@ interface Article {
   tag_list: string[];
 }
 
+// The HN front page is generic: keep only AI and software-development stories
+const HN_TOPICS = /\b(ai|llms?|gpt|openai|anthropic|claude|gemini|agents?|machine learning|neural|inference|rust|python|golang|java|javascript|typescript|react|node|ruby|rails|wasm|webassembly|api|sdk|compiler|code|coding|programming|developers?|software|open[- ]source|github|git|database|sql|postgres|sqlite|linux|kernel|docker|kubernetes|devops|servers?|rce|css|html|framework)\b/i;
+
 export function TechNewsSection() {
   const { t, lang } = useTranslation();
   const [articles, setArticles] = useState<Article[]>([]);
@@ -32,7 +35,7 @@ export function TechNewsSection() {
     const hackerNews = async (): Promise<Article[]> => {
       const r = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=30');
       if (!r.ok) throw new Error('hn');
-      return (await r.json()).hits.map((h: any) => ({
+      return (await r.json()).hits.filter((h: any) => h.title && HN_TOPICS.test(h.title)).map((h: any) => ({
         id: Number(h.objectID) + 1e9, // keeps React keys distinct from dev.to ids
         title: h.title,
         description: `${h.points} points · ${h.num_comments ?? 0} comments`,

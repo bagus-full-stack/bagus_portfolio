@@ -10,7 +10,7 @@ interface SearchOverlayProps {
   onClose: () => void;
 }
 
-const SUGGESTIONS = ['AgroSahel AI', 'PyTorch', 'FastAPI', 'Angular'];
+const SUGGESTIONS = ['AI Health Chef', 'PyTorch', 'FastAPI', 'Angular'];
 
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const { t } = useTranslation();
@@ -69,7 +69,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   }, [isOpen]);
 
   const defaultSuggestions: SearchResult[] = [
-    { id: '1', title: 'AgroSahel AI', url: '/projects/agrosahel-ai', type: 'project', excerpt: '' },
+    { id: '1', title: 'AI Health Chef', url: '/projects/ai-health-chef', type: 'project', excerpt: '' },
     { id: '2', title: 'PyTorch', url: '/#skills', type: 'skill', excerpt: '' },
     { id: '3', title: 'FastAPI', url: '/#skills', type: 'skill', excerpt: '' },
     { id: '4', title: t('nav.contact'), url: '/#contact', type: 'other', excerpt: '' }

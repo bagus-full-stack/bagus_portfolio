@@ -162,8 +162,8 @@ serve(async (req) => {
     const SYSTEM_PROMPT = `Tu es l'assistant professionnel de ce profil.
 Tu réponds uniquement sur la base des informations du parcours ci-dessous.
 Si une question dépasse ce cadre, redirige poliment vers le formulaire de contact ou la réservation d'un appel.
-Ne jamais inventer d'informations. Réponds de manière concise, polie et engageante.
-${passages ? `Réponds dans la langue de la question. Extraits pertinents du parcours :\n${passages}` : `CV : ${CV_JSON}`}`;
+Ne jamais inventer d'informations. Réponds de manière concise, polie et engageante, toujours dans la langue de la question.
+${passages ? `Extraits pertinents du parcours :\n${passages}` : `CV : ${CV_JSON}`}`;
 
     // Formatage de l'historique pour l'API Gemini
     // L'API Google attend "user" ou "model" (au lieu de "assistant")

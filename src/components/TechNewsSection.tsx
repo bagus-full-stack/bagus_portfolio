@@ -22,33 +22,44 @@ export function TechNewsSection() {
   useEffect(() => {
     let mounted = true;
     
+    // Public APIs with open CORS (no key, static site): dev.to (AI + web) and Hacker News.
+    // allSettled: one source being down must not hide the others.
+    const devto = async (tag: string): Promise<Article[]> => {
+      const r = await fetch(`https://dev.to/api/articles?tag=${tag}&top=7&per_page=30`);
+      if (!r.ok) throw new Error(`dev.to ${tag}`);
+      return (await r.json()).filter((a: any) => a.language === 'en' || a.language === 'fr');
+    };
+    const hackerNews = async (): Promise<Article[]> => {
+      const r = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=30');
+      if (!r.ok) throw new Error('hn');
+      return (await r.json()).hits.map((h: any) => ({
+        id: Number(h.objectID) + 1e9, // keeps React keys distinct from dev.to ids
+        title: h.title,
+        description: `${h.points} points · ${h.num_comments ?? 0} comments`,
+        url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
+        cover_image: '',
+        readable_publish_date: new Date(h.created_at).toLocaleDateString(lang, { day: 'numeric', month: 'short' }),
+        reading_time_minutes: 0,
+        tag_list: ['hackernews'],
+      }));
+    };
+
     async function fetchNews() {
-      try {
-        // API publique dev.to (CORS ouvert) : le site est statique, pas de serveur /api/news
-        const response = await fetch('https://dev.to/api/articles?tag=tech&per_page=100');
-        if (!response.ok) {
-          throw new Error('Failed to fetch news');
-        }
-        let data = (await response.json()).filter((a: any) => a.language === 'en' || a.language === 'fr');
-        const sameLang = data.filter((a: any) => a.language === lang);
-        if (sameLang.length >= 3) data = sameLang;
-        if (mounted) {
-          // Dev.to API can return articles without cover_image, filter to show nice ones
-          const withImages = data.filter((a: Article) => a.cover_image).slice(0, 3);
-          // If not enough with images, just take the first 3
-          const finalArticles = withImages.length === 3 ? withImages : data.slice(0, 3);
-          setArticles(finalArticles);
-          setLoading(false);
-        }
-      } catch (err) {
-        // console.error(err);
-        if (mounted) {
-          setError(true);
-          setLoading(false);
-        }
-      }
+      const [ai, web, hn] = await Promise.allSettled([devto('ai'), devto('webdev'), hackerNews()]);
+      if (!mounted) return;
+      const ok = (r: PromiseSettledResult<Article[]>) => (r.status === 'fulfilled' ? r.value : []);
+      const seen = new Set<number>();
+      let dev = [...ok(ai), ...ok(web)].filter(a => !seen.has(a.id) && seen.add(a.id));
+      const sameLang = dev.filter((a: any) => a.language === lang);
+      if (sameLang.length >= 3) dev = sameLang;
+      // Prefer articles with a cover image; 3 from dev.to + 3 from Hacker News
+      dev = [...dev.filter(a => a.cover_image), ...dev.filter(a => !a.cover_image)].slice(0, 3);
+      const all = [...dev, ...ok(hn).slice(0, 3)];
+      setArticles(all);
+      setError(all.length === 0);
+      setLoading(false);
     }
-    
+
     fetchNews();
     return () => { mounted = false; };
   }, [lang]);
@@ -115,7 +126,9 @@ export function TechNewsSection() {
                   <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5 text-xs text-text-muted font-mono">
                     <div className="flex items-center gap-4">
                       <span className="flex items-center gap-1.5"><Calendar size={14} /> {article.readable_publish_date}</span>
-                      <span className="flex items-center gap-1.5"><Clock size={14} /> {article.reading_time_minutes} {t('tech_news.minutes_read')}</span>
+                      {article.reading_time_minutes > 0 && (
+                        <span className="flex items-center gap-1.5"><Clock size={14} /> {article.reading_time_minutes} {t('tech_news.minutes_read')}</span>
+                      )}
                     </div>
                     <ExternalLink size={16} className="text-text-primary group-hover:text-accent-ocre transition-colors opacity-50 group-hover:opacity-100" />
                   </div>

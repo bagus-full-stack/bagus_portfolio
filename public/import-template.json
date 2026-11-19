@@ -48,9 +48,9 @@
 
   "projects": [
     {
-      "slug": "agrosahel-ai",
-      "title_fr": "AgroSahel AI",
-      "title_en": "AgroSahel AI",
+      "slug": "mon-projet",
+      "title_fr": "Mon projet",
+      "title_en": "My project",
       "description_fr": "Diagnostic agricole IA...",
       "description_en": "AI agricultural diagnostic...",
       "stack": ["Flutter", "FastAPI", "PyTorch"],

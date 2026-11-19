@@ -78,7 +78,7 @@ Translate every string of the JSON array below from ${names[from]} to ${names[to
 STRICT RULES :
 - Return ONLY a JSON array of strings, same length and same order as the input
 - Preserve ALL technical terms exactly as-is (React, TypeScript, FastAPI, Docker, etc.)
-- Preserve proper nouns and brand names (Assami Baga, AgroSahel AI, Supabase, etc.)
+- Preserve proper nouns and brand names (Assami Baga, AI Health Chef, Supabase, etc.)
 - Preserve punctuation, capitalization and the same professional tone
 
 ${JSON.stringify(texts)}`
@@ -189,7 +189,7 @@ STRICT RULES :
 - Return ONLY the translated text
 - No explanations, no quotes, no preamble
 - Preserve ALL technical terms exactly as-is (React, TypeScript, FastAPI, Docker, etc.)
-- Preserve proper nouns and brand names (Assami Baga, AgroSahel AI, Supabase, etc.)
+- Preserve proper nouns and brand names (Assami Baga, AI Health Chef, Supabase, etc.)
 - Preserve the exact same formatting (line breaks, punctuation, capitalization)
 - Preserve the same professional tone
 - If a term has no good translation, keep the original term

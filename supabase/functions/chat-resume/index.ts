@@ -5,6 +5,10 @@ import {
   isOriginAllowed,
   handlePreflight
 } from "../_shared/cors.ts"
+import { embed } from "../_shared/rag.ts"
+
+const RAG_TOP_K = 6
+const RAG_MIN_SIMILARITY = 0.35 // below this a passage is noise: answer from the rest or redirect
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -15,6 +19,7 @@ interface ChatMessage {
 interface ChatRequest {
   message: string
   history: ChatMessage[]
+  lang?: string
 }
 
 // Liste de priorité des modèles Google (Fallback)
@@ -76,7 +81,8 @@ serve(async (req) => {
       for (const [k, t] of rateLimit) if (now - t >= RATE_LIMIT_WINDOW) rateLimit.delete(k);
     }
 
-    const { message, history } = await req.json() as ChatRequest
+    const { message, history, lang } = await req.json() as ChatRequest
+    const ragLang = lang === 'en' ? 'en' : 'fr'
 
     const trimmedMessage = message?.trim();
 
@@ -104,6 +110,22 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseAnonKey, { db: { schema: 'portfolio' } });
 
+    // RAG: embed the question, keep the closest passages. Any failure (no index yet, API down) -> full CV below.
+    let passages: string | null = null;
+    try {
+      const [queryVec] = await embed([trimmedMessage], geminiKey, 'RETRIEVAL_QUERY');
+      const { data: hits, error: ragError } = await supabase.rpc('match_chunks', {
+        query_embedding: queryVec, match_lang: ragLang, match_count: RAG_TOP_K,
+      });
+      if (ragError) throw ragError;
+      const good = (hits || []).filter((h: any) => h.similarity >= RAG_MIN_SIMILARITY);
+      if (good.length) passages = good.map((h: any) => h.content).join('\n---\n');
+    } catch (e) {
+      console.warn('RAG indisponible, repli sur le CV complet :', (e as Error).message);
+    }
+
+    let CV_JSON = '';
+    if (!passages) {
     const [
       { data: profile },
       { data: experiences },
@@ -116,7 +138,7 @@ serve(async (req) => {
       supabase.from('skills').select('*')
     ]);
 
-    const CV_JSON = JSON.stringify({
+    CV_JSON = JSON.stringify({
       name: profile?.name || profile?.name_fr || "Assami Baga",
       role: profile?.title || "Ingénieur Full Stack & IA",
       bio: profile?.bio || "Développeur passionné avec 5 ans d'expérience.",
@@ -135,12 +157,13 @@ serve(async (req) => {
       skills: (skills || []).map(s => s.name),
       availability: "Disponible pour de nouvelles opportunités"
     });
+    }
 
     const SYSTEM_PROMPT = `Tu es l'assistant professionnel de ce profil.
 Tu réponds uniquement sur la base des informations du parcours ci-dessous.
 Si une question dépasse ce cadre, redirige poliment vers le formulaire de contact ou la réservation d'un appel.
 Ne jamais inventer d'informations. Réponds de manière concise, polie et engageante.
-CV : ${CV_JSON}`;
+${passages ? `Réponds dans la langue de la question. Extraits pertinents du parcours :\n${passages}` : `CV : ${CV_JSON}`}`;
 
     // Formatage de l'historique pour l'API Gemini
     // L'API Google attend "user" ou "model" (au lieu de "assistant")

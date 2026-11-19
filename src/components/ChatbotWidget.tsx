@@ -119,7 +119,7 @@ export function ChatbotWidget() {
     try {
       if (!supabase) throw new Error("Supabase not configured");
       const { data, error: invokeError } = await supabase.functions.invoke('chat-resume', {
-        body: { message: trimmedText, history: messages.slice(-10) },
+        body: { message: trimmedText, history: messages.slice(-10), lang: language },
         signal: abortControllerRef.current.signal
       } as any);
       if (invokeError) throw invokeError;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Eye, TrendingUp, Mail, Folder, Shield, 
-  User, Plus, ExternalLink, Download, CheckCircle, AlertTriangle
+  User, Plus, ExternalLink, Download, CheckCircle, AlertTriangle, RefreshCw
 } from 'lucide-react';
 import { supabase } from '../../services/supabase.service';
 
@@ -11,6 +11,15 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [lastLogin, setLastLogin] = useState<string>('');
+  const [indexing, setIndexing] = useState(false);
+  const [indexMsg, setIndexMsg] = useState('');
+
+  async function reindex() {
+    setIndexing(true);
+    const { data, error } = await supabase.functions.invoke('rag-index');
+    setIndexMsg(error || data?.error ? 'Échec de l\'indexation' : `${data.indexed} passages indexés`);
+    setIndexing(false);
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -204,6 +213,14 @@ export function AdminDashboard() {
             <ShortcutButton icon={<Plus size={18} />} label="Ajouter un projet" to="/admin/projects/new" />
             <ShortcutButton icon={<ExternalLink size={18} />} label="Voir le site" to="/" external />
             <ShortcutButton icon={<Download size={18} />} label="Exporter le CV" to="/admin/media" />
+            <button
+              onClick={reindex}
+              disabled={indexing}
+              className="flex items-center p-3 rounded bg-bg-primary/50 border border-white/5 hover:border-white/10 text-sm text-text-primary transition-colors disabled:opacity-50"
+            >
+              <RefreshCw size={18} className={`mr-3 ${indexing ? 'animate-spin' : ''}`} />
+              {indexing ? 'Indexation…' : indexMsg || 'Réindexer le chatbot'}
+            </button>
           </div>
         </div>
       </div>

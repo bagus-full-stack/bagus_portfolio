@@ -9,10 +9,12 @@ import { ContactSection } from '../components/ContactSection';
 import { TestimonialsSection } from '../components/TestimonialsSection';
 import { setHomeMeta } from '../services/meta.service';
 import { SEOHead } from '../components/SEOHead';
+import { useTranslation } from '../hooks/useTranslation';
 import { usePresentationMode } from '../hooks/usePresentationMode';
 import { PresentationControls } from '../components/PresentationControls';
 
 export function Home() {
+  const { t } = useTranslation();
   const { isActive } = usePresentationMode();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -38,8 +40,8 @@ export function Home() {
   return (
     <div ref={containerRef} className={containerClasses}>
       <SEOHead meta={{
-        title: "Assami Baga — Ingénieur Full Stack & IA | Île-de-France",
-        description: "Portfolio d'Assami Baga, ingénieur Full Stack & IA basé en Île-de-France. Expert React, FastAPI, PyTorch. Créateur d'AgroSahel AI. Disponible pour CDI.",
+        title: t('seo.home_title'),
+        description: t('seo.home_desc'),
         url: "https://assamibaga.com"
       }} />
       <div id="hero" className={sectionClasses}><HeroSection /></div>

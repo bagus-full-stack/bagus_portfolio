@@ -18,6 +18,9 @@ class I18nServiceClass {
       if (savedLang && (savedLang === 'fr' || savedLang === 'en')) {
         this.currentLang = savedLang;
       }
+      // /en/... URLs are the English version: the path wins over the saved choice
+      if (/^\/en(\/|$)/.test(window.location.pathname)) this.currentLang = 'en';
+      document.documentElement.lang = this.currentLang;
     }
   }
 
@@ -25,6 +28,7 @@ class I18nServiceClass {
     this.currentLang = lang;
     if (typeof window !== 'undefined') {
       localStorage.setItem('portfolio-lang', lang);
+      document.documentElement.lang = lang;
     }
     this.listeners.forEach(l => l(lang));
   }

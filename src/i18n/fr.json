@@ -236,5 +236,11 @@
     "error": "Impossible de charger les actualités.",
     "read_more": "Lire la suite",
     "minutes_read": "min de lecture"
+  },
+  "seo": {
+    "home_title": "Assami Baga — Ingénieur Full Stack & IA | Île-de-France",
+    "home_desc": "Portfolio d'Assami Baga, ingénieur Full Stack & IA basé en Île-de-France. Expert React, FastAPI, PyTorch. Créateur d'AgroSahel AI. Disponible pour CDI.",
+    "news_desc": "Retrouvez les dernières actualités Tech selectionnées.",
+    "home": "Accueil"
   }
 }

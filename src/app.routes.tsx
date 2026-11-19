@@ -1,5 +1,5 @@
 import React, { lazy } from 'react';
-import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { createBrowserRouter, Outlet, RouteObject } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
@@ -56,15 +56,8 @@ const NotFoundLayout = ({ children }: { children?: React.ReactNode }) => (
   </div>
 );
 
-export const router = createBrowserRouter([
-  {
-    element: <Layout />,
-    errorElement: (
-      <NotFoundLayout>
-        <NotFoundPage />
-      </NotFoundLayout>
-    ),
-    children: [
+// Public pages exist twice: French at the root, English under /en (crawlable hreflang URLs)
+const publicRoutes: RouteObject[] = [
       {
         path: '/',
         element: <Home />
@@ -89,6 +82,19 @@ export const router = createBrowserRouter([
           return { project };
         }
       }
+];
+
+export const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    errorElement: (
+      <NotFoundLayout>
+        <NotFoundPage />
+      </NotFoundLayout>
+    ),
+    children: [
+      ...publicRoutes,
+      ...publicRoutes.map(r => ({ ...r, path: '/en' + (r.path === '/' ? '' : r.path) }))
     ]
   },
   {

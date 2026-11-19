@@ -236,5 +236,11 @@
     "error": "Unable to load news.",
     "read_more": "Read more",
     "minutes_read": "min read"
+  },
+  "seo": {
+    "home_title": "Assami Baga — Full Stack & AI Engineer | Île-de-France",
+    "home_desc": "Portfolio of Assami Baga, a Full Stack & AI engineer based in Île-de-France. React, FastAPI and PyTorch expert. Creator of AgroSahel AI. Open to full-time roles.",
+    "news_desc": "The latest curated tech news.",
+    "home": "Home"
   }
 }

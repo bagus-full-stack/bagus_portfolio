@@ -11,7 +11,7 @@ import { useLocalizedField } from '../hooks/useLocalizedField';
 export function ProjectDetail() {
   const { project } = useLoaderData() as { project: Project };
   const { t: translate } = useTranslation();
-  const { t, tArray } = useLocalizedField();
+  const { t, tArray, currentLang } = useLocalizedField();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -43,17 +43,29 @@ export function ProjectDetail() {
         type: 'article',
         structuredData: {
           "@context": "https://schema.org",
-          "@type": "SoftwareSourceCode",
-          "name": title,
-          "description": description,
-          "url": `https://assamibaga.com/projects/${project.slug}`,
-          "author": {
-            "@type": "Person",
-            "name": "Assami Baga",
-            "url": "https://assamibaga.com"
-          },
-          "programmingLanguage": stack,
-          "codeRepository": project.github_url
+          "@graph": [
+            {
+              "@type": "SoftwareSourceCode",
+              "name": title,
+              "description": description,
+              "url": `https://assamibaga.com/projects/${project.slug}`,
+              "inLanguage": currentLang,
+              "author": {
+                "@type": "Person",
+                "name": "Assami Baga",
+                "url": "https://assamibaga.com"
+              },
+              "programmingLanguage": stack,
+              "codeRepository": project.github_url
+            },
+            {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": translate('seo.home'), "item": "https://assamibaga.com" },
+                { "@type": "ListItem", "position": 2, "name": title, "item": `https://assamibaga.com/projects/${project.slug}` }
+              ]
+            }
+          ]
         }
       }} />
       <div className="max-w-3xl mx-auto px-6">

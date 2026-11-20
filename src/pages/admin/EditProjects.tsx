@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Folder, Image as ImageIcon, Check, Languages } from 'lucide-react';
+import { Loader2, Plus, Edit2, Trash2, ArrowLeft, Folder, Image as ImageIcon, Check, Languages } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDropzone } from 'react-dropzone';
 import { Project } from '../../types';
-import { SupabaseService, supabase } from '../../services/supabase.service';
+import { supabase } from '../../services/supabase.service';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import BilingualField from '../../components/admin/BilingualField';

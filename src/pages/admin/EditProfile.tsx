@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, Loader2, Save } from 'lucide-react';
+import { Upload, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Profile } from '../../types';
 import { SupabaseService, supabase } from '../../services/supabase.service';

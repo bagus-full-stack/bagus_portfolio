@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabase.service';
-import { Loader2, Plus, Copy, Edit2, Trash2, Link as LinkIcon, Check, X } from 'lucide-react';
+import { Loader2, Plus, Copy, Edit2, Trash2, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ShortUrl {

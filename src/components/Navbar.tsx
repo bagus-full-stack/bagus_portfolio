@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { SearchOverlay } from './SearchOverlay';
 import { LanguageSelector } from './LanguageSelector';
 import ThemeToggle from './ui/ThemeToggle';

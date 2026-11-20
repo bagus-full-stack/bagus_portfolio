@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { Mailbox, Trash2, Check, RefreshCw } from 'lucide-react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { Mailbox, Trash2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Message } from '../../types';
 import { SupabaseService } from '../../services/supabase.service';

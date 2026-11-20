@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, X, Tag, Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skill } from '../../types';
-import { SupabaseService, supabase } from '../../services/supabase.service';
+import { supabase } from '../../services/supabase.service';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 import { useAutoSave } from '../../hooks/useAutoSave';
 

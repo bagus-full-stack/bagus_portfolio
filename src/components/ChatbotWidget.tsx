@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X, Send, User, RotateCcw, Mic, MicOff, Loader2 } from 'lucide-react';
+import { MessageSquare, X, Send, RotateCcw, Mic, MicOff, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChatMessage } from '../types';
 import { supabase } from '../services/supabase.service';

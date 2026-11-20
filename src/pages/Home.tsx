@@ -7,7 +7,6 @@ import { CertificationsSection } from '../components/CertificationsSection';
 import { ProjectsSection } from '../components/ProjectsSection';
 import { ContactSection } from '../components/ContactSection';
 import { TestimonialsSection } from '../components/TestimonialsSection';
-import { setHomeMeta } from '../services/meta.service';
 import { SEOHead } from '../components/SEOHead';
 import { useTranslation } from '../hooks/useTranslation';
 import { usePresentationMode } from '../hooks/usePresentationMode';

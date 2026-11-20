@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Briefcase, GraduationCap, Languages } from 'lucide-react';
+import { Loader2, Plus, Edit2, Trash2, ArrowLeft, Briefcase, GraduationCap, Languages } from 'lucide-react';
 import { toast } from 'sonner';
 import { Experience } from '../../types';
 import { supabase } from '../../services/supabase.service';

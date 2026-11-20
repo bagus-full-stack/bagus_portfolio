@@ -365,7 +365,7 @@ L'application sera accessible sur `http://localhost:3000` (ou le port spécifié
 
 1.  **Base de données** : Exécutez vos scripts SQL initiaux pour créer les tables nécessaires (`profiles`, `projects`, `experiences`, `skills`, `certifications`).
 2.  **Storage** : Créez les buckets `avatars` (public) et `cv` (privé).
-3.  **Edge Functions** : `meet`, `calendar`, `chat-resume`, `translate`. Elles sont déployées sur un Supabase **self-hosted** (Coolify) par l'app `supabase-deployer`, sans SSH (voir ci-dessous).
+3.  **Edge Functions** : `meet`, `contact`, `chat-resume`, `rag-index`, `translate`. Elles sont déployées sur un Supabase **self-hosted** (Coolify) par l'app `supabase-deployer`, sans SSH (voir ci-dessous).
 
 ---
 
@@ -409,7 +409,9 @@ Le résultat du deployer se lit dans ses *Runtime Logs* (`DEPLOY OK`). Les migra
 | Variable | Utilisée par |
 |---|---|
 | `GEMINI_API_KEY` | `chat-resume`, `translate` |
-| `GOOGLE_CREDENTIALS`, `GOOGLE_CALENDAR_ID`, `OWNER_EMAIL` | `meet`, `calendar` |
+| `GOOGLE_CREDENTIALS`, `GOOGLE_CALENDAR_ID` | `meet` (lecture des créneaux et repli, compte de service) |
+| `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN` | `meet` (création de l'événement avec invité et lien Meet, compte du propriétaire). Le refresh token expire sous 7 jours tant que l'écran de consentement est en mode « Test ». |
+| `MEET_LINK` | `meet` (lien Meet fixe, utilisé seulement si l'OAuth échoue) |
 | `ENVIRONMENT` | `_shared/cors.ts`. Mettre `production` (ou ne pas la définir) ; `development` désactive la liste blanche CORS. |
 | `DISABLE_SIGNUP` | GoTrue. Valeur booléenne exacte (`true` / `false`, sans ponctuation) sinon `supabase-auth` boucle en crash. |
 

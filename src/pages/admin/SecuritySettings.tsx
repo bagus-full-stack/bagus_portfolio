@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Key, Monitor, Smartphone, Eye, EyeOff, AlertTriangle, CheckCircle2, X, LogOut } from 'lucide-react';
+import { Shield, Key, Monitor, Smartphone, Eye, EyeOff, AlertTriangle, X, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { SupabaseService } from '../../services/supabase.service';
 import { AuthService } from '../../services/auth.service';

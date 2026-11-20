@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Trash2, Mail, Check, AlertTriangle, Reply, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Trash2, Check, AlertTriangle, Reply, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { Message } from '../../types';
 import { SupabaseService } from '../../services/supabase.service';

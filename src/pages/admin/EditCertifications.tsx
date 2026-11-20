@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Save, Plus, Edit2, Trash2, ArrowLeft, Award } from 'lucide-react';
+import { Loader2, Plus, Edit2, Trash2, ArrowLeft, Award } from 'lucide-react';
 import { toast } from 'sonner';
 import { Certification } from '../../types';
-import { SupabaseService, supabase } from '../../services/supabase.service';
+import { supabase } from '../../services/supabase.service';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
 
 export function EditCertifications() {

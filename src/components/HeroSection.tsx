@@ -1,8 +1,6 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { supabase } from '../services/supabase.service';
 import { useTranslation } from '../hooks/useTranslation';
-import { toast } from 'sonner';
-import { Loader2, Download, ChevronDown, Code, Brain } from 'lucide-react';
 import useTheme from '../hooks/useTheme';
 
 import CVDropdown from './CVDropdown';

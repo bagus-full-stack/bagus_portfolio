@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { I18nService } from '../services/i18n.service';
 
 export function useTranslation() {

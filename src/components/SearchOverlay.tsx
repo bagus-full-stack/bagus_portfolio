@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, Folder, Award, Briefcase, Zap, ArrowRight } from 'lucide-react';
+import { Search, Folder, Award, Briefcase, Zap, ArrowRight } from 'lucide-react';
 import { SearchService } from '../services/search.service';
 import { SearchResults, SearchResult } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
@@ -9,8 +9,6 @@ interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const SUGGESTIONS = ['AI Health Chef', 'PyTorch', 'FastAPI', 'Angular'];
 
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const { t } = useTranslation();

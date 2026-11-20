@@ -17,7 +17,8 @@ export interface BookingRequest {
 
 export interface BookingConfirmation {
   eventId: string;
-  meetLink: string;   // meet.google.com/xxx-xxx-xxx
+  invited?: boolean;  // Google a envoyé l'invitation au visiteur
+  meetLink: string;  // meet.google.com/xxx-xxx-xxx
   icsContent: string; // base64
 }
 

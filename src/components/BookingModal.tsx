@@ -23,7 +23,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
   });
   
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-  const [confirmationData, setConfirmationData] = useState<{ meetLink?: string, icsContent?: string } | null>(null);
+  const [confirmationData, setConfirmationData] = useState<{ meetLink?: string, icsContent?: string, invited?: boolean } | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -319,7 +319,9 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
             <div>
               <h3 className="font-space text-2xl font-bold text-white mb-2">Votre appel est confirmé !</h3>
               <p className="font-inter text-[var(--text-muted)] text-sm">
-                Créneau réservé. Je reviens vers vous à {formData.email} pour confirmer.
+                {confirmationData?.invited
+                  ? `Une invitation avec le lien Meet a été envoyée à ${formData.email}`
+                  : `Créneau réservé. Je reviens vers vous à ${formData.email} pour confirmer.`}
               </p>
             </div>
 

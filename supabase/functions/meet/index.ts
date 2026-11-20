@@ -14,6 +14,18 @@ const auth = new google.auth.GoogleAuth({
 })
 
 const calendar = google.calendar({ version: 'v3', auth })
+
+// Compte de service: lecture des créneaux + repli. Il ne peut ni inviter ni créer de Meet sans Workspace.
+// Le compte du propriétaire (OAuth, refresh token) le peut : événement avec invité et lien Meet propre.
+const oauthId = Deno.env.get('GOOGLE_OAUTH_CLIENT_ID')
+const oauthSecret = Deno.env.get('GOOGLE_OAUTH_CLIENT_SECRET')
+const oauthRefresh = Deno.env.get('GOOGLE_OAUTH_REFRESH_TOKEN')
+let ownerCalendar: ReturnType<typeof google.calendar> | null = null
+if (oauthId && oauthSecret && oauthRefresh) {
+  const oauth = new google.auth.OAuth2(oauthId, oauthSecret)
+  oauth.setCredentials({ refresh_token: oauthRefresh })
+  ownerCalendar = google.calendar({ version: 'v3', auth: oauth })
+}
 const CALENDAR_ID = Deno.env.get('GOOGLE_CALENDAR_ID') || ''
 
 const TZ = 'Europe/Paris'
@@ -209,41 +221,57 @@ serve(async (req) => {
         return json({ error: 'Slot no longer available' }, 409, corsHeaders)
       }
 
-      // shortcut: un compte de service sans Workspace (délégation de domaine) ne peut ni inviter de participants
-      // ni créer de lien Meet (403) : le visiteur est noté dans la description, le lien Meet est fixe (MEET_LINK).
-      // À remplacer par attendees + conferenceData si l'agenda passe sur Google Workspace avec délégation.
-      const meetLink = Deno.env.get('MEET_LINK') || ''
-      const { data: event } = await calendar.events.insert({
-        calendarId: CALENDAR_ID,
-        requestBody: {
-          summary: `Appel avec ${name}${topic ? ` — ${topic}` : ''}`,
-          location: meetLink || undefined,
-          description: [
-            `Contact : ${name} <${attendeeEmail}>`,
-            meetLink ? `Lien Meet : ${meetLink}` : '',
-            notes ? `Notes : ${notes}` : '',
-            '',
-            'Réunion créée depuis assamibaga.com'
-          ].filter(Boolean).join('\n'),
-
-          start: {
-            dateTime: start,
-            timeZone: 'Europe/Paris'
-          },
-          end: {
-            dateTime: end,
-            timeZone: 'Europe/Paris'
-          },
-
-          reminders: {
-            useDefault: false,
-            overrides: [
-              { method: 'email', minutes: 60 },   // H-1
-              { method: 'popup', minutes: 15 }    // 15 min avant
-            ]
-          }
+      const fixedLink = Deno.env.get('MEET_LINK') || ''
+      const baseBody = {
+        summary: `Appel avec ${name}${topic ? ` — ${topic}` : ''}`,
+        start: { dateTime: start, timeZone: 'Europe/Paris' },
+        end: { dateTime: end, timeZone: 'Europe/Paris' },
+        reminders: {
+          useDefault: false,
+          overrides: [
+            { method: 'email', minutes: 60 },   // H-1
+            { method: 'popup', minutes: 15 }    // 15 min avant
+          ]
         }
-      })
+      }
+      const describe = (link: string) => [
+        `Contact : ${name} <${attendeeEmail}>`,
+        link ? `Lien Meet : ${link}` : '',
+        notes ? `Notes : ${notes}` : '',
+        '',
+        'Réunion créée depuis assamibaga.com'
+      ].filter(Boolean).join('\n')
+
+      let event: any = null
+      if (ownerCalendar) {
+        try {
+          // Compte du propriétaire : invité + lien Meet unique, Google envoie l'invitation
+          ;({ data: event } = await ownerCalendar.events.insert({
+            calendarId: CALENDAR_ID,
+            sendUpdates: 'all',
+            conferenceDataVersion: 1,
+            requestBody: {
+              ...baseBody,
+              description: describe(''),
+              attendees: [{ email: attendeeEmail, displayName: name }],
+              conferenceData: {
+                createRequest: { requestId: crypto.randomUUID(), conferenceSolutionKey: { type: 'hangoutsMeet' } }
+              }
+            }
+          }))
+        } catch (e: any) {
+          // shortcut: refresh token expiré/révoqué (écran de consentement en mode Test = 7 jours) -> repli sans invité
+          console.error('meet: OAuth échoué, repli compte de service:', e?.code, e?.message)
+        }
+      }
+      if (!event) {
+        const { data } = await calendar.events.insert({
+          calendarId: CALENDAR_ID,
+          requestBody: { ...baseBody, location: fixedLink || undefined, description: describe(fixedLink) }
+        })
+        event = data
+      }
+      const meetLink = event.hangoutLink || fixedLink
 
       // Générer le fichier .ics en complément
       const icsLines = [
@@ -265,6 +293,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           eventId: event.id,
+          invited: !!event.attendees?.length,
           meetLink,
           icsContent: btoa(icsLines)
         }),
